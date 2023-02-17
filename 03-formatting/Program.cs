@@ -1,4 +1,5 @@
 ﻿using System;
+using static System.Console;
 
 /// <h1>
 /// Formatting using numbered positional arguments
@@ -58,7 +59,7 @@ Console.WriteLine(format: "{0,-10} {1,6:N0}", arg0: applesText, arg1: applesCoun
 Console.WriteLine(format: "{0,-10} {1,6:N0}", arg0: bananasText, arg1: bananasCount);
 
 /// <h1>
-///Getting text input from the user 
+/// Getting text input from the user 
 /// </h1>
 /// We can get text input from the user using the ReadLine method. This method waits for the user to
 /// type some text. Then, as soon as the user presses Enter, whatever the user has typed is returned as
@@ -70,3 +71,37 @@ string firstName = Console.ReadLine();
 Console.Write("Type your age and press ENTER: ");
 string age = Console.ReadLine();
 Console.WriteLine($"Hello {firstName}, you look good for {age}.");
+
+/// 上面 firstName 和 age 会产生编译告警，因为ReadLine方法可能返回null而不是字符串。
+/// 可以在类型string后面加上问号，用于告诉编译器我们期望一个空值。
+string? lastName = Console.ReadLine();
+
+/// 我们也可以在句尾分号前加上叹号（称之为null-forgiving operator），告诉编译器我们希望不要返回空值。
+string name = Console.ReadLine()!;
+Console.WriteLine(name);
+
+/// In C# 6.0 and later, the using statement can be used not only to import a namespace but also to further
+/// simplify our code by importing a static class. Then, we won’t need to enter the Console type name
+/// throughout our code.
+/// C# 6.0 以后，using语言不但可以导入命名空间，而且可以使用using static导入静态类。所以我们可以不必写Console
+WriteLine("No need Console");
+
+/// Instead of statically importing the Console class just for one code file, it would probably be better to
+/// import it for all code files in the project:
+/// 更好的方法是在项目的配置文件里配置为所有的文件都导入Console类，而不是在每个代码文件里分别导入。
+/// 在.csproj加入：
+/// <ItemGroup>
+///   <Using Include="System.Console" Static="true" />
+/// </ItemGroup>
+
+/// <h1>
+/// Getting key input from the user
+/// </h1>
+/// We can get key input from the user using the ReadKey method. This method waits for the user to press
+/// a key or key combination that is then returned as a ConsoleKeyInfo value.
+/// 我们可以通过 ReadKey 方法获取用户输入的按键Key。这个方法等待用户按下一个Key或Key的组合然后返回一个 ConsoleKeyInfo 值。
+Write("Press any key combination: ");
+ConsoleKeyInfo key = ReadKey();
+WriteLine();
+WriteLine("Key: {0}, Char: {1}, Modifiers: {2}", arg0: key.Key, arg1: key.KeyChar, arg2: key.Modifiers);
+
