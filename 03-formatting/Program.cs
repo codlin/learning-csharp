@@ -1,6 +1,4 @@
-﻿using System;
-
-/// <h1>
+﻿/// <h1>
 /// Formatting using numbered positional arguments
 /// </h1>
 int numberOfApples = 12;
@@ -58,7 +56,7 @@ Console.WriteLine(format: "{0,-10} {1,6:N0}", arg0: applesText, arg1: applesCoun
 Console.WriteLine(format: "{0,-10} {1,6:N0}", arg0: bananasText, arg1: bananasCount);
 
 /// <h1>
-///Getting text input from the user 
+/// Getting text input from the user 
 /// </h1>
 /// We can get text input from the user using the ReadLine method. This method waits for the user to
 /// type some text. Then, as soon as the user presses Enter, whatever the user has typed is returned as
@@ -70,3 +68,14 @@ string firstName = Console.ReadLine();
 Console.Write("Type your age and press ENTER: ");
 string age = Console.ReadLine();
 Console.WriteLine($"Hello {firstName}, you look good for {age}.");
+
+/// <h1>
+/// Getting key input from the user
+/// </h1>
+/// We can get key input from the user using the ReadKey method. This method waits for the user to press
+/// a key or key combination that is then returned as a ConsoleKeyInfo value.
+/// 我们能用ReadKey方法获取用户输入的key。这个方法等待用户按下的Key或者键值组合，然后返回一个ConsoleKeyInfo类型的值。
+Console.Write("Press any key combination: ");
+ConsoleKeyInfo key = Console.ReadKey();
+Console.WriteLine();
+Console.WriteLine("Key: {0}, Char: {1}, Modifiers: {2}", arg0: key.Key, arg1: key.KeyChar, arg2: key.Modifiers);
