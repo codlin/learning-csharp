@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using static System.Console;
 
 /// <h1>
@@ -43,7 +43,7 @@ Console.WriteLine(fullname);
 /// which might need to be left- or right-aligned within a width of characters. Alignment values are integers.
 /// Positive integers mean right-aligned and negative integers mean left-aligned.
 /// 可以在逗号或冒号后使用格式字符串来格式化变量或表达式。
-/// N0 格式字符串表示带有千位分隔符且没有小数位的数字，而 C 格式字符串表示货币。货币格式将由当前线程确定。
+/// N0 格式字符串表示带有千位分隔符且没有小数位的数字（注：N1则代表有一个小数位），而 C 格式字符串表示货币。货币格式将由当前线程确定。
 /// 例如，如果您在英国的 PC 上运行使用数字或货币格式的代码，您将获得英镑以逗号作为千位分隔符，但是如果您在德国的 PC 上运行它，您
 /// 将得到带有点作为千位分隔符的欧元。
 /// 格式项的完整语法是：

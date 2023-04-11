@@ -265,8 +265,25 @@ Console.WriteLine($"number has been set to: {number}");
 number = default;
 Console.WriteLine($"number has been reset to its default: {number}");
 
+var p1 = new Point();
+Console.WriteLine($"{p1.X}, {p1.Y}");
+
+Point p2 = new Point { X = 1, Y = 2 };
+Console.WriteLine($"{p2.X}, {p2.Y}");
+
+Point p3 = new();
+Console.WriteLine($"{p3.X}, {p3.Y}");
+
+// Point p4 = new(3, 4);          // compiling error
+// Point p5 = new(X = 5, Y = 6);  // compiling error
+
 class Person
 {
     public DateTime BirthDate;
 }
 
+struct Point
+{
+    public int X;
+    public int Y;
+}

@@ -1,4 +1,4 @@
-# create a new conole app && configurate it
+# create a new console app && configurate it
 
 ## command
 
