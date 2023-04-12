@@ -1,5 +1,7 @@
 ﻿using System.Xml;
 
+using BasicTypes;
+
 /// <h1>
 /// Storing text
 /// </h1>
@@ -52,38 +54,6 @@ string person = $$"""
                 """;
 Console.WriteLine(person);
 
-/// <sumary>
-/// 总结存储文本的选项
-/// 总结一下：
-/// • 文字串：用双引号括起来的字符。他们可以使用转义字符像 \t 制表符。要表示反斜杠，请使用两个：\\。
-/// • 原始字符串文字：包含在三个或更多双引号字符中的字符。
-/// • Verbatim 字符串：以 @ 为前缀的文字字符串，用于禁用转义字符，以便反斜杠是一个反斜杠。它还允许字符串值跨越多行，因为空格
-///   字符被视为它们自己而不是编译器的指令。
-/// • 内插字符串：以 $ 为前缀的文字字符串
-/// </sumary>
-
-/// <h1>
-/// Storing numbers
-/// </h1>
-
-// unsigned integer means positive whole number or 0
-uint naturalNumber = 23;
-// integer means negative or positive whole number or 0
-int integerNumber = -23;
-// float means single-precision floating point
-// F suffix makes it a float literal
-float realNumber = 2.3F;
-// double means double-precision floating point
-// double is the default type for a number value with a decimal point .
-double anotherRealNumber = 2.3; // double literal
-
-/// 使用数字分隔符提高易读性
-int million = 1_000_000;
-int india_million = 10_00_000;
-
-/// 不同进制数的表示
-int binary = 0b1001; // 9
-int hex = 0xFF; // 255
 // three variables that store the number 2 million
 int decimalNotation = 2_000_000;
 int binaryNotation = 0b_0001_1110_1000_0100_1000_0000;
@@ -131,25 +101,6 @@ else
     Console.WriteLine($"{c} + {d} does NOT equal {0.3M}");
 }
 
-/// Good Practice: Use int for whole numbers. Use double for real numbers that will not be
-/// compared for equality to other values; it is okay to compare double values being less than
-/// or greater than, and so on. Use decimal for money, CAD drawings, general engineering,
-/// and wherever the accuracy of a real number is important.
-
-/// The float and double types have some useful special values: NaN represents not-a-number (for example,
-/// the result of dividing by zero), Epsilon represents the smallest positive number that can be stored in
-/// a float or double, and PositiveInfinity and NegativeInfinity represent infinitely large positive
-/// and negative values. They also have methods for checking for these special values like IsInfinity
-/// and IsNan.
-/// float 和 double 类型有一些有用的值：NaN代表非数字，Epsilon代表可以以float或double存储的最小正数，
-/// PositiveInfinity 和 NegativeInfinity 代表无限大正数和无限小负数。它们也都有检查这些值的方法如IsInfinity 和 IsNan。
-
-/// <h1>
-/// Storing Booleans
-/// </h1>
-bool happy = true;
-bool sad = false;
-
 /// <h1>
 /// Storing any type of object
 /// </h1>
@@ -184,30 +135,6 @@ Console.WriteLine(something); // 12
 // an array of any type has a Length property
 something = new[] { 3, 5, 7 };
 Console.WriteLine(something.Length); // 3
-
-/// <h1>
-/// Declaring local variables
-/// </h1>
-/// Local variables are declared inside methods, and they only exist during the execution of that method.
-/// Once the method returns, the memory allocated to any local variables is released.
-/// Strictly speaking, value types are released while reference types must wait for a garbage collection.
-
-/// <h2>
-/// Inferring the type of a local variable
-/// </h2>
-// 一个不带小数点的数字的字面值会被推断为int类型，除非给它加上后缀。支持的后缀及意义：
-// • L: Compiler infers long
-// • UL: Compiler infers ulong
-// • M: Compiler infers decimal
-// • D: Compiler infers double
-// • F: Compiler infers float
-// 带小数点但是没有加后缀的数字会被推断为double。双引号被推断为字符串，单引号被推断为字符，true和false被推断为布尔类型。
-var population = 67_000_000; // 67 million in UK
-var weight = 1.88; // in kilograms
-var price = 4.99M; // in pounds sterling
-var fruit = "Apples"; // strings use double-quotes
-var letter = 'Z'; // chars use single-quotes
-var open = true; // Booleans have value of true or false
 
 // good use of var because it avoids the repeated type
 // as shown in the more verbose second statement
@@ -265,25 +192,13 @@ Console.WriteLine($"number has been set to: {number}");
 number = default;
 Console.WriteLine($"number has been reset to its default: {number}");
 
-var p1 = new Point();
-Console.WriteLine($"{p1.X}, {p1.Y}");
-
-Point p2 = new Point { X = 1, Y = 2 };
-Console.WriteLine($"{p2.X}, {p2.Y}");
-
-Point p3 = new();
-Console.WriteLine($"{p3.X}, {p3.Y}");
-
-// Point p4 = new(3, 4);          // compiling error
-// Point p5 = new(X = 5, Y = 6);  // compiling error
+var basicTypeTest = new BasicTypesTest();
+basicTypeTest.Create();
+basicTypeTest.ValueCopy();
+basicTypeTest.ReferenceCopy();
+basicTypeTest.Conversion();
 
 class Person
 {
     public DateTime BirthDate;
-}
-
-struct Point
-{
-    public int X;
-    public int Y;
 }
