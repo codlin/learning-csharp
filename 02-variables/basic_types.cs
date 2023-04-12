@@ -13,6 +13,15 @@ namespace BasicTypes;
 
 class BasicTypesTest
 {
+    string x = "Old Value";
+    public string X
+    {
+        get
+        {
+            return x;
+        }
+    }
+
     public void Create()
     {
         var p1 = new Point();
@@ -91,6 +100,63 @@ class BasicTypesTest
         f = (float)d;
         Console.WriteLine($"从 double 到 float 需要执行强制类型转换： f = {f}");
     }
+
+    /// <summary>
+    /// ref Locals
+    /// 可以定义一个局部变量来引用数组中的元素或对象的字段
+    /// ref local 的⽬标必须是数组元素、字段或局部变量；不可以是属性property
+    /// ref locals ⽤于专门的微优化场景，通常与 ref returns 结合使⽤
+    /// </summary>
+    public void RefLocals()
+    {
+        int[] numbers = { 0, 1, 2, 3, 4 };
+        ref int numRef = ref numbers[2];
+        numRef *= 10;
+        Console.WriteLine(numbers[2]);
+    }
+
+    /// <summary>
+    /// 从⽅法返回⼀个ref local。这称为ref return
+    /// 如果在调⽤⽅省略 ref 修饰符，它将恢复为返回⼀个普通的值
+    /// 可以在定义属性或索引器时使⽤ ref return
+    /// 可以使⽤ ref readonly 来防⽌返回的内容被修改
+    /// </summary>
+    /// <returns></returns>
+    public ref string RefReturns()
+    {
+        return ref x;
+    }
+    public ref string RefX
+    {
+        get
+        {
+            return ref x;
+        }
+        // 尝试在 ref returns 属性或索引器上定义显式的设置访问器是⾮法的。
+        // set
+        // {
+        //     x = value;
+        // }
+    }
+    public ref readonly string RefReadonlyReturns()
+    {
+        return ref x;
+    }
+
+    /// <summary>
+    /// 隐式类型局部变量
+    /// 如果编译器能够从初始化表达式中推断出类型，你可以使⽤关键字 var 代替类型声明
+    /// </summary>
+    public void ImplicitlyTypedLocalVariables()
+    {
+        var p = new Point { X = 1, Y = 1 };
+        var x = "hello";
+        Console.WriteLine("{0}, {1}", p, x);
+
+        Random r = new Random();
+        var n = r.Next();  // 不好的风格
+        int m = r.Next();  // 推荐的风格
+    }
 }
 
 
@@ -98,6 +164,11 @@ struct Point
 {
     public int X;
     public int Y;
+
+    public override string ToString()
+    {
+        return $"({X}, {Y})";
+    }
 }
 
 class Bird

@@ -197,6 +197,19 @@ basicTypeTest.Create();
 basicTypeTest.ValueCopy();
 basicTypeTest.ReferenceCopy();
 basicTypeTest.Conversion();
+basicTypeTest.RefLocals();
+ref string xRef = ref basicTypeTest.RefReturns();
+xRef = "New Value";
+Console.WriteLine(basicTypeTest.X);
+string x = basicTypeTest.RefReturns();
+x = "Magic Value";
+Console.WriteLine(basicTypeTest.X);
+
+ref readonly string sr = ref basicTypeTest.RefReadonlyReturns();
+// sr = "Const Value"; // <-- HERE
+Console.WriteLine(sr);
+
+basicTypeTest.ImplicitlyTypedLocalVariables();
 
 class Person
 {
