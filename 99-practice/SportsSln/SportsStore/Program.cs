@@ -7,6 +7,7 @@ builder.Services.AddDbContext<StoreDbContext>(opts => {
     opts.UseNpgsql(@$"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST")};Username=test;Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWD")};Database=SportsStore");
 });
 builder.Services.AddScoped<IStoreRepository, EFStoreRepository>();
+builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
 
 // enable razor page
 builder.Services.AddRazorPages();
