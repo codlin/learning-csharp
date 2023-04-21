@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SportsStore.Infrastructure;
 using SportsStore.Models;
 
 namespace SportsStore.Pages;
@@ -28,6 +27,12 @@ public class CartModel : PageModel {
             Cart.AddItem(product, 1);
             // HttpContext.Session.SetJson("cart", Cart);
         }
+        return RedirectToPage(new { returnUrl = returnUrl });
+    }
+
+    public IActionResult OnPostRemove(long productId, string returnUrl) {
+        Cart.RemoveLine(Cart.Lines.First(cl =>
+        cl.Product.ProductID == productId).Product);
         return RedirectToPage(new { returnUrl = returnUrl });
     }
 
