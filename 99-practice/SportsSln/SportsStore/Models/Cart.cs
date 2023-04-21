@@ -2,7 +2,7 @@ namespace SportsStore.Models;
 
 public class Cart {
     public List<CartLine> Lines { get; set; } = new();
-    public void AddItem(Product product, int quantity) {
+    public virtual void AddItem(Product product, int quantity) {
         CartLine? line = Lines.Where(p => p.Product.ProductID == product.ProductID).FirstOrDefault();
         if (line == null) {
             Lines.Add(new CartLine {
@@ -14,7 +14,7 @@ public class Cart {
         }
     }
 
-    public void RemoveLine(Product product) {
+    public virtual void RemoveLine(Product product) {
         Lines.RemoveAll(l => l.Product.ProductID == product.ProductID);
     }
 
@@ -22,7 +22,7 @@ public class Cart {
         return Lines.Sum(e => e.Product.Price * e.Quantity);
     }
 
-    public void Clear() => Lines.Clear();
+    public virtual void Clear() => Lines.Clear();
 }
 
 public class CartLine {
