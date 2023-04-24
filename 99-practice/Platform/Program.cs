@@ -15,13 +15,14 @@ app.Use(async (context, next) => {
 });
 
 ((IApplicationBuilder)app).Map("/branch", branch => {
-    branch.UseMiddleware<Platform.QueryStringMiddleware>();
-    branch.Use(async (HttpContext context, Func<Task> next) => {
-        await context.Response.WriteAsync($"Branch Middleware");
-    });
+    // // branch.Use(async (HttpContext context, Func<Task> next) => {
+    // branch.Run(async (context) => {
+    //     await context.Response.WriteAsync($"Branch Middleware");
+    // });
+    branch.Run(new Platform.QueryStringMiddleWare().Invoke);
 });
 
-app.UseMiddleware<Platform.QueryStringMiddleware>();
+app.UseMiddleware<Platform.QueryStringMiddleWare>();
 
 app.MapGet("/", () => "Hello World!");
 

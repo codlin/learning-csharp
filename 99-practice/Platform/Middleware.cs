@@ -1,8 +1,13 @@
 namespace Platform;
 
-public class QueryStringMiddleware {
-    private RequestDelegate next;
-    public QueryStringMiddleware(RequestDelegate nextDelegate) {
+public class QueryStringMiddleWare {
+    private RequestDelegate? next;
+
+    public QueryStringMiddleWare() {
+        // do nothing
+    }
+
+    public QueryStringMiddleWare(RequestDelegate nextDelegate) {
         next = nextDelegate;
     }
 
@@ -13,6 +18,8 @@ public class QueryStringMiddleware {
             }
             await context.Response.WriteAsync("Class-based Middleware \n");
         }
-        await next(context);
+        if (next != null) {
+            await next(context);
+        }
     }
 }
