@@ -4,6 +4,7 @@ public class Capital {
     public static async Task Endpoint(HttpContext context) {
         string? capital = null;
         string? country = context.Request.RouteValues["country"] as string;
+        Console.WriteLine(country);
         switch ((country ?? "").ToLower()) {
             case "uk":
                 capital = "London";
