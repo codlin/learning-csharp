@@ -7,34 +7,18 @@ builder.Services.Configure<MessageOptions>(options => {
 
 var app = builder.Build();
 
-app.Use(async (context, next) => {
-    await next();
-    await context.Response.WriteAsync($"\nStatus Code: {context.Response.StatusCode}");
+app.UseMiddleware<Population>();
+app.UseMiddleware<Capital>();
+
+app.UseRouting();
+app.UseEndpoints(endpoints => {
+    endpoints.MapGet("routing", async context => {
+        await context.Response.WriteAsync("Request Was Routed");
+    });
 });
 
-app.Use(async (context, next) => {
-    if (context.Request.Path == "/short") {
-        await context.Response.WriteAsync($"Request Short Circuited");
-    } else {
-        await next();
-    }
+app.Run(async (context) => {
+    await context.Response.WriteAsync("Terminal Middleware Reached");
 });
-
-((IApplicationBuilder)app).Map("/branch", branch => {
-    // // branch.Use(async (HttpContext context, Func<Task> next) => {
-    // branch.Run(async (context) => {
-    //     await context.Response.WriteAsync($"Branch Middleware");
-    // });
-    branch.Run(new QueryStringMiddleware().Invoke);
-});
-
-app.UseMiddleware<QueryStringMiddleware>();
-app.UseMiddleware<LocationMiddleware>();
-
-app.MapGet("/", () => "Hello World!");
-// app.MapGet("/location", async (HttpContext context, IOptions<MessageOptions> msgOpts) => {
-//     Platform.MessageOptions opts = msgOpts.Value;
-//     await context.Response.WriteAsync($"{opts.CityName}, {opts.CountryName}");
-// });
 
 app.Run();
