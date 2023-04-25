@@ -1,8 +1,13 @@
 using Platform;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<RouteOptions>(opts => {
+    opts.ConstraintMap.Add("countryName", typeof(CountryRouteConstraint));
+});
+
 var app = builder.Build();
 
+app.MapGet("capital/{country:countryName}", Capital.Endpoint);
 // app.MapGet("files/{filename}.{ext}", async context => {
 // app.MapGet("{first}/{second}/{*catchall}", async context => {
 // app.MapGet("{first:int}/{second:bool}", async context => {
