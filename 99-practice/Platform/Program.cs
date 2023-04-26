@@ -18,6 +18,7 @@ builder.Services.AddSession(opts => {
 });
 
 var app = builder.Build();
+app.UseHttpsRedirection();
 app.UseSession();
 app.UseMiddleware<Platform.ConsentMiddleware>();
 
