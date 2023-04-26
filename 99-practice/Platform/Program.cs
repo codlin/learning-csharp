@@ -1,45 +1,34 @@
-using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.Extensions.FileProviders;
-
-using Platform;
-
 var builder = WebApplication.CreateBuilder(args);
-var servicesConfig = builder.Configuration;
-// - use configuration settings to set up services
-builder.Services.Configure<MessageOptions>(servicesConfig.GetSection("Location"));
-builder.Services.AddHttpLogging(opts => {
-    opts.LoggingFields = HttpLoggingFields.RequestMethod
-    | HttpLoggingFields.RequestPath | HttpLoggingFields.ResponseStatusCode;
-});
 
 var app = builder.Build();
-app.UseHttpLogging();
-app.UseStaticFiles();
-var env = app.Environment;
-app.UseStaticFiles(new StaticFileOptions {
-    // The FileProvider property is used to select a different location for static content
-    FileProvider = new PhysicalFileProvider($"{env.ContentRootPath}/staticfiles"),
-    RequestPath = "/files"
+
+app.MapGet("/cookie", async context => {
+    int counter1 = int.Parse(context.Request.Cookies["counter1"] ?? "0") + 1;
+    context.Response.Cookies.Append(
+        "counter1",
+        counter1.ToString(),
+        new CookieOptions {
+            MaxAge = TimeSpan.FromMinutes(30)
+        });
+
+    int counter2 = int.Parse(context.Request.Cookies["counter2"] ?? "0") + 1;
+    context.Response.Cookies.Append(
+        "counter2",
+        counter2.ToString(),
+        new CookieOptions {
+            MaxAge = TimeSpan.FromMinutes(30)
+        });
+
+    await context.Response.WriteAsync($"Counter1: {counter1}, Counter2: {counter2}");
 });
 
-app.UseMiddleware<LocationMiddleware>();
-
-app.MapGet("config", async (HttpContext context, IConfiguration config, IWebHostEnvironment env) => {
-    string defaultDebug = config["Logging:LogLevel:Default"];
-    await context.Response.WriteAsync($"The config setting is: {defaultDebug}");
-    await context.Response.WriteAsync($"\nThe env setting is: {env.EnvironmentName}");
-    string wsID = config["WebService:Id"];
-    string wsKey = config["WebService:Key"];
-    await context.Response.WriteAsync($"\nThe secret ID is: {wsID}");
-    await context.Response.WriteAsync($"\nThe secret Key is: {wsKey}");
+app.MapGet("clear", context => {
+    context.Response.Cookies.Delete("counter1");
+    context.Response.Cookies.Delete("counter2");
+    context.Response.Redirect("/");
+    return Task.CompletedTask;
 });
 
-app.MapGet("/", async context => {
-    await context.Response.WriteAsync("Hello World!");
-});
-
-app.MapGet("population/{city?}", Population.Endpoint);
-
-app.Logger.LogDebug("Pipeline configuration complete");
+app.MapFallback(async context => await context.Response.WriteAsync("Hello World!"));
 
 app.Run();
