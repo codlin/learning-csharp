@@ -15,6 +15,10 @@ app.MapGet("config", async (HttpContext context, IConfiguration config, IWebHost
     string defaultDebug = config["Logging:LogLevel:Default"];
     await context.Response.WriteAsync($"The config setting is: {defaultDebug}");
     await context.Response.WriteAsync($"\nThe env setting is: {env.EnvironmentName}");
+    string wsID = config["WebService:Id"];
+    string wsKey = config["WebService:Key"];
+    await context.Response.WriteAsync($"\nThe secret ID is: {wsID}");
+    await context.Response.WriteAsync($"\nThe secret Key is: {wsKey}");
 });
 
 app.MapGet("/", async context => {
