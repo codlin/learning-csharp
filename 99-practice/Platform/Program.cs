@@ -11,11 +11,10 @@ var pipelineConfig = app.Configuration;
 
 app.UseMiddleware<LocationMiddleware>();
 
-app.MapGet("config", async (HttpContext context, IConfiguration config) => {
+app.MapGet("config", async (HttpContext context, IConfiguration config, IWebHostEnvironment env) => {
     string defaultDebug = config["Logging:LogLevel:Default"];
     await context.Response.WriteAsync($"The config setting is: {defaultDebug}");
-    string environ = config["ASPNETCORE_ENVIRONMENT"];
-    await context.Response.WriteAsync($"\nThe env setting is: {environ}");
+    await context.Response.WriteAsync($"\nThe env setting is: {env.EnvironmentName}");
 });
 
 app.MapGet("/", async context => {
