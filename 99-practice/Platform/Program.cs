@@ -1,6 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<CookiePolicyOptions>(opts => {
+    opts.CheckConsentNeeded = context => true;
+});
 
 var app = builder.Build();
+app.UseCookiePolicy();
 
 app.MapGet("/cookie", async context => {
     int counter1 = int.Parse(context.Request.Cookies["counter1"] ?? "0") + 1;
@@ -8,7 +12,8 @@ app.MapGet("/cookie", async context => {
         "counter1",
         counter1.ToString(),
         new CookieOptions {
-            MaxAge = TimeSpan.FromMinutes(30)
+            MaxAge = TimeSpan.FromMinutes(30),
+            IsEssential = true
         });
 
     int counter2 = int.Parse(context.Request.Cookies["counter2"] ?? "0") + 1;
