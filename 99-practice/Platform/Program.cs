@@ -25,4 +25,6 @@ app.MapGet("/", async context => {
     await context.Response.WriteAsync("Hello World!");
 });
 
+app.MapGet("population/{city?}", Population.Endpoint);
+
 app.Run();
