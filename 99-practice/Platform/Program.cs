@@ -1,4 +1,11 @@
+using Microsoft.AspNetCore.HostFiltering;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<HostFilteringOptions>(opts => {
+    opts.AllowedHosts.Clear();
+    opts.AllowedHosts.Add("*.example.com");
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment()) {
