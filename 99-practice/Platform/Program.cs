@@ -5,6 +5,7 @@ builder.Services.Configure<CookiePolicyOptions>(opts => {
 
 var app = builder.Build();
 app.UseCookiePolicy();
+app.UseMiddleware<Platform.ConsentMiddleware>();
 
 app.MapGet("/cookie", async context => {
     int counter1 = int.Parse(context.Request.Cookies["counter1"] ?? "0") + 1;
