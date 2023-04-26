@@ -17,8 +17,15 @@ builder.Services.AddSession(opts => {
     opts.Cookie.IsEssential = true;
 });
 
+builder.Services.AddHttpsRedirection(opts => {
+    opts.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+    opts.HttpsPort = 5500;
+});
+
 var app = builder.Build();
 app.UseHttpsRedirection();
+
+
 app.UseSession();
 app.UseMiddleware<Platform.ConsentMiddleware>();
 
