@@ -5,8 +5,15 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Services.AddSingleton<IResponseFormatter, HtmlResponseFormatter>();
 // builder.Services.AddTransient<IResponseFormatter, GuidService>();
 // builder.Services.AddScoped<IResponseFormatter, GuidService>();
-builder.Services.AddScoped<IResponseFormatter, TimeResponseFormatter>();
-builder.Services.AddScoped<ITimeStamper, DefaultTimeStamper>();
+// builder.Services.AddScoped<IResponseFormatter, TimeResponseFormatter>();
+// builder.Services.AddScoped<ITimeStamper, DefaultTimeStamper>();
+IWebHostEnvironment env = builder.Environment;
+if (env.IsDevelopment()) {
+    builder.Services.AddScoped<IResponseFormatter, TimeResponseFormatter>();
+    builder.Services.AddScoped<ITimeStamper, DefaultTimeStamper>();
+} else {
+    builder.Services.AddScoped<IResponseFormatter, HtmlResponseFormatter>();
+}
 
 var app = builder.Build();
 app.UseMiddleware<WeatherMiddleware>();
