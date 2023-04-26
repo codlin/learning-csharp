@@ -12,6 +12,7 @@ builder.Services.AddHttpLogging(opts => {
 
 var app = builder.Build();
 app.UseHttpLogging();
+app.UseStaticFiles();
 
 app.UseMiddleware<LocationMiddleware>();
 
