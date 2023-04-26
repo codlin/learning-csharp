@@ -21,6 +21,19 @@ var app = builder.Build();
 app.UseSession();
 app.UseMiddleware<Platform.ConsentMiddleware>();
 
+app.MapGet("/session", async context => {
+    int counter1 = (context.Session.GetInt32("counter1") ?? 0) + 1;
+    int counter2 = (context.Session.GetInt32("counter2") ?? 0) + 1;
+    context.Session.SetInt32("counter1", counter1);
+    context.Session.SetInt32("counter2", counter2);
+    // 不必处理会话 cookie、检测过期会话或从缓存中加载会话数据。
+    // 所有这些工作都由会话中间件自动完成，它通过 HttpContext.Session 属性显示结果。
+    // 这种方法的一个结果是 HttpContext.Session 属性直到会话中间件处理完请求后才填充数据，
+    // 这意味着您应该尝试仅在中间件或在之后添加到请求管道的端点中访问会话数据UseSession 方法被调用。
+    await context.Session.CommitAsync();
+    await context.Response.WriteAsync($"Counter1: {counter1}, Counter2: {counter2}");
+});
+
 app.MapFallback(async context => await context.Response.WriteAsync("Hello World!"));
 
 app.Run();
