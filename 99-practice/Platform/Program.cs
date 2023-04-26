@@ -17,7 +17,8 @@ app.MapGet("middleware/function", async (HttpContext context, IResponseFormatter
 // app.MapWeather("endpoint/class");
 app.MapEndpoint<WeatherEndpoint>("endpoint/class");
 
-app.MapGet("endpoint/function", async (HttpContext context, IResponseFormatter formatter) => {
+app.MapGet("endpoint/function", async (HttpContext context) => {
+    IResponseFormatter formatter = context.RequestServices.GetRequiredService<IResponseFormatter>();
     await formatter.Format(context, "Endpoint Function: It is sunny in LA");
 });
 
