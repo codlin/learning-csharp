@@ -17,12 +17,18 @@ builder.Services.AddSession(opts => {
     opts.Cookie.IsEssential = true;
 });
 
-builder.Services.AddHttpsRedirection(opts => {
-    opts.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-    opts.HttpsPort = 5500;
+// HTTPS 重定向的一个限制是用户可以在被重定向到安全连接之前使用 HTTP 发出初始请求，这会带来安全风险。 
+// HTTP 严格传输安全 (HSTS) 协议旨在帮助减轻这种风险，其工作原理是在响应中包含一个标头，告诉浏览器仅在向 Web 应用程序的主机发送请求时使用 HTTPS。
+// 收到 HSTS 标头后，支持 HSTS 的浏览器将使用 HTTPS 向应用程序发送请求，即使用户指定了 HTTP URL。
+builder.Services.AddHsts(opts => {
+    opts.MaxAge = TimeSpan.FromDays(1);
+    opts.IncludeSubDomains = true;
 });
 
 var app = builder.Build();
+if (app.Environment.IsProduction()) {
+    app.UseHsts();
+}
 app.UseHttpsRedirection();
 
 
