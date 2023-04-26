@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.FileProviders;
+
 using Platform;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,12 @@ builder.Services.AddHttpLogging(opts => {
 var app = builder.Build();
 app.UseHttpLogging();
 app.UseStaticFiles();
+var env = app.Environment;
+app.UseStaticFiles(new StaticFileOptions {
+    // The FileProvider property is used to select a different location for static content
+    FileProvider = new PhysicalFileProvider($"{env.ContentRootPath}/staticfiles"),
+    RequestPath = "/files"
+});
 
 app.UseMiddleware<LocationMiddleware>();
 
