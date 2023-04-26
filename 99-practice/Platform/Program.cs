@@ -6,6 +6,7 @@ var servicesConfig = builder.Configuration;
 builder.Services.Configure<MessageOptions>(servicesConfig.GetSection("Location"));
 
 var app = builder.Build();
+app.Logger.LogDebug("Pipeline configuration starting");
 var pipelineConfig = app.Configuration;
 // - use configuration settings to set up pipeline
 
@@ -26,5 +27,7 @@ app.MapGet("/", async context => {
 });
 
 app.MapGet("population/{city?}", Population.Endpoint);
+
+app.Logger.LogDebug("Pipeline configuration complete");
 
 app.Run();
