@@ -1,9 +1,14 @@
+using Microsoft.AspNetCore.HttpLogging;
 using Platform;
 
 var builder = WebApplication.CreateBuilder(args);
 var servicesConfig = builder.Configuration;
 // - use configuration settings to set up services
 builder.Services.Configure<MessageOptions>(servicesConfig.GetSection("Location"));
+builder.Services.AddHttpLogging(opts => {
+    opts.LoggingFields = HttpLoggingFields.RequestMethod
+    | HttpLoggingFields.RequestPath | HttpLoggingFields.ResponseStatusCode;
+});
 
 var app = builder.Build();
 app.UseHttpLogging();
