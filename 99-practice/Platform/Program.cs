@@ -6,9 +6,7 @@ var servicesConfig = builder.Configuration;
 builder.Services.Configure<MessageOptions>(servicesConfig.GetSection("Location"));
 
 var app = builder.Build();
-app.Logger.LogDebug("Pipeline configuration starting");
-var pipelineConfig = app.Configuration;
-// - use configuration settings to set up pipeline
+app.UseHttpLogging();
 
 app.UseMiddleware<LocationMiddleware>();
 
