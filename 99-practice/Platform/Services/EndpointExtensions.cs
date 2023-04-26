@@ -17,7 +17,7 @@ public static class EndpointExtensions {
                                                              methodParams
                                                                 .Select(p => p.ParameterType == typeof(HttpContext)
                                                                 ? context
-                                                                : app.ServiceProvider.GetService(p.ParameterType)).ToArray()))!);
+                                                                : context.RequestServices.GetService(p.ParameterType)).ToArray()))!);
     }
 
     // public static void MapWeather(this IEndpointRouteBuilder app, string path) {
