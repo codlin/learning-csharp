@@ -116,3 +116,31 @@ public IActionResult Redirect() {
     return Redirect("/api/products/1");
 }
 ```
+
+### Redirecting to an Action Method
+您可以使用 RedirectToAction 方法（用于临时重定向）或 RedirectToActionPermanent 方法（用于永久重定向）重定向到另一个操作方法。
+清单 19-23 更改了 Redirect 操作方法，以便客户端将被重定向到控制器定义的另一个操作方法。
+```C#
+...
+[HttpGet("redirect")]
+public IActionResult Redirect() {
+    return RedirectToAction(nameof(GetProduct), new { Id = 1 });
+}
+...
+```
+操作方法被指定为字符串，尽管 nameof 表达式可用于选择操作方法而没有拼写错误的风险。使用匿名对象提供创建路由所需的任何其他值。  
+如果您仅指定一个操作方法名称，则重定向将以当前控制器为目标。有一个 RedirectToAction 方法的重载可以接受控制器名称和操作Action。  
+#### REDIRECTING USING ROUTE VALUES 
+RedirectToRoute 和 RedirectToRoutePermanent 方法将客户端重定向到一个 URL，该 URL 通过为路由系统提供段变量的值并允许它选择要使用的路由而创建。
+这对于具有复杂路由配置的应用程序很有用，应谨慎使用，因为很容易创建到错误 URL 的重定向。下面是使用 RedirectToRoute 方法进行重定向的示例： 
+```C#
+...
+[HttpGet("redirect")]
+public IActionResult Redirect() {
+    return RedirectToRoute(new {
+        controller = "Products", action = "GetProduct", Id = 1
+    });
+}
+...
+```
+此重定向中的值集依赖于约定路由来选择控制器和操作方法。约定路由通常与生成 HTML 响应的控制器一起使用，如第 21 章所述。
