@@ -70,3 +70,12 @@ public Product GetProduct() {
 |---|---|---|
 | GET | api/products      | GetProducts |
 | GET | api/products/{id} | GetProduct  |
+
+## Using Asynchronous Actions
+ASP.NET Core 平台通过从池中分配一个线程来处理每个请求。可以并发处理的请求数受池大小的限制，线程在等待操作产生结果时不能用于处理任何其他请求。
+依赖于外部资源的操作可能会导致请求线程等待较长时间。例如，数据库服务器可能有自己的并发限制，并且可能会在查询可以执行之前排队查询。
+在数据库为操作生成结果之前，ASP.NET Core 请求线程无法处理任何其他请求，然后生成可发送到 HTTP 客户端的响应。
+这个问题可以通过定义异步操作来解决，它允许 ASP.NET Core 线程在其他请求被阻止时处理其他请求，从而增加应用程序可以同时处理的 HTTP 请求的数量。  
+`ProductsController.cs` 修改了控制器以使用异步操作。
+Entity Framework Core 提供了一些方法的异步版本，例如 FindAsync、AddAsync 和 SaveChangesAsync，我将这些方法与 await 关键字一起使用。
+并非所有操作都可以异步执行，这就是 UpdateProduct 和 DeleteProduct 操作中的 Update 和 Remove 方法保持不变的原因。对于某些操作（包括对数据库的 LINQ 查询），可以使用 IAsyncEnumerable<T> 接口，它表示应该异步枚举的对象序列，并防止 ASP.NET Core 请求线程等待每个对象生成数据库。控制器产生的响应没有变化，但 ASP.NET Core 分配用于处理每个请求的线程不一定被操作方法阻塞。
