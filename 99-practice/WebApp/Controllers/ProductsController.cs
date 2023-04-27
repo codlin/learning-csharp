@@ -20,17 +20,26 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<Product?> GetProduct(long id, [FromServices] ILogger<ProductsController> logger)
+    public async Task<IActionResult?> GetProduct(long id, [FromServices] ILogger<ProductsController> logger)
     {
         logger.LogDebug("GetProduct Action Invoke");
-        return await context.Products.FindAsync(id);
+        Product? p = await context.Products.FindAsync(id);
+        if (p == null)
+        {
+            return NotFound();
+        }
+        return Ok(p);
     }
 
     [HttpPost]
-    public async void SavaProduct([FromBody] ProductBindingTarget target)
+    public async Task<IActionResult> SavaProduct([FromBody] ProductBindingTarget target)
     {
-        await context.Products.AddAsync(target.ToProduct());
+        Product p = target.ToProduct();
+        await context.Products.AddAsync(p);
         await context.SaveChangesAsync();
+
+        // 把生成的包含`id`的对象返回
+        return Ok(p);
     }
 
     [HttpPut]

@@ -83,3 +83,27 @@ Entity Framework Core 提供了一些方法的异步版本，例如 FindAsync、
 ## Preventing Over-Binding
 默认情况下，Entity Framework Core 将数据库配置为在存储新对象时分配主键值。这意味着应用程序不必担心跟踪哪些键值已经分配，​​并且允许多个应用程序共享同一个数据库而无需协调键分配。 Product 数据模型类需要一个 ProductId 属性，但模型绑定过程不理解该属性的重要性，并将客户端提供的任何值添加到它创建的对象中，这导致 SaveProduct 操作方法中出现异常。  
 这被称为过度绑定`over-binding`，当客户端提供开发人员未预料到的值时，它会导致严重的问题。充其量，应用程序的行为会出乎意料，但这种技术已被用来破坏应用程序的安全性，并授予用户比他们应有的更多访问权限。防止过度绑定的最安全方法是创建单独的数据模型类，这些类仅用于通过模型绑定过程接收数据。将名为 ProductBindingTarget.cs 的类文件添加到 WebApp/Models 文件夹，并使用它来定义类。
+
+## Using Action Results
+ASP.NET Core 会自动设置响应的状态代码，但您并不总能得到想要的结果，部分原因是没有针对 RESTful Web 服务的严格规则，并且 Microsoft 做出的假设可能与您的期望不符。一个例子是请求product，请求的 URL 将由 GetProduct 操作方法处理，它将在数据库中查询 ProductId 值为 1000 的对象，命令产生以下输出：`数据库中没有匹配的对象`，这意味着GetProduct 操作方法返回 null。当 MVC 框架从操作方法接收到 null 时，它会返回 204 状态代码，这表示成功的请求没有产生任何数据。并非所有 Web 服务都以这种方式运行，常见的替代方法是返回 404 响应，表示未找到。类似地，SaveProducts 操作在存储对象时将返回 200 响应，但由于在存储数据之前不会生成主键，因此客户端不知道分配的键值是什么。对于这些类型的 Web 服务实现细节，这里没有对错之分，您应该选择最适合您的项目和个人喜好的方法。本节是如何更改默认行为的示例，而不是遵循任何特定样式的 Web 服务的方向。  
+动作方法可以指示 MVC 框架通过返回一个实现 IActionResult 接口的对象来发送特定的响应，这被称为动作结果。这允许操作方法指定所需的响应类型，而不必使用 HttpResponse 对象直接生成它。ControllerBase 类提供了一组用于创建操作结果对象的方法(OK, BadRequest, NotFound等等)，这些对象可以从操作方法返回。
+```C#
+[HttpGet("{id}")]
+public async Task<IActionResult> GetProduct(long id) {
+    Product? p = await context.Products.FindAsync(id);
+    if (p == null) {
+        return NotFound();
+    }
+    return Ok(p);
+}
+
+[HttpPost]
+public async Task<IActionResult>
+SaveProduct([FromBody] ProductBindingTarget target) {
+    Product p = target.ToProduct();
+    await context.Products.AddAsync(p);
+    await context.SaveChangesAsync();
+    return Ok(p);
+}
+```
+当一个action方法返回一个对象时，相当于把这个对象传递给Ok方法并返回结果。当操作返回 null 时，它相当于返回 NoContent 方法的结果。
