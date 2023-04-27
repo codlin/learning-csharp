@@ -79,3 +79,7 @@ ASP.NET Core 平台通过从池中分配一个线程来处理每个请求。可�
 `ProductsController.cs` 修改了控制器以使用异步操作。
 Entity Framework Core 提供了一些方法的异步版本，例如 FindAsync、AddAsync 和 SaveChangesAsync，我将这些方法与 await 关键字一起使用。
 并非所有操作都可以异步执行，这就是 UpdateProduct 和 DeleteProduct 操作中的 Update 和 Remove 方法保持不变的原因。对于某些操作（包括对数据库的 LINQ 查询），可以使用 IAsyncEnumerable<T> 接口，它表示应该异步枚举的对象序列，并防止 ASP.NET Core 请求线程等待每个对象生成数据库。控制器产生的响应没有变化，但 ASP.NET Core 分配用于处理每个请求的线程不一定被操作方法阻塞。
+
+## Preventing Over-Binding
+默认情况下，Entity Framework Core 将数据库配置为在存储新对象时分配主键值。这意味着应用程序不必担心跟踪哪些键值已经分配，​​并且允许多个应用程序共享同一个数据库而无需协调键分配。 Product 数据模型类需要一个 ProductId 属性，但模型绑定过程不理解该属性的重要性，并将客户端提供的任何值添加到它创建的对象中，这导致 SaveProduct 操作方法中出现异常。  
+这被称为过度绑定`over-binding`，当客户端提供开发人员未预料到的值时，它会导致严重的问题。充其量，应用程序的行为会出乎意料，但这种技术已被用来破坏应用程序的安全性，并授予用户比他们应有的更多访问权限。防止过度绑定的最安全方法是创建单独的数据模型类，这些类仅用于通过模型绑定过程接收数据。将名为 ProductBindingTarget.cs 的类文件添加到 WebApp/Models 文件夹，并使用它来定义类。
