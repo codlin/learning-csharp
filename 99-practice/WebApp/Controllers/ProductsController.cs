@@ -4,6 +4,7 @@ using WebApp.Models;
 
 namespace WebApp.Controllers;
 
+[ApiController]
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
@@ -32,19 +33,12 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SavaProduct([FromBody] ProductBindingTarget target)
+    public async Task<IActionResult> SaveProduct(ProductBindingTarget target)
     {
-        if (ModelState.IsValid)
-        {
-            Product p = target.ToProduct();
-            await context.Products.AddAsync(p);
-            await context.SaveChangesAsync();
-
-            // 把生成的包含`id`的对象返回
-            return Ok(p);
-        }
-
-        return BadRequest(ModelState);
+        Product p = target.ToProduct();
+        await context.Products.AddAsync(p);
+        await context.SaveChangesAsync();
+        return Ok(p);
     }
 
     [HttpPut]

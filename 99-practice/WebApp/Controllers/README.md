@@ -144,3 +144,24 @@ public IActionResult Redirect() {
 ...
 ```
 此重定向中的值集依赖于约定路由来选择控制器和操作方法。约定路由通常与生成 HTML 响应的控制器一起使用，如第 21 章所述。
+
+### Applying the API Controller Atribute
+ApiController 属性可应用于 Web 服务控制器类，以更改模型绑定和验证功能的行为。
+使用 FromBody 属性从请求正文中选择数据并显式检查 ModelState.IsValid 属性在已使用 ApiController 属性装饰的控制器中不是必需的。
+从主体获取数据和验证数据在 Web 服务中非常普遍，因此在使用属性时会自动应用它们，将控制器操作中的代码重点恢复到处理应用程序功能，如清单所示.
+```C#
+[ApiController]
+[Route("api/[controller]")]
+public class ProductsController : ControllerBase {
+    ...
+    [HttpPost]
+    public async Task<IActionResult>
+    SaveProduct(ProductBindingTarget target) {
+        Product p = target.ToProduct();
+        await context.Products.AddAsync(p);
+        await context.SaveChangesAsync();
+        return Ok(p);
+    }
+    ...
+}
+```
