@@ -7,22 +7,22 @@ namespace WebApp.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
+    private DataContext context;
+    public ProductsController(DataContext ctx)
+    {
+        context = ctx;
+    }
+
     [HttpGet]
     public IEnumerable<Product> GetProducts()
     {
-        return new Product[]  {
-            new Product() { Name = "Product #1" },
-            new Product() { Name = "Product #2" },
-        };
+        return context.Products;
     }
 
     [HttpGet("{id}")]
-    public Product GetProduct()
+    public Product? GetProduct([FromServices] ILogger<ProductsController> logger)
     {
-        return new Product()
-        {
-            ProductId = 1,
-            Name = "Test Product"
-        };
+        logger.LogDebug("GetProduct Action Invoke");
+        return context.Products.FirstOrDefault();
     }
 }
