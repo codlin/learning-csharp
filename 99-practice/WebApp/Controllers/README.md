@@ -107,3 +107,12 @@ SaveProduct([FromBody] ProductBindingTarget target) {
 }
 ```
 当一个action方法返回一个对象时，相当于把这个对象传递给Ok方法并返回结果。当操作返回 null 时，它相当于返回 NoContent 方法的结果。
+
+### Performing Redirections
+表 19-7 中的许多操作结果方法都与重定向有关，将客户端重定向到另一个 URL。执行重定向的最基本方法是调用 Redirect 方法，如清单 19-21 所示
+```c#
+[HttpGet("redirect")]
+public IActionResult Redirect() {
+    return Redirect("/api/products/1");
+}
+```
