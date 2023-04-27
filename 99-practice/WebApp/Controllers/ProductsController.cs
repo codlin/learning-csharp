@@ -34,12 +34,17 @@ public class ProductsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SavaProduct([FromBody] ProductBindingTarget target)
     {
-        Product p = target.ToProduct();
-        await context.Products.AddAsync(p);
-        await context.SaveChangesAsync();
+        if (ModelState.IsValid)
+        {
+            Product p = target.ToProduct();
+            await context.Products.AddAsync(p);
+            await context.SaveChangesAsync();
 
-        // 把生成的包含`id`的对象返回
-        return Ok(p);
+            // 把生成的包含`id`的对象返回
+            return Ok(p);
+        }
+
+        return BadRequest(ModelState);
     }
 
     [HttpPut]
