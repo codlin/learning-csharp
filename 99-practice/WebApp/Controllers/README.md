@@ -209,3 +209,20 @@ Content
 -------
 {"productId":1,"name":"Green Kayak","price":275.00,"categoryId":1,"supplierId":1}
 ```
+#### Configuring the JSON Serializer
+JSON 序列化程序可以配置为在序列化对象时忽略属性。配置序列化程序的一种方法是使用 JsonIgnore 属性。
+```C#
+...
+[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+public Supplier? Supplier { get; set; }
+...
+```
+该属性必须应用于模型类，并且在应忽略少量属性时很有用，但对于更复杂的数据模型，这可能难以管理。可以使用选项模式为序列化定义通用策略，如清单所示。
+```c#
+using System.Text.Json.Serialization;
+...
+builder.Services.Configure<JsonOptions>(opts => {
+    opts.JsonSerializerOptions.DefaultIgnoreCondition
+    = JsonIgnoreCondition.WhenWritingNull;
+});
+```

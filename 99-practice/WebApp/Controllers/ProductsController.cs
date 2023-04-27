@@ -29,14 +29,7 @@ public class ProductsController : ControllerBase
         {
             return NotFound();
         }
-        return Ok(new
-        {
-            ProductId = p.ProductId,
-            Name = p.Name,
-            Price = p.Price,
-            CategoryId = p.CategoryId,
-            SupplierId = p.SupplierId
-        });
+        return Ok(p);
     }
 
     [HttpPost]
