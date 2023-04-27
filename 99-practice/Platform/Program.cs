@@ -10,6 +10,7 @@ builder.Services.AddResponseCaching();
 builder.Services.AddSingleton<IResponseFormatter, HtmlResponseFormatter>();
 builder.Services.AddDbContext<CalculationContext>(opts => {
     opts.UseNpgsql(@$"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST")};Username=test;Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWD")};Database=CalcDb");
+    opts.EnableSensitiveDataLogging(true);
 });
 
 builder.Services.AddTransient<SeedData>();
