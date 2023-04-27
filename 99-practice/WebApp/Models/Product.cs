@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApp.Models {
-    public class Product {
+namespace WebApp.Models
+{
+    public class Product
+    {
 
         public long ProductId { get; set; }
 

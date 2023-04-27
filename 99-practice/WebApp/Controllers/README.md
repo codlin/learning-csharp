@@ -165,3 +165,47 @@ public class ProductsController : ControllerBase {
     ...
 }
 ```
+### Omitting Null Properties
+我将在本章中进行的最后更改是从 Web 服务返回的数据中删除空值。
+数据模型类包含 Entity Framework Core 用于关联复杂查询中的相关数据的导航属性，如第 20 章中所述。
+对于本章中执行的简单查询，没有值分配给这些导航属性，这意味着客户端收到的属性的值永远不会可用。
+要查看问题，请使用 PowerShell 命令提示符运行清单 19-28 中所示的命令。
+```POWERSHELL
+Invoke-WebRequest http://localhost:5000/api/products/1 | Select-Object Content
+```
+结果：
+```POWERSHELL
+Content
+-------
+{"productId":1,"name":"Green Kayak","price":275.00,"categoryId":1,"category":null,
+"supplierId":1,"supplier":null}
+```
+
+#### Projecting Selected Properties
+```c#
+[HttpGet("{id}")]
+    public async Task<IActionResult?> GetProduct(long id, [FromServices] ILogger<ProductsController> logger)
+    {
+        logger.LogDebug("GetProduct Action Invoke");
+        Product? p = await context.Products.FindAsync(id);
+        if (p == null)
+        {
+            return NotFound();
+        }
+        return Ok(new
+        {
+            // projecting Selected Properties
+            ProductId = p.ProductId,
+            Name = p.Name,
+            Price = p.Price,
+            CategoryId = p.CategoryId,
+            SupplierId = p.SupplierId
+        });
+    }
+```
+result:
+```json
+Content
+-------
+{"productId":1,"name":"Green Kayak","price":275.00,"categoryId":1,"supplierId":1}
+```
