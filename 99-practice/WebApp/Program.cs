@@ -1,7 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+
+using WebApp.Models;
+
+// using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +14,16 @@ builder.Services.AddDbContext<DataContext>(opts =>
 });
 
 // the AddControllers method defines the services that are required by the MVC framework.
-builder.Services.AddControllers();
-builder.Services.Configure<JsonOptions>(opts => {
-opts.JsonSerializerOptions.DefaultIgnoreCondition
-= JsonIgnoreCondition.WhenWritingNull;
+// builder.Services.AddControllers();
+// builder.Services.Configure<JsonOptions>(opts => {
+// opts.JsonSerializerOptions.DefaultIgnoreCondition
+// = JsonIgnoreCondition.WhenWritingNull;
+// });
+builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.Configure<MvcNewtonsoftJsonOptions>(opts =>
+{
+    opts.SerializerSettings.NullValueHandling
+    = Newtonsoft.Json.NullValueHandling.Ignore;
 });
 
 var app = builder.Build();
