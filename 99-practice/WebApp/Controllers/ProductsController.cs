@@ -20,7 +20,15 @@ public class ProductsController : ControllerBase
         return context.Products.AsAsyncEnumerable();
     }
 
+    /// <summary>
+    /// 为了修复API分析器检测到的问题，可以使用 ProducesResponseType 属性来声明操作方法可以产生的每种响应类型。
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult?> GetProduct(long id, [FromServices] ILogger<ProductsController> logger)
     {
         logger.LogDebug("GetProduct Action Invoke");
