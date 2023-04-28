@@ -46,3 +46,33 @@ WriteLiteral("</td></tr>");
 
 ## CACHING RESPONSES
 可以通过将 ResponseCache 属性应用于操作方法（或控制器类，它缓存来自所有操作方法的响应）来缓存来自视图的响应。有关如何启用响应缓存的详细信息，请参阅第 17 章。
+
+## Setting the View Model Type
+`Watersports.cshtml` 文件的生成类派生自 RazorPage<T>，但 Razor 不知道视图模型的操作方法将使用什么类型，因此它选择动态作为泛型类型参数。
+这意味着 @Model 表达式可以与任何属性或方法名称一起使用，这些名称会在运行时生成响应时进行评估。
+为了演示使用不存在的成员时会发生什么，请将清单 21-14 中所示的内容添加到 Watersports.cshtml 文件中。
+```html
+<tr><th>Tax Rate</th><td>@Model?.TaxRate</td></tr>
+```
+因为不存在`TaxRate`这个字段，所以引发异常。  
+**要在开发过程中检查表达式，可以使用 model 关键字指定模型对象的类型。**
+```html
+@model WebApp.Models.Product
+<!DOCTYPE html>
+<html>
+```
+
+# Understanding Directives
+| Name | Description |
+|-|-|
+| @model | This directive specifies the type of the view model. |
+| @using | This directive imports a namespace. |
+| @page | This directive denotes a Razor Page, described in Chapter 23. |
+| @section | This directive denotes a layout section, as described in Chapter 22. |
+| @addTagHelper | This directive adds tag helpers to a view, as described in Chapter 25. |
+| @namespace | This directive sets the namespace for the C# class generated from a view. |
+| @functions | This directive adds C# properties and methods to the C# class generated from a view and is commonly used in Razor Pages, as described in Chapter 23. |
+| @attribute | This directive adds an attribute to the C# class generated from a view. I use this feature to apply authorization restrictions in Chapter 38. |
+| @implements | This directive declares that the C# class generated from a view implements an interface. This feature is demonstrated in Chapter 36. |
+| @inherits | This directive sets the base class for the C# class generated from a view. This feature is demonstrated in Chapter 36. |
+| @inject | This directive provides a view with direct access to a service through dependency injection. This feature is demonstrated in Chapter 23. |
