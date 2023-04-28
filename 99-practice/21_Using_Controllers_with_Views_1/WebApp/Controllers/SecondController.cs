@@ -8,4 +8,9 @@ public class SecondController : Controller
     {
         return View("Common");
     }
+
+    public IActionResult Index2()
+    {
+        return View("/Views/Shared/Common.cshtml");
+    }
 }
