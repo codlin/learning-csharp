@@ -11,10 +11,35 @@
     <div class="m-2">
         <table class="table table-sm table-striped table-bordered" data-id="@Model?.ProductId">
             <tbody>
-                <tr>
-                    <th>Name</th>
-                    <td>@Model?.Name</td>
-                </tr>
+               @* @if (Model?.Price > 200) {
+                    <tr><th>Name</th><td>Luxury @Model?.Name</td></tr>
+                } else {
+                    <tr><th>Name</th><td>Basic @Model?.Name</td></tr>
+                } *@
+                @* @switch (Model?.Name) {
+                case "Kayak":
+                    <tr><th>Name</th><td>Small Boat</td></tr>
+                    break;
+                case "Lifejacket":
+                    <tr><th>Name</th><td>Flotation Aid</td></tr>
+                    break;
+                default:
+                    <tr><th>Name</th><td>@Model?.Name</td></tr>
+                    break;
+                } *@
+                <tr><th>Name</th><td>
+                    @switch (Model?.Name) {
+                        case "Kayak":
+                            @:Small Boat
+                            break;
+                        case "Lifejacket":
+                            @:Flotation Aid
+                            break;
+                        default:
+                            @Model?.Name
+                            break;
+                    }
+                </td></tr>
                 <tr>
                     <th>Price</th>
                     <td>@Model?.Price.ToString("c")</td>

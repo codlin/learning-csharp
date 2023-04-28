@@ -82,14 +82,14 @@ Razor 内容表达式生成的内容包含在视图生成的输出中。表 21-6
 **Table 21-6.** *Useful Razor Content Expressions*  
 | Name | Description |
 |-|-|
-| @<expression> | This is the basic Razor expression, which is evaluated, and the result it produces is inserted into the response.| 
-| @if | This expression is used to select regions of content based on the result of an expression. See the “Using Conditional Expressions” section for examples.| 
-| @switch | This expression is used to select regions of content based on the result of an expression. See the “Using Conditional Expressions” section for examples.| 
-| @foreach | This expression generates the same region of content for each element in a sequence. See the “Enumerating Sequences” for  examples.| 
-| @{ ... } | This expression defines a code block. See the “Using Razor Code Blocks” section for an example.| 
-| @: This | expression denotes a section of content that is not enclosed in HTML elements. See the “Using Conditional Expressions” section for an example.| 
-| @try | This expression is used to catch exceptions.| 
-| @await | This expression is used to perform an asynchronous operation, the result of which is inserted into the response. See Chapter 24 for examples. | 
+| @<expression> | 这是基本的 Razor 表达式，它被计算，它产生的结果被插入到响应中。| 
+| @if | 此表达式用于根据表达式的结果选择内容区域。有关示例，请参见“使用条件表达式”部分。| 
+| @switch | 此表达式用于根据表达式的结果选择内容区域。有关示例，请参见“使用条件表达式”部分。| 
+| @foreach | 此表达式为序列中的每个元素生成相同的内容区域。有关示例，请参见“枚举序列”。 | 
+| @{ ... } | 该表达式定义了一个代码块。有关示例，请参阅“使用 Razor 代码块”部分。| 
+| @: | 此表达式表示未包含在 HTML 元素中的内容部分。有关示例，请参见“使用条件表达式”部分。| 
+| @try | 该表达式用于捕获异常。| 
+| @await | 此表达式用于执行异步操作，其结果将插入到响应中。有关示例，请参见第 24 章。 | 
 
 ## UNDERSTANDING THE USE OF THE NULL CONDITIONAL OPERATOR IN VIEWS
 使用@Model 表达式时，需要空条件运算符（? 运算符）来防止出现空模型值，如下所示：
@@ -128,3 +128,49 @@ Razor View 编译器保守地匹配表达式，并假定第一个表达式中的
 ```html
 <table data-id="@Model?.ProductId">
 ```
+
+## Using Conditional Expressions
+Razor 支持条件表达式，这意味着可以根据视图模型定制输出。此技术是 Razor 的核心，允许您从易于阅读和维护的视图创建复杂而流畅的响应。
+```cs
+@if (Model?.Price > 200) {
+    <tr><th>Name</th><td>Luxury @Model?.Name</td></tr>
+} else {
+    <tr><th>Name</th><td>Basic @Model?.Name</td></tr>
+}
+```
+Razor 还支持 @switch 表达式，这是一种处理多个条件的更简洁的方式，如清单 21-22 所示。
+```cs
+@switch (Model?.Name) {
+case "Kayak":
+    <tr><th>Name</th><td>Small Boat</td></tr>
+    break;
+case "Lifejacket":
+    <tr><th>Name</th><td>Flotation Aid</td></tr>
+    break;
+default:
+    <tr><th>Name</th><td>@Model?.Name</td></tr>
+    break;
+}
+```
+条件表达式可能导致每个结果子句重复相同的内容块。例如，在 switch 表达式中，每个 case 子句仅在 td 元素的内容上有所不同，而 tr 和 th 元素保持不变。  
+要删除这种重复，可以在元素中使用条件表达式。
+```cs
+<tr><th>Name</th><td>
+    @switch (Model?.Name) {
+        case "Kayak":
+            @:Small Boat
+            break;
+        case "Lifejacket":
+            @:Flotation Aid
+            break;
+        default:
+            @Model?.Name
+            break;
+    }
+</td></tr>
+```
+Razor 编译器需要有关未包含在 HTML 元素中的文字值的帮助，需要 @: 前缀，如下所示：
+```cs
+@:Small Boat
+```
+编译器会处理 HTML 元素，因为它会检测到开放标记，但文本内容需要此额外帮助。
