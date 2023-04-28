@@ -37,4 +37,8 @@ public class HomeController : Controller
 
         return View(prod);
     }
+    public IActionResult Common()
+    {
+        return View();
+    }
 }
