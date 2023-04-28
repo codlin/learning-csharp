@@ -76,3 +76,49 @@ WriteLiteral("</td></tr>");
 | @implements | This directive declares that the C# class generated from a view implements an interface. This feature is demonstrated in Chapter 36. |
 | @inherits | This directive sets the base class for the C# class generated from a view. This feature is demonstrated in Chapter 36. |
 | @inject | This directive provides a view with direct access to a service through dependency injection. This feature is demonstrated in Chapter 23. |
+
+# Understanding Content Expressions
+Razor 内容表达式生成的内容包含在视图生成的输出中。表 21-6 描述了最有用的内容表达式，这些表达式将在后面的部分中进行演示。  
+**Table 21-6.** *Useful Razor Content Expressions*  
+| Name | Description |
+|-|-|
+| @<expression> | This is the basic Razor expression, which is evaluated, and the result it produces is inserted into the response.| 
+| @if | This expression is used to select regions of content based on the result of an expression. See the “Using Conditional Expressions” section for examples.| 
+| @switch | This expression is used to select regions of content based on the result of an expression. See the “Using Conditional Expressions” section for examples.| 
+| @foreach | This expression generates the same region of content for each element in a sequence. See the “Enumerating Sequences” for  examples.| 
+| @{ ... } | This expression defines a code block. See the “Using Razor Code Blocks” section for an example.| 
+| @: This | expression denotes a section of content that is not enclosed in HTML elements. See the “Using Conditional Expressions” section for an example.| 
+| @try | This expression is used to catch exceptions.| 
+| @await | This expression is used to perform an asynchronous operation, the result of which is inserted into the response. See Chapter 24 for examples. | 
+
+## UNDERSTANDING THE USE OF THE NULL CONDITIONAL OPERATOR IN VIEWS
+使用@Model 表达式时，需要空条件运算符（? 运算符）来防止出现空模型值，如下所示：
+```html
+...
+<tr><th>Name</th><td>@Model?.Name</td></tr>
+...
+```
+但是**当 @model 用于定义模型类型时，需要一个不可为 null 的类型**，如下所示：
+```html
+@model Product
+```
+实际上，如果您在@model 表达式中指定了可为空的引用类型，编译器将报告警告。这不是它看起来的一致性，它反映了 Razor 在幕后的工作方式。
+RazorPage<T> 类（从中派生生成的 C# 视图类）定义了视图表达式中使用的 Model 属性，如表 21-3 中所述。  
+RazorPage<T>.Model 属性定义如下：
+```c#
+...
+public T? Model => ViewData == null ? default(T) : ViewData.Model;
+...
+```
+这意味着**即使在 @model 表达式中使用了不可为 null 的 Product 类型，在 @Model 表达式中使用的 Model 属性的类型也是可为 null 的 `Product?` 类型，正是由于这个原因，在视图表达式中需要 null 条件运算符**。
+
+```html
+<tr><th>Tax</th><td>@Model?.Price * 0.2m</td></tr>
+<tr><th>Tax</th><td>@(Model?.Price * 0.2m)</td></tr>
+```
+最终生成为：
+```html
+<tr><th>Tax</th><td>275.00 * 0.2m</td></tr>
+<tr><th>Tax</th><td>55.000</td></tr>
+```
+Razor View 编译器保守地匹配表达式，并假定第一个表达式中的星号和数值是静态内容。第二个表达式的**括号**避免了这个问题。
