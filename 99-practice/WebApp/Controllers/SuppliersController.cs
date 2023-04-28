@@ -25,6 +25,17 @@ public class SuppliersController : ControllerBase
         // 下面的代码会造成异常：JsonException: A possible object cycle was detected.
         // 该问题是由 Entity Framework Core 功能引起的，该功能试图最大限度地减少从数据库读取的数据量，
         // 但会导致 ASP.NET Core 应用程序出现问题。它在 Supplier 和 Product 对象的导航属性之间创建了一个循环引用。
-        return await context.Suppliers.Include(s => s.Products).FirstAsync(s => s.SupplierId == id);
+        // return await context.Suppliers.Include(s => s.Products).FirstAsync(s => s.SupplierId == id);
+
+        // 通过下面的方法避免循环引用
+        Supplier supplier = await context.Suppliers.Include(s => s.Products).FirstAsync(s => s.SupplierId == id);
+        if (supplier.Products != null)
+        {
+            foreach (Product p in supplier.Products)
+            {
+                p.Supplier = null;
+            }
+        }
+        return supplier;
     }
 }
