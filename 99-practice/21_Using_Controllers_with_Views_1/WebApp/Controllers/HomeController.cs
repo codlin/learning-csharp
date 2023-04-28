@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
 using WebApp.Models;
 
 namespace WebApp.Controllers;
@@ -28,14 +28,8 @@ public class HomeController : Controller
     /// <returns></returns>
     public async Task<IActionResult> Index(long id = 1)
     {
-        Product? prod = await context.Products.FindAsync(id);
-        if (prod?.CategoryId == 1)
-        {
-            // 操作方法可以通过提供名称作为视图的参数来选择视图方法
-            return View("Watersports", prod);
-        }
-
-        return View(prod);
+        ViewBag.AveragePrice = await context.Products.AverageAsync(p => p.Price);
+        return View(await context.Products.FindAsync(id));
     }
     public IActionResult Common()
     {
