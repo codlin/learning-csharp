@@ -28,6 +28,13 @@ public class HomeController : Controller
     /// <returns></returns>
     public async Task<IActionResult> Index(long id = 1)
     {
-        return View(await context.Products.FindAsync(id));
+        Product? prod = await context.Products.FindAsync(id);
+        if (prod?.CategoryId == 1)
+        {
+            // 操作方法可以通过提供名称作为视图的参数来选择视图方法
+            return View("Watersports", prod);
+        }
+
+        return View(prod);
     }
 }
