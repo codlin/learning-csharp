@@ -176,3 +176,18 @@ Razor 编译器需要有关未包含在 HTML 元素中的文字值的帮助，�
 编译器会处理 HTML 元素，因为它会检测到开放标记，但文本内容需要此额外帮助。
 
 ## Enumerating Sequences
+
+## Using Razor Code Blocks
+```cs
+// List.cshtml
+@model IEnumerable<Product>
+@{
+    decimal average = Model?.Average(p => p.Price) ?? 0;
+}
+...
+<td>@((p.Price / average * 100).ToString("F1")) % of average</td>
+...
+```
+代码块由 @{ 和 } 表示，并包含标准 C# 语句。上面代码块使用 LINQ 计算分配给名为 average 的变量的值，
+该变量在表达式中用于设置表格单元格的内容，避免了对每个对象重复计算平均值的需要视图模型序列。  
+**如果代码块包含多个语句，它们可能会变得难以管理。对于更复杂的任务，请考虑使用视图包`view bag`，或向控制器添加非操作`nonaction`方法。**
