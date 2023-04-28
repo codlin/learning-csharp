@@ -50,10 +50,18 @@ public class ContentController : ControllerBase
         return $"JSON: {product.Name}";
     }
 
-    [HttpPost]
-    [Consumes("application/xml")]
-    public string SaveProductXml(ProductBindingTarget product)
-    {
-        return $"XML: {product.Name}";
-    }
+    /*
+    当您同时负责开发 Web 服务及其客户端时，每个操作的目的及其结果都是显而易见的，并且通常同时编写。
+    如果您负责第三方开发人员使用的 Web 服务，那么您可能需要提供描述该 Web 服务如何工作的文档。 
+    OpenAPI 规范（也称为 Swagger）以其他程序员可以理解并以编程方式使用的方式描述 Web 服务。
+    在本节中，我将演示如何使用 OpenAPI 来描述 Web 服务，并向您展示如何微调该描述。 
+    OpenAPI 发现过程需要每个操作方法的 HTTP 方法和 URL 模式的唯一组合。
+    该流程不支持 Consumes 属性，因此需要更改 ContentController 以删除接收 XML 和 JSON 数据的单独操作，如清单 20-25 所示。
+    */
+    // [HttpPost]
+    // [Consumes("application/xml")]
+    // public string SaveProductXml(ProductBindingTarget product)
+    // {
+    //     return $"XML: {product.Name}";
+    // }
 }

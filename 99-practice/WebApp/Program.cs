@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 using WebApp.Models;
 
@@ -30,6 +31,10 @@ builder.Services.Configure<MvcNewtonsoftJsonOptions>(opts =>
 //     opts.RespectBrowserAcceptHeader = true;
 //     opts.ReturnHttpNotAcceptable = true;
 // });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApp", Version = "v1" });
+});
 
 var app = builder.Build();
 
@@ -39,6 +44,12 @@ app.MapControllers();
 app.UseMiddleware<WebApp.TestMiddleware>();
 
 app.MapGet("/", () => "Hello World!");
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApp");
+});
 
 var context = app.Services.CreateScope().ServiceProvider
     .GetRequiredService<DataContext>();
