@@ -25,11 +25,11 @@ builder.Services.Configure<MvcNewtonsoftJsonOptions>(opts =>
     opts.SerializerSettings.NullValueHandling
     = Newtonsoft.Json.NullValueHandling.Ignore;
 });
-builder.Services.Configure<MvcOptions>(opts =>
-{
-    opts.RespectBrowserAcceptHeader = true;
-    opts.ReturnHttpNotAcceptable = true;
-});
+// builder.Services.Configure<MvcOptions>(opts =>
+// {
+//     opts.RespectBrowserAcceptHeader = true;
+//     opts.ReturnHttpNotAcceptable = true;
+// });
 
 var app = builder.Build();
 
