@@ -39,4 +39,21 @@ public class ContentController : ControllerBase
             SupplierId = p.SupplierId
         };
     }
+
+    /// 新的操作方法用 Consumes 属性修饰，限制了每个方法可以处理的数据类型。
+    /// 属性的组合意味着 Content-Type 标头为 application/json 的 HTTP POST 属性将由 SaveProductJson 操作方法处理。 
+    /// Content-Type 标头为 application/xml 的 HTTP POST 请求将由 SaveProductXml 操作方法处理。
+    [HttpPost]
+    [Consumes("application/json")]
+    public string SaveProductJson(ProductBindingTarget product)
+    {
+        return $"JSON: {product.Name}";
+    }
+
+    [HttpPost]
+    [Consumes("application/xml")]
+    public string SaveProductXml(ProductBindingTarget product)
+    {
+        return $"XML: {product.Name}";
+    }
 }
