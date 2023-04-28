@@ -9,7 +9,7 @@
 <body>
     <h6 class="bg-secondary text-white text-center m-2 p-2">Watersports</h6>
     <div class="m-2">
-        <table class="table table-sm table-striped table-bordered">
+        <table class="table table-sm table-striped table-bordered" data-id="@Model?.ProductId">
             <tbody>
                 <tr>
                     <th>Name</th>
@@ -24,9 +24,9 @@
                     <td>@Model?.CategoryId</td>
                 </tr>
                 @* <tr>
-                    <th>Tax Rate</th>
-                    <td>@Model?.TaxRate</td>
-                    </tr> *@
+                        <th>Tax Rate</th>
+                        <td>@Model?.TaxRate</td>
+                        </tr> *@
                 <tr>
                     <th>Tax</th>
                     <td>@Model?.Price * 0.2m</td>

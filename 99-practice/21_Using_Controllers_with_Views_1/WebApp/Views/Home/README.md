@@ -122,3 +122,9 @@ public T? Model => ViewData == null ? default(T) : ViewData.Model;
 <tr><th>Tax</th><td>55.000</td></tr>
 ```
 Razor View 编译器保守地匹配表达式，并假定第一个表达式中的星号和数值是静态内容。第二个表达式的**括号**避免了这个问题。
+
+## Setting Attribute Values
+数据属性是名称以 data- 为前缀的属性，多年来一直是创建自定义属性的非正式方式，并作为 HTML5 的一部分成为正式标准的一部分。它们最常用于使 JavaScript 代码可以定位特定元素，或者使 CSS 样式可以更窄地应用。
+```html
+<table data-id="@Model?.ProductId">
+```
