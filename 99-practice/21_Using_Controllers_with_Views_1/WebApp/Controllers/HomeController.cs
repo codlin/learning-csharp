@@ -41,4 +41,8 @@ public class HomeController : Controller
     {
         return View();
     }
+    public IActionResult List()
+    {
+        return View(context.Products);
+    }
 }
