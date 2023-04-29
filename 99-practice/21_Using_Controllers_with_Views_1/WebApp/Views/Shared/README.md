@@ -1,5 +1,5 @@
 
-# Using Shared Views
+## Using Shared Views
 当 Razor 视图引擎找到一个视图时，它会在 View/[controller] 文件夹中查找，然后在 Views/Shared 文件夹中查找。
 这种搜索模式意味着包含公共内容的视图可以在控制器之间共享，避免重复。
 
@@ -28,3 +28,7 @@ Listing 22-10. Using a Layout in the Index.cshtml File in the Views/Home Folder
 有两种情况你需要在视图中定义布局Layout属性，即使已经设置了view start文件。
 第一种情况是一个视图需要不同的布局。
 第二种可能需要 Layout 属性的情况是当视图包含完整的 HTML 文档并且根本不需要布局时。此时可以在视图中把Layout 设置为 null;
+
+## Using Layout Sections
+Razor 视图引擎支持部分的概念，它允许您在布局中提供内容区域。 Razor sections 可以更好地控制将视图的哪些部分插入到布局中以及它们的放置位置。
+Section是使用 Razor @section 表达式定义的，后跟section的名称。_Layout.cshtml 定义了名为 Header 和 Footer 的部分，这些部分可以包含相同的 HTML 内容和表达式组合，就像视图的主要部分一样。使用@RenderSection 表达式在布局中应用部分。
