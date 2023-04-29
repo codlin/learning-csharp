@@ -32,3 +32,4 @@ Listing 22-10. Using a Layout in the Index.cshtml File in the Views/Home Folder
 ## Using Layout Sections
 Razor 视图引擎支持部分的概念，它允许您在布局中提供内容区域。 Razor sections 可以更好地控制将视图的哪些部分插入到布局中以及它们的放置位置。
 Section是使用 Razor @section 表达式定义的，后跟section的名称。_Layout.cshtml 定义了名为 Header 和 Footer 的部分，这些部分可以包含相同的 HTML 内容和表达式组合，就像视图的主要部分一样。使用@RenderSection 表达式在布局中应用部分。
+所有定义的section都必须在视图渲染时能够找得到，否则会抛出异常。譬如在 `_Layout.cshtml` 中定义的 `@RenderSection("Header")`，如果包含了这个布局的视图中没有关于 `@section Header` 的定义，那么该视图抛出异常。可以在定义section时把它定义为可选的(在后面加上false，如 `@RenderSection("Header"， false)`)，这样就不会存在此类问题。
