@@ -19,3 +19,7 @@ Listing 22-10. Using a Layout in the Index.cshtml File in the Views/Home Folder
    ... 
 </div>
 ```
+
+## Using a View Start File
+你不必在每一个视图中设置 `Layout` 属性，只需要添加一个 `view start` 文件作为默认的 `Layout` 值。把 `_ViewStart.cshtml` 添加到 `Views` 目录中。
+`_ViewStart.cshtml` 中设置了 `Layout` 属性的值，并把它的值作为默认的值应用与其它视图。
