@@ -1,6 +1,6 @@
 @model WebApp.Models.Product
 @{
-    Layout = "_Layout";
+    Layout = Model.Price > 100 ? "_ImportantLayout" : "_Layout";
     ViewBag.Title = ViewBag.Title ?? "Product Table";
 }
 <div class="m-2">
