@@ -36,3 +36,13 @@ Section是使用 Razor @section 表达式定义的，后跟section的名称。_L
 所有定义的section都必须在视图渲染时能够找得到，否则会抛出异常。譬如在 `_Layout.cshtml` 中定义的 `@RenderSection("Header")`，如果包含了这个布局的视图中没有关于 `@section Header` 的定义，那么该视图抛出异常。可以在定义section时把它定义为可选的(在后面加上false，如 `@RenderSection("Header"， false)`)，这样就不会存在此类问题。
 ### Testing for Layout Sections
 IsSectionDefined 方法用于确定视图是否定义了指定的部分，并且可以在 if 表达式中用于呈现回退内容。`_Layout.cshtml` 中呈现了此类用法。
+
+## Using Partial Views
+您经常需要在几个不同的地方使用同一组 HTML 元素和表达式。部分视图是包含内容片段的视图，这些内容片段将包含在其他视图中以产生复杂的响应而不会重复。
+### Enabling Partial Views
+部分视图使用称为标签助手`tag helpers`的功能来应用，第 25 章对此进行了详细描述；标签助手在视图导入文件中配置，请将清单中所示的语句添加到 _ViewImports.cshtml 文件中。
+```cs
+@using WebApp.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+```
+### Creating a Partial View
