@@ -39,4 +39,8 @@ public class HomeController : Controller
     {
         return View(context.Products);
     }
+    public IActionResult Html()
+    {
+        return View((object)"This is a <h3><i>string</i></h3>");
+    }
 }

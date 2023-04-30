@@ -61,3 +61,41 @@ Views/Home 文件夹中 _CellPartial.cshtml 文件的内容：
 @model string
 <td class="bg-info text-white">@Model</td>
 ```
+
+## Understanding Content-Encoding
+Razor 视图为编码内容提供了两个有用的功能。 HTML 内容编码功能可确保表达式响应不会更改发送到浏览器的响应结构，这是一项重要的安全功能。 JSON 编码功能将对象编码为 JSON 并将其插入到响应中，这是一个有用的调试功能，在向 JavaScript 应用程序提供数据时也很有用。这两种编码功能都在以下部分中进行了描述。
+### Understanding HTML Encoding
+Razor View 引擎对表达式结果进行编码，使它们可以安全地包含在 HTML 文档中，而无需更改其结构。在处理用户提供的内容时，这是一个重要的功能，用户可能会试图破坏应用程序或意外输入危险内容。清单 22-30 向 Home 控制器添加了一个Html()操作方法，该方法将 HTML 片段传递给 View 方法。
+Listing 22-30. Adding an Action in the HomeController.cs File in the Controllers Folder
+```cs
+using Microsoft.AspNetCore.Mvc;
+using WebApp.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace WebApp.Controllers;
+
+public class HomeController : Controller {
+    private DataContext context;
+
+    public HomeController(DataContext ctx) {
+        context = ctx;
+    }
+
+    public async Task<IActionResult> Index(long id = 1) {
+        ViewBag.AveragePrice =
+            await context.Products.AverageAsync(p => p.Price);
+        return View(await context.Products.FindAsync(id));
+    }
+    public IActionResult List() {
+        return View(context.Products);
+    }
+    public IActionResult Html() {
+        return View((object)"This is a <h3><i>string</i></h3>");
+    }
+}
+```
+Html() 方法中的内容将会被安全编码，在其视图中将显示为纯文本。如果要显示为html元素，则可以在视图Html.cshtml中调用Html.Raw方法。
+```cs
+<div class="bg-secondary text-white text-center m-2 p-2">@Html.Raw(Model)</div>
+```
+**警告** 除非您完全确信不会将恶意内容传递到视图，否则不要禁用安全编码。粗心地使用此功能会给您的应用程序和用户带来安全风险。
