@@ -46,3 +46,18 @@ IsSectionDefined 方法用于确定视图是否定义了指定的部分，并且
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 ```
 ### Creating a Partial View
+### Selecting the Partial View Model Using an Expression
+for 属性用于使用*应用于视图模型的表达式来*设置部分视图的模型，这是一个比描述更容易展示的特性。
+在 Views/Home 文件夹中的 _RowPartial.cshtml 文件中使用分部视图：
+```cs
+@model Product
+<tr>
+    <partial name="_CellPartial" for="Name" />
+    <td>@Model?.Price</td>
+</tr>
+```
+Views/Home 文件夹中 _CellPartial.cshtml 文件的内容：
+```c#
+@model string
+<td class="bg-info text-white">@Model</td>
+```
