@@ -99,3 +99,16 @@ Html() 方法中的内容将会被安全编码，在其视图中将显示为纯�
 <div class="bg-secondary text-white text-center m-2 p-2">@Html.Raw(Model)</div>
 ```
 **警告** 除非您完全确信不会将恶意内容传递到视图，否则不要禁用安全编码。粗心地使用此功能会给您的应用程序和用户带来安全风险。
+
+### Understanding JSON Encoding
+如第 21 章所述，添加到从视图生成的类中的 Json 属性可用于将对象编码为 JSON。 JSON 数据最常见的用途是在 RESTful Web 服务中，如前几章所述，但我发现 Razor JSON 编码功能在我没有从视图中获得期望的输出时可用作调试辅助工具。清单 22-33 将视图模型对象的 JSON 表示添加到 Index.cshtml 视图生成的输出中。
+Listing 22-33. Using JSON Encoding in the Index.cshtml File in the Views/Home Folder
+```cs
+...
+@section Summary {
+<div class="bg-info text-white m-2 p-2">
+    @Json.Serialize(Model)
+</div>
+}
+...
+```
