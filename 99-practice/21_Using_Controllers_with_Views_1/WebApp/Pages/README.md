@@ -144,3 +144,17 @@ public class IndexModel : PageModel
     }
 }
 ```
+### Adding a View Imports File
+视图导入文件可用于避免在视图文件中使用页面模型类的完全限定名称，其作用与我在第 22 章中为 MVC 框架使用的作用相同。如果您使用的是 Visual Studio，请使用 Razor View Imports 模板将名为 _ViewImports.cshtml 的文件添加到 WebApp/Pages 文件夹，其内容如清单 23-11 所示。如果您使用的是 Visual Studio Code，请直接添加该文件。
+Listing 23-11. The Contents of the _ViewImports.cshtml File in the WebApp/Pages Folder
+```cs
+@namespace WebApp.Pages
+@using WebApp.Models
+```
+@namespace 指令为视图生成的 C# 类设置命名空间，并在视图导入文件中使用该指令为应用程序中的所有 Razor 页面设置默认命名空间，效果是视图及其页面模型类位于相同的命名空间中，并且 @model 指令不需要完全限定的类型，如清单 23-12 所示。
+Listing 23-12. Removing the Page Model Namespace in the Index.cshtml File in the Pages Folder
+```cs
+@page "{id:long?}"
+@model IndexModel
+...
+```
