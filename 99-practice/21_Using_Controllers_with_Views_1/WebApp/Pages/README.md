@@ -71,3 +71,30 @@ app.MapRazorPages().Add(b => ((RouteEndpointBuilder)b).Order = 2);
 Razor Pages 路由是使用 0 的顺序创建的，这使它们优先于使用 1 的顺序创建的 MVC 路由。分配 2 的顺序使 MVC 框架路由优先。  
 在我自己的项目中，我混合了 Razor 页面和 MVC 控制器，我倾向于依赖 MVC 框架来处理默认 URL，并且我避免创建 Index.cshtml Razor 页面以避免混淆。
 
+## Specifying a Routing Pattern in a Razor Page
+使用文件夹和文件结构来执行路由意味着没有段变量供模型绑定过程使用。相反，请求处理程序方法的值是从 URL 查询字符串中获取的，您可以通过使用浏览器请求 http://localhost:5000/index?id=2 来查看。
+请求 URL 中的查询字符串参数用于在调用 OnGetAsync 方法时提供 id 参数，该方法用于查询数据库中的产品。 
+```cs
+public async Task OnGetAsync(long id = 1) { ... }
+```
+@page 指令可以与路由模式一起使用，它允许定义段变量，如清单 23-6 所示。
+Listing 23-6. Defining a Segment Variable in the Index.cshtml File in the Pages Folder
+```cs
+@page "{id:long?}"
+```
+我们除了使用查询字符串的访问访问外，现在还可以用 `http://localhost:5000/index/2` 的URL形式来访问了。
+同样的，我们使用 @page 指令替换 Razor 页面的默认基于文件的路由，修改List.cshtml来使用段变量访问：
+```cs
+@page "/lists/suppliers"
+```
+值得注意的是，我们指定了page的访问url后，就不能再用约定路由的方式访问了。但我们也可以通过配置语句为页面配置一个或多个路由，见下一节。
+
+## Adding Routes for a Razor Page
+使用 @page 指令替换 Razor 页面的默认基于文件的路由。如果要为一个页面定义多个路由，则可以将配置语句添加到 Program.cs 文件中，如清单所示：
+```cs
+using Microsoft.AspNetCore.Mvc.RazorPages;
+...
+builder.Services.Configure<RazorPagesOptions>(opts => {
+    opts.Conventions.AddPageRoute("/Index", "/extra/page/{id:long?}");
+});
+```
