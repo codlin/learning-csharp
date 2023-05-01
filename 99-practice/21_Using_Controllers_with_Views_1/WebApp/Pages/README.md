@@ -13,3 +13,37 @@ builder.Services.AddRazorPages();
 ...
 app.MapRazorPages();
 ```
+## Creating a Razor Page
+参见 `Pages/index.cshtml`
+
+### Understanding the URL Routing Convention
+Razor Pages 的 URL 路由基于文件名和相对于 Pages 文件夹的位置。`Pages/index.cshtml` 中的 Razor 页面位于 Pages 文件夹中名为 Index.cshtml 的文件中，这意味着它将处理对 /index 的请求。可以覆盖路由约定，如“了解 Razor 页面路由”部分中所述，但默认情况下，Razor 页面文件的位置决定了它响应的 URL。
+
+### Understanding the Page Mode
+在 Razor 页面中，@model 指令用于选择页面模型类，而不是标识操作方法提供的对象的类型。`Pages/index.cshtml` 中的 @model 指令选择了 IndexModel 类。
+```cshtml
+...
+@model IndexModel
+...
+```
+页面模型在 @functions 指令中定义，并派生自 PageModel 类，如下所示：
+```cs
+...
+@functions {
+    public class IndexModel: PageModel {
+...
+```
+选择Razor Page以处理HTTP请求时，创建了页面模型类的新实例，并使用第14章中描述的功能使用依赖项注入来解决使用构造函数参数声明的任何依赖项。
+IndexModel 类声明了对第 18 章中创建的 DataContext 服务的依赖，这允许它访问数据库中的数据。
+```cs
+public IndexModel(DataContext ctx) {
+    context = ctx;
+}
+```
+创建页面模型对象后，将调用处理程序方法。处理程序方法的名称是 On，后跟请求的 HTTP 方法，以便在选择 Razor 页面处理 HTTP GET 请求时调用 OnGet 方法。处理程序方法可以是异步的，在这种情况下，GET 请求将调用 OnGetAsync 方法，这是由 IndexModel 类实现的方法。
+```cs
+public async Task OnGetAsync(long id = 1) {
+    Product = await context.Products.FindAsync(id);
+}
+```
+处理程序方法参数的值是使用模型绑定过程从 HTTP 请求中获取的，这在第 28 章中有详细描述。OnGetAsync 方法从模型绑定器接收其 id 参数的值，它用于查询数据库和将结果分配给其 Product 属性。
