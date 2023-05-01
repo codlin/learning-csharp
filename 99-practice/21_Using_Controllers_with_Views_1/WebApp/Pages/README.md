@@ -58,3 +58,16 @@ Razor 页面使用相同的 HTML 片段和代码表达式组合来生成内容�
 ### Understanding the Generated C# Class
 在幕后，Razor 页面被转换为 C# 类，就像常规 Razor 视图一样。
 如果将此代码与第 21 章中显示的等效代码进行比较，您可以看到 Razor Pages 如何依赖 MVC 框架使用的相同功能。 HTML 片段和视图表达式被转换为对 WriteLiteral 和 Write 方法的调用。
+
+# Understanding Razor Pages Routing
+Razor Pages 依赖 CSHTML 文件的位置进行路由，因此对 http://localhost:5000/index 的请求由 Pages/Index.cshtml 文件处理。为应用程序添加更复杂的 URL 结构是通过添加其名称代表您要支持的 URL 中的段的文件夹来完成的。例如，创建 WebApp/Pages/Suppliers 文件夹并向其中添加一个名为 List.cshtml 的 Razor 页面，其内容如 `Pages/Suppliers/List.cshtml` 所示，则其路由为 `http://localhost:5000/suppliers/list` 。
+
+## UNDERSTANDING THE DEFAULT URL HANDLING
+MapRazorPages 方法为 Index.cshtml Razor 页面的默认 URL 设置路由，遵循 MVC 框架使用的类似约定。正是出于这个原因，添加到项目中的第一个 Razor 页面通常称为 Index.cshtml。但是，当应用程序将 Razor Pages 和 MVC 框架混合在一起时，Razor Pages 定义的默认路由优先，因为它是用较低的顺序创建的（路由顺序在第 13 章中描述）。这意味着请求 http://localhost:5000 由示例项目中的 Index.cshtml Razor 页面处理，而不是 Home 控制器上的 Index 操作。  
+如果您希望 MVC 框架处理默认 URL，则可以更改分配给 Razor Pages 路由的顺序，如下所示：
+```cs
+app.MapRazorPages().Add(b => ((RouteEndpointBuilder)b).Order = 2);
+```
+Razor Pages 路由是使用 0 的顺序创建的，这使它们优先于使用 1 的顺序创建的 MVC 路由。分配 2 的顺序使 MVC 框架路由优先。  
+在我自己的项目中，我混合了 Razor 页面和 MVC 控制器，我倾向于依赖 MVC 框架来处理默认 URL，并且我避免创建 Index.cshtml Razor 页面以避免混淆。
+
