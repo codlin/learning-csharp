@@ -98,3 +98,49 @@ builder.Services.Configure<RazorPagesOptions>(opts => {
     opts.Conventions.AddPageRoute("/Index", "/extra/page/{id:long?}");
 });
 ```
+
+# Understanding the Page Model Class
+页面模型派生自 PageModel 类，该类提供 ASP.NET Core 的其余部分与 Razor 页面的视图部分之间的链接。 PageModel 类提供了管理如何处理请求的方法和提供上下文数据的属性，表 23-3 中描述了其中最有用的方法。为了完整起见，我列出了这些属性，但在 Razor 页面开发中并不经常需要它们，Razor 页面开发更侧重于选择呈现页面视图部分所需的数据。
+Table 23-3. Selected PageModel Properties for Context Data
+*详细内容见书本*
+
+## Using a Code-Behind Class File
+@function 指令允许将 page-behind 类和 Razor 内容定义在同一个文件中，这是流行的客户端框架（如 React 或 Vue.js）使用的一种开发方法。在同一个文件中定义代码和标记很方便，但对于更复杂的应用程序来说可能变得难以管理。 Razor 页面也可以拆分为单独的视图和代码文件，这类似于前面章节中的 MVC 示例，让人想起 ASP.NET 网页，它在称为代码隐藏文件的文件中定义 C# 类。第一步是从 CSHTML 文件中删除页面模型类，如清单 23-9 所示。我还删除了不再需要的 @using 表达式。
+Listing 23-9. Removing the Page Model Class in the Index.cshtml File in the Pages Folder
+```cs
+@page "{id:long?}"
+@model WebApp.Pages.IndexModel
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="bg-primary text-white text-center m-2 p-2">@Model.Product?.Name</div>
+    </body>
+</html>
+```
+@model 表达式已被修改以指定页面模型的命名空间，这在以前不是必需的，因为 @functions 表达式在视图的命名空间中定义了 IndexModel 类。  
+在定义单独的页面模型类时，我在 WebApp.Pages 命名空间中定义该类。这不是必需的，但它使 C# 类与应用程序的其余部分保持一致。  
+命名 Razor Pages 代码隐藏文件的约定是将 .cs 文件扩展名附加到视图文件的名称。
+Listing 23-10. The Contents of the Index.cshtml.cs File in the Pages Folder
+```cs
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApp.Models;
+
+namespace WebApp.Pages;
+
+public class IndexModel : PageModel
+{
+    private DataContext context;
+    public Product? Product { get; set; }
+    public IndexModel(DataContext ctx)
+    {
+        context = ctx;
+    }
+    public async Task OnGetAsync(long id = 1)
+    {
+        Product = await context.Products.FindAsync(id);
+    }
+}
+```
