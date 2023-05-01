@@ -183,3 +183,11 @@ public class IndexModel : PageModel {
 Page 方法继承自 PageModel 类并创建一个 PageResult 对象，该对象告诉框架呈现页面的视图部分。
 与 MVC 操作方法中使用的 View 方法不同，Razor Pages 页面方法不接受参数，并且始终呈现已选择用于处理请求的页面视图部分。   
 PageModel 类提供了其他方法来创建不同的操作结果以产生不同的结果，如表 23-4 中所述。
+### Using an Action Result
+除 Page 方法外，表 23-4 中的方法与操作方法中可用的方法相同。但是，必须小心使用这些方法，因为发送状态代码响应在 Razor 页面中没有帮助，因为它们仅在客户端需要视图内容时使用。例如，当无法找到请求的数据时，不要使用 NotFound 方法，更好的方法是将客户端重定向到另一个可以为用户显示 HTML 消息的 URL。重定向可以是静态 HTML 文件、另一个 Razor 页面或控制器定义的操作。将名为 NotFound.cshtml 的 Razor 页面添加到 Pages 文件夹。
+在 `Index.cshtml.cs` 文件中添加找不到商品时的跳转：
+```cs
+if (Product == null) {
+   return RedirectToPage("NotFound");
+}
+```

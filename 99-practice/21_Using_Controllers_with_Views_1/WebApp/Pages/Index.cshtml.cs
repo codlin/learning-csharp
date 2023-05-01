@@ -15,6 +15,10 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnGetAsync(long id = 1) // <-HERE
     {
         Product = await context.Products.FindAsync(id);
+        if (Product == null)
+        {
+            return RedirectToPage("NotFound");
+        }
         return Page(); // <-HERE
     }
 }
