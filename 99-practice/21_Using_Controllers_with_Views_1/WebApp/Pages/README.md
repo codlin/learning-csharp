@@ -195,3 +195,14 @@ if (Product == null) {
 ## Handling Multiple HTTP Methods
 Razor 页面可以定义响应不同 HTTP 方法的处理程序方法。最常见的组合是支持允许用户查看和编辑数据的 GET 和 POST 方法。为了演示，将一个名为 Editor.cshtml 的 Razor 页面添加到 Pages 文件夹，将名为 Editor.cshtml.cs 的文件添加到 WebApp/Pages 文件夹。
 页面模型类定义了两个处理程序方法，方法的名称告诉 Razor Pages 框架每个处理哪个 HTTP 方法。 OnGetAsync 方法用于处理 GET 请求，它通过定位一个 Product 来完成，其详细信息由视图显示。 OnPostAsync 方法用于处理 POST 请求，该请求将在用户提交 HTML 表单时由浏览器发送。 OnPostAsync 方法的参数是从请求中获取的，因此 id 值是从 URL 路由中获取的，而 price 值是从表单中获取的。 （从表单中提取数据的模型绑定特性在第 28 章中描述。）
+
+## Selecting a Handler Method
+页面模型类可以定义多个处理程序方法，允许请求使用处理程序查询字符串参数或路由段变量来选择方法。要演示此功能，请将名为 HandlerSelector.cshtml 的 Razor 页面文件添加到 Pages 文件夹。
+此示例中的页面模型类定义了两个处理程序方法：OnGetAsync 和 OnGetRelatedAsync。默认使用OnGetAsync方法，重启ASP.NET Core，使用浏览器请求http://localhost:5000/handlerselector 即可看到。  
+页面呈现的锚元素之一以带有处理程序查询字符串参数的 URL 为目标，如下所示：
+```html
+...
+<a href="/handlerselector?handler=related" class="btn btn-primary">Related</a>
+...
+```
+指定处理程序方法的名称时不带 On[method] 前缀且不带 Async 后缀，以便使用选择 OnGetRelatedAsync 方法相关的处理程序值。
