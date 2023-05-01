@@ -47,3 +47,10 @@ public async Task OnGetAsync(long id = 1) {
 }
 ```
 处理程序方法参数的值是使用模型绑定过程从 HTTP 请求中获取的，这在第 28 章中有详细描述。OnGetAsync 方法从模型绑定器接收其 id 参数的值，它用于查询数据库和将结果分配给其 Product 属性。
+
+### Understanding the Page View
+Razor 页面使用相同的 HTML 片段和代码表达式组合来生成内容，这些内容定义了呈现给用户的视图。页面模型的方法和属性可通过 @Model 表达式在 Razor 页面中访问。 IndexModel 类定义的 Product 属性用于设置 HTML 元素的内容，如下所示：
+```cs
+<div class="bg-primary text-white text-center m-2 p-2">@Model.Product?.Name</div>
+```
+@Model 表达式返回一个 IndexModel 对象，这个表达式读取 Product 属性返回的对象的 Name 属性。 Model 属性不需要 null 条件运算符 (?)，因为它将始终分配给页面模型类的实例并且不能为 null。但是，页面模型类定义的属性可以为 null，这就是我在 Razor 表达式中使用 Product 属性运算符的原因。
