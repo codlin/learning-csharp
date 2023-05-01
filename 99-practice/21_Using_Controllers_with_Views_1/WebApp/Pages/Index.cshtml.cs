@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc; // <-HERE
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Models;
 
@@ -11,8 +12,9 @@ public class IndexModel : PageModel
     {
         context = ctx;
     }
-    public async Task OnGetAsync(long id = 1)
+    public async Task<IActionResult> OnGetAsync(long id = 1) // <-HERE
     {
         Product = await context.Products.FindAsync(id);
+        return Page(); // <-HERE
     }
 }

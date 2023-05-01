@@ -158,3 +158,28 @@ Listing 23-12. Removing the Page Model Namespace in the Index.cshtml File in the
 @model IndexModel
 ...
 ```
+
+## Understanding Action Results in Razor Pages
+虽然不是很明显，但 Razor 页面处理程序方法使用相同的 IActionResult 接口来控制它们生成的响应。为了使页面模型类更易于开发，处理程序方法具有显示页面视图部分的隐含结果。清单 23-13 明确了结果。
+Listing 23-13. Using an Explicit Result in the Index.cshtml.cs File in the Pages Folder
+```cs
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApp.Models;
+using Microsoft.AspNetCore.Mvc; // <-HERE
+namespace WebApp.Pages;
+
+public class IndexModel : PageModel {
+    private DataContext context;
+    public Product? Product { get; set; }
+    public IndexModel(DataContext ctx) {
+        context = ctx;
+    }
+    public async Task<IActionResult> OnGetAsync(long id = 1) {  // <-HERE
+        Product = await context.Products.FindAsync(id);
+        return Page(); // <-HERE
+    }
+}
+```
+Page 方法继承自 PageModel 类并创建一个 PageResult 对象，该对象告诉框架呈现页面的视图部分。
+与 MVC 操作方法中使用的 View 方法不同，Razor Pages 页面方法不接受参数，并且始终呈现已选择用于处理请求的页面视图部分。   
+PageModel 类提供了其他方法来创建不同的操作结果以产生不同的结果，如表 23-4 中所述。
