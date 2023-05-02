@@ -241,3 +241,10 @@ Listing 23-25. Using a Partial View in the Index.cshtml File in the Pages Folder
 <div class="bg-primary text-white text-center m-2 p-2">@Model.Product?.Name</div>
 <partial name="_ProductPartial" model="Model.Product" />
 ```
+
+## Creating Razor Pages Without Page Models
+如果 Razor 页面只是简单地向用户呈现数据，则结果可能是一个页面模型类，该类仅声明构造函数依赖项以设置在视图中使用的属性。
+要了解此模式，请将名为 Data.cshtml 的 Razor 页面添加到 WebApp/Pages 文件夹。
+此示例 `Data.cshtml` 中的页面模型不转换数据、执行计算或执行任何操作，只是通过依赖注入为视图提供对数据的访问权限。
+为了避免这种模式，其中页面模型类仅用于访问服务，@inject 指令可用于在视图中获取服务，而不需要页面模型，如 `DataWithoutPageModel.cshtml` 所示。
+@inject 表达式指定服务类型和访问服务的名称。在此示例中，服务类型是 DataContext，访问它的名称是 context。在视图中，@foreach 表达式为 DataContext.Categories 属性返回的每个对象生成元素。由于此示例中没有页面模型，因此我删除了@page 和@using 指令。
