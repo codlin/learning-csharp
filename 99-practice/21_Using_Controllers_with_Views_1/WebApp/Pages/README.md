@@ -206,3 +206,18 @@ Razor 页面可以定义响应不同 HTTP 方法的处理程序方法。最常�
 ...
 ```
 指定处理程序方法的名称时不带 On[method] 前缀且不带 Async 后缀，以便使用选择 OnGetRelatedAsync 方法相关的处理程序值。
+
+# Understanding the Razor Page View
+Razor 页面的视图部分使用与控制器使用的视图相同的语法并具有相同的功能。 Razor Pages 可以使用各种表达式和功能，例如会话、临时数据和布局。除了使用 @page 指令和页面模型类之外，唯一的区别是在配置布局和部分视图等功能时有一定数量的重复，如以下部分所述。
+## Creating a Layout for Razor Pages
+Razor 页面布局的创建方式与控制器视图相同，但位于 Pages/Shared 文件夹中。
+创建 Pages/Shared 文件夹，在新文件夹中创建 _Layout.cshtml 文件。
+创建 Pages/_ViewStart.cshtml 文件并添加内容。
+从 Razor Pages 生成的 C# 类派生自 Page 类，该类提供视图启动文件使用的 Layout 属性，其目的与控制器视图使用的属性相同。
+现在更新了Index页面以删除布局将提供的元素，只保留：
+```html
+@page "{id:long?}"
+@model IndexModel
+<div class="bg-primary text-white text-center m-2 p-2">@Model.Product?.Name</div>
+```
+使用视图开始文件 _ViewStart.cshtml 将布局应用于所有页面，但并不会覆盖给 Layout 属性赋值的那些页面，如 Editor.cshtml 中把 Layout 设置为 null，所以该页面不会被应用默认布局。
