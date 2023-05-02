@@ -221,3 +221,23 @@ Razor 页面布局的创建方式与控制器视图相同，但位于 Pages/Shar
 <div class="bg-primary text-white text-center m-2 p-2">@Model.Product?.Name</div>
 ```
 使用视图开始文件 _ViewStart.cshtml 将布局应用于所有页面，但并不会覆盖给 Layout 属性赋值的那些页面，如 Editor.cshtml 中把 Layout 设置为 null，所以该页面不会被应用默认布局。
+
+## Using Partial Views in Razor Pages
+Razor Pages 可以使用部分视图，这样公共内容就不会重复。本节中的示例依赖于标签助手功能，我在第 25 章中详细介绍了该功能。
+对于本章，将下面所示的指令添加到视图导入文件 _ViewImports.cshtml 中，它启用将自定义HTML元素应用于部分视图。
+```cs
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+```
+在 Pages/Shared 文件夹中添加名为 _ProductPartial.cshtml 的 Razor 视图。
+请注意，部分视图中没有特定于 Razor Pages 的内容。部分视图使用 @model 指令接收视图模型对象，不使用 @page 指令或具有页面模型，这两者都是特定于 Razor Pages 的。这允许 Razor Pages 与 MVC 控制器共享部分视图，如下面所述。
+> **UNDERSTANDING THE PARTIAL METHOD SEARCH PATH**   
+> Razor 视图引擎开始在与使用它的 Razor 页面相同的文件夹中寻找分部视图。如果没有匹配的文件，则在每个父目录中继续搜索，直到到达 Pages 文件夹。例如，对于在 Pages/App/Data 文件夹中定义的 Razor 页面使用的局部视图，视图引擎会在 Pages/App/Data 文件夹、Page/App 文件夹和 Pages 文件夹中查找。如果没有找到文件，搜索将继续到 Pages/Shared 文件夹，最后到 Views/Shared 文件夹。最后一个搜索位置允许 Razor 页面使用定义为与控制器一起使用的部分视图，这是一个有用的功能，可以避免在同时使用 MVC 控制器和 Razor 页面的应用程序中出现重复内容。
+
+注意： 部分视图通过它们的 @model 指令接收视图模型，而不是页面模型。正是由于这个原因，model 属性的值是 Model.Product 而不仅仅是 Model。
+Listing 23-25. Using a Partial View in the Index.cshtml File in the Pages Folder
+```html
+@page "{id:long?}"
+@model IndexModel
+<div class="bg-primary text-white text-center m-2 p-2">@Model.Product?.Name</div>
+<partial name="_ProductPartial" model="Model.Product" />
+```
