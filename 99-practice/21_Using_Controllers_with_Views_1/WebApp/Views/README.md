@@ -185,3 +185,8 @@ public IViewComponentResult Invoke(string themeName= "success") {
 
 ### Creating Asynchronous View Components
 本章到目前为止的所有示例都是同步视图组件，可以识别它们是因为它们定义了 Invoke 方法。如果您的视图组件依赖于异步 API，则您可以通过定义返回 Task 的 InvokeAsync 方法来创建异步视图组件。当 Razor 从 InvokeAsync 方法接收到 Task 时，它将等待它完成，然后将结果插入到主视图中。要创建新组件，请将名为 PageSize.cs 的类文件添加到 Components 文件夹，并使用它来定义如清单 24-26 所示的类。
+
+## Creating View Components Classes
+视图组件通常提供由控制器或 Razor 页面深入处理的功能摘要或快照。例如，对于汇总购物篮的视图组件，通常会有一个链接以控制器为目标，该控制器提供购物篮中产品的详细列表，可用于结帐和完成购买。    
+在这种情况下，您可以创建一个既是视图组件又是控制器或 Razor 页面的类。请将名为 Cities.cshtml.cs 的文件添加到 Pages 文件夹。
+此页面模型类使用 ViewComponent 属性进行修饰，这使其可以用作视图组件。 Name 参数指定将应用视图组件的名称。由于页面模型不能从 ViewComponent 基类继承，因此类型为 ViewComponentContext 的属性用 ViewComponentContext 属性修饰，这表明应该在 Invoke 或 InvokeAsync 方法之前为其分配一个定义表 24-5 中描述的属性的对象被调用。 View 方法不可用，所以我必须创建一个 ViewViewComponentResult 对象，它依赖于通过装饰属性接收的上下文对象。清单 24-30 更新了页面的视图部分以使用新的页面模型类。
