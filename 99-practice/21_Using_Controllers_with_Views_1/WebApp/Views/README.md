@@ -32,3 +32,12 @@ Partial views 用于创建视图中所需的可重用标记，避免在应用程
 ```cs
 @using WebApp.Components
 ```
+#### Applying View Components Using a Tag Helper
+Razor 视图和页面可以包含标记帮助器`Tag Helpers`，它们是由 C# 类管理的自定义 HTML 元素。我在第 25 章详细解释了标签助手的工作原理，但是可以使用作为标签助手实现的 HTML 元素来应用视图组件。要启用此功能，请将清单 24-10 中所示的指令添加到 Views 文件夹中的 _ViewImports.cshtml 文件中。  
+注意：视图组件只能在控制器视图或 Razor 页面中使用，不能直接用于处理请求。
+Configuring a Tag Helper in the _ViewImports.cshtml File in the Views Folder
+```cs
+...
+@addTagHelper *, WebApp
+```
+自定义元素的标签是 vc，后跟一个冒号，然后是视图组件类的名称，它被转换为 kebab-case。类名中的每个大写单词都被转换为小写并用连字符分隔，这样 CitySummary 就变成了 city-summary，并且使用 vc:city-summary 元素应用了 CitySummary 视图组件。
