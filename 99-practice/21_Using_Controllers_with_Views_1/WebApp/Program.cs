@@ -19,6 +19,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddSingleton<CitiesData>();
+
 var app = builder.Build();
 
 app.UseStaticFiles();
