@@ -41,3 +41,15 @@ Configuring a Tag Helper in the _ViewImports.cshtml File in the Views Folder
 @addTagHelper *, WebApp
 ```
 自定义元素的标签是 vc，后跟一个冒号，然后是视图组件类的名称，它被转换为 kebab-case。类名中的每个大写单词都被转换为小写并用连字符分隔，这样 CitySummary 就变成了 city-summary，并且使用 vc:city-summary 元素应用了 CitySummary 视图组件。
+
+#### Applying View Components in Razor Pages
+Razor 页面以相同的方式使用视图组件，通过 Component 属性或通过自定义 HTML 元素。由于 Razor Pages 有自己的视图导入文件，因此需要一个单独的 @addTagHelper 指令，加入到`Pages/_ViewImports.cshtml`中，如清单所示。
+```
+@addTagHelper *, WebApp
+```
+Using a View Component in the Data.cshtml File in the Pages Folder
+```html
+<div class="bg-info text-white m-2 p-2">
+    <vc:city-summary />
+</div>
+```
