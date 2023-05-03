@@ -131,3 +131,30 @@ public IViewComponentResult Invoke() {
 ...
 ```
 这种技术应该谨慎使用，并且只能用于不能被篡改并执行自己编码的内容源。
+
+## Getting Context Data
+有关当前请求和父视图的详细信息通过 ViewComponent 基类定义的属性提供给视图组件，如表 24-5 中所述。
+Table 24-5. The ViewComponentContext Properties
+| Name | Description |
+|--|--|
+| HttpContext | 此属性返回一个 HttpContext 对象，该对象描述当前请求和正在准备的响应。 |
+| Request | 该属性返回一个描述当前 HTTP 请求的 HttpRequest 对象。 |
+| User | 该属性返回一个描述当前用户的 IPrincipal 对象，如第 37 和 38 章所述。|
+| RouteData | 该属性返回动态视图包对象，可用于在视图组件和视图之间传递数据，如第 22 章所述。 |
+| ModelState | 此属性返回一个 ModelStateDictionary，它提供模型绑定过程的详细信息，如第 29 章所述。|
+| ViewData | 此属性返回一个 ViewDataDictionary，它提供对为视图组件提供的视图数据的访问。|
+可以以任何方式使用上下文数据来帮助视图组件完成其工作，包括改变选择数据的方式或呈现不同的内容或视图。
+很难设计一个在视图组件中使用上下文数据的代表性示例，因为它解决的问题是特定于每个项目的。
+在清单 24-19 中，我检查请求的路由数据以确定路由模式是否包含控制器段变量，该变量指示将由控制器和视图处理的请求。
+Listing 24-19. Using Request Data in the CitySummary.cs File in the Components Folder
+```cs
+...
+public string Invoke() {
+    if (RouteData.Values["controller"] != null) {
+        return "Controller Request";
+    } else {
+        return "Razor Page Request";
+    }
+}
+...
+```

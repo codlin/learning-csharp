@@ -10,6 +10,7 @@ public class CitySummary : ViewComponent
     {
         data = cdata;
     }
+
     // public string Invoke()
     // {
     //     return $"{data.Cities.Count()} cities, "
@@ -24,8 +25,21 @@ public class CitySummary : ViewComponent
     //         Population = data.Cities.Sum(c => c.Population)
     //     });
     // }
-    public IViewComponentResult Invoke()
+
+    // public IViewComponentResult Invoke()
+    // {
+    //     return Content("This is a <h3><i>string</i></h3>");
+    // }
+
+    public string Invoke()
     {
-        return Content("This is a <h3><i>string</i></h3>");
+        if (RouteData.Values["controller"] != null)
+        {
+            return "Controller Request";
+        }
+        else
+        {
+            return "Razor Page Request";
+        }
     }
 }
