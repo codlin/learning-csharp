@@ -182,3 +182,6 @@ public IViewComponentResult Invoke(string themeName= "success") {
     ...
 }
 ```
+
+### Creating Asynchronous View Components
+本章到目前为止的所有示例都是同步视图组件，可以识别它们是因为它们定义了 Invoke 方法。如果您的视图组件依赖于异步 API，则您可以通过定义返回 Task 的 InvokeAsync 方法来创建异步视图组件。当 Razor 从 InvokeAsync 方法接收到 Task 时，它将等待它完成，然后将结果插入到主视图中。要创建新组件，请将名为 PageSize.cs 的类文件添加到 Components 文件夹，并使用它来定义如清单 24-26 所示的类。
