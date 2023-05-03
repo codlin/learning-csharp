@@ -175,3 +175,10 @@ public IViewComponentResult Invoke(string themeName)
 }
 ...
 ```
+**Using a Default Parameter Value**
+可以为 Invoke 方法参数定义默认值，如清单 24-24 所示，如果父视图不提供值，它会提供回退。
+```cs
+public IViewComponentResult Invoke(string themeName= "success") {
+    ...
+}
+```

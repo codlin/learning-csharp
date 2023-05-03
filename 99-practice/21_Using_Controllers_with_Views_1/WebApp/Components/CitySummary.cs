@@ -43,7 +43,7 @@ public class CitySummary : ViewComponent
     //     }
     // }
 
-    public IViewComponentResult Invoke(string themeName)
+    public IViewComponentResult Invoke(string themeName = "success")
     {
         ViewBag.Theme = themeName;
         return View(new CityViewModel
