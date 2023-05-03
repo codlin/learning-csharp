@@ -53,3 +53,49 @@ Using a View Component in the Data.cshtml File in the Pages Folder
     <vc:city-summary />
 </div>
 ```
+
+## Understanding View Component Results
+将简单字符串值插入视图或页面的能力并不是特别有用，但幸运的是，视图组件的功能要多得多。
+通过让 Invoke 或 InvokeAsync 方法返回一个实现 IViewComponentResult 接口的对象，可以实现更复杂的效果。
+表 24-3 描述了三个实现 IViewComponentResult 接口的内置类，以及 ViewComponent 基类提供的创建它们的便捷方法。
+我将在接下来的部分中描述每种结果类型的使用。
+| Name | Description |
+|--|--|
+| ViewViewComponentResult | 此类用于指定具有可选视图模型数据的 Razor 视图。此类的实例是使用 View 方法创建的。 |
+| ContentViewComponentResult | 此类用于指定将被安全编码以包含在 HTML 文档中的文本结果。此类的实例是使用 Content 方法创建的。 |
+| HtmlContentViewComponentResult | 此类用于指定将包含在 HTML 文档中而无需进一步编码的 HTML 片段。没有ViewComponent 方法来创建此类结果。|
+有两种结果类型的特殊处理。如果一个视图组件返回一个字符串，那么它将用于创建一个 ContentViewComponentResult 对象，这是我在前面的示例中所依赖的。如果视图组件返回 IHtmlContent 对象，则它用于创建 HtmlContentViewComponentResult 对象。
+
+### Returning a Partial View
+最有用的响应是命名笨拙的 ViewViewComponentResult 对象，它告诉 Razor 呈现局部视图并将结果包含在父视图中。 ViewComponent 基类提供了用于创建 ViewViewComponentResult 对象的 View 方法，该方法有四个版本可用，如表 24-4 所述。
+| Name | Description |
+|--|--|
+| View() | Using this method selects the default view for the view component and does not provide a view model. |
+| View(model) | Using the method selects the default view and uses the specified object as the view model. |
+| View(viewName) | Using this method selects the specified view and does not provide a view model. |
+| View(viewName, model) |  Using this method selects the specified view and uses the specified object as the view model. |
+这些方法对应于 Controller 基类提供的方法，并且使用方式大致相同。要创建视图组件可以使用的视图模型类，请将名为 CityViewModel.cs 的类文件添加到 WebApp/Models 文件夹，并使用它来定义如清单 24-14 所示的类。
+Listing 24-14. The Contents of the CityViewModel.cs File in the Models Folder
+```cs
+namespace WebApp.Models;
+
+public class CityViewModel
+{
+    public int? Cities { get; set; }
+    public int? Population { get; set; }
+}
+```
+清单 24-15 修改了 CitySummary 视图组件的 Invoke 方法，因此它使用 View 方法选择部分视图并使用 CityViewModel 对象提供视图数据。
+```cs
+...
+public IViewComponentResult Invoke()
+{
+    return View(new CityViewModel
+    {
+        Cities = data.Cities.Count(),
+        Population = data.Cities.Sum(c => c.Population)
+    });
+}
+...
+```
+创建 WebApp/Views/Shared/Components/CitySummary 文件夹并向其中添加一个名为 Default.cshtml 的 Razor 视图。

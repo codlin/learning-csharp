@@ -10,9 +10,18 @@ public class CitySummary : ViewComponent
     {
         data = cdata;
     }
-    public string Invoke()
+    // public string Invoke()
+    // {
+    //     return $"{data.Cities.Count()} cities, "
+    //     + $"{data.Cities.Sum(c => c.Population)} people";
+    // }
+
+    public IViewComponentResult Invoke()
     {
-        return $"{data.Cities.Count()} cities, "
-        + $"{data.Cities.Sum(c => c.Population)} people";
+        return View(new CityViewModel
+        {
+            Cities = data.Cities.Count(),
+            Population = data.Cities.Sum(c => c.Population)
+        });
     }
 }
