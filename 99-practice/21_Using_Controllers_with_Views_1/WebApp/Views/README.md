@@ -99,3 +99,35 @@ public IViewComponentResult Invoke()
 ...
 ```
 创建 WebApp/Views/Shared/Components/CitySummary 文件夹并向其中添加一个名为 Default.cshtml 的 Razor 视图。
+
+### Returning HTML Fragments
+ContentViewComponentResult 类用于在不使用视图的情况下在父视图中包含 HTML 片段。 ContentViewComponentResult 类的实例是使用从 ViewComponent 基类继承的 Content 方法创建的，它接受一个字符串值。清单 24-17 演示了 Content 方法的使用。
+Listing 24-17. Using the Content Method in the CitySummary.cs File in the Components Folder
+```cs
+public IViewComponentResult Invoke() {
+    return Content("This is a <h3><i>string</i></h3>");
+}
+```
+Content 方法接收到的字符串经过编码，可以安全地包含在 HTML 文档中。这在处理用户或外部系统提供的内容时尤为重要，因为它可以防止 JavaScript 内容嵌入到应用程序生成的 HTML 中。  
+如果您查看视图组件生成的 HTML，您会看到尖括号已被替换，以便浏览器不会将内容解释为 HTML 元素，如下所示： 
+```html
+...
+<div class="bg-info text-white m-2 p-2">
+    This is a &lt;h3&gt;&lt;i&gt;string&lt;/i&gt;&lt;/h3&gt;
+</div>
+...
+```
+如果您信任，则不需要对内容进行编码它的来源，并希望它被解释为 HTML。 Content 方法总是对其参数进行编码，因此您必须直接创建 HtmlContentViewComponentResult 对象并为其构造函数提供一个 HtmlString 对象，该对象表示您知道可以安全显示的字符串，因为它来自您信任的源或因为您确信它已经被编码，如清单 24-18 所示。
+```cs
+using Microsoft.AspNetCore.Mvc;
+using WebApp.Models;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.AspNetCore.Html;
+...
+public IViewComponentResult Invoke() {
+    return new HtmlContentViewComponentResult(
+        new HtmlString("This is a <h3><i>string</i></h3>"));  // <-HERE
+}
+...
+```
+这种技术应该谨慎使用，并且只能用于不能被篡改并执行自己编码的内容源。

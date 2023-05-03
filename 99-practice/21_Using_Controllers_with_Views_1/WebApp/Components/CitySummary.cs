@@ -16,12 +16,16 @@ public class CitySummary : ViewComponent
     //     + $"{data.Cities.Sum(c => c.Population)} people";
     // }
 
+    // public IViewComponentResult Invoke()
+    // {
+    //     return View(new CityViewModel
+    //     {
+    //         Cities = data.Cities.Count(),
+    //         Population = data.Cities.Sum(c => c.Population)
+    //     });
+    // }
     public IViewComponentResult Invoke()
     {
-        return View(new CityViewModel
-        {
-            Cities = data.Cities.Count(),
-            Population = data.Cities.Sum(c => c.Population)
-        });
+        return Content("This is a <h3><i>string</i></h3>");
     }
 }
