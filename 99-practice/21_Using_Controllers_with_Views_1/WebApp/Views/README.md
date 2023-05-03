@@ -158,3 +158,20 @@ public string Invoke() {
 }
 ...
 ```
+
+### Providing Context from the Parent View Using Arguments
+父视图可以为视图组件提供额外的上下文数据，为它们提供有关应生成的内容的数据或指导。上下文数据是通过 Invoke 或 InvokeAsync 方法接收的，如清单 24-20 所示。
+Listing 24-20. Receiving a Value in the CitySummary.cs File in the Components Folder
+```cs
+...
+public IViewComponentResult Invoke(string themeName)
+{
+    ViewBag.Theme = themeName;
+    return View(new CityViewModel
+    {
+        Cities = data.Cities.Count(),
+        Population = data.Cities.Sum(c => c.Population)
+    });
+}
+...
+```

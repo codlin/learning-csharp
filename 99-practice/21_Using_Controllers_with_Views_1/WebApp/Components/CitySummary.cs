@@ -31,15 +31,25 @@ public class CitySummary : ViewComponent
     //     return Content("This is a <h3><i>string</i></h3>");
     // }
 
-    public string Invoke()
+    // public string Invoke()
+    // {
+    //     if (RouteData.Values["controller"] != null)
+    //     {
+    //         return "Controller Request";
+    //     }
+    //     else
+    //     {
+    //         return "Razor Page Request";
+    //     }
+    // }
+
+    public IViewComponentResult Invoke(string themeName)
     {
-        if (RouteData.Values["controller"] != null)
+        ViewBag.Theme = themeName;
+        return View(new CityViewModel
         {
-            return "Controller Request";
-        }
-        else
-        {
-            return "Razor Page Request";
-        }
+            Cities = data.Cities.Count(),
+            Population = data.Cities.Sum(c => c.Population)
+        });
     }
 }
