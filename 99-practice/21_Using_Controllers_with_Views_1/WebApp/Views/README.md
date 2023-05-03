@@ -190,3 +190,13 @@ public IViewComponentResult Invoke(string themeName= "success") {
 视图组件通常提供由控制器或 Razor 页面深入处理的功能摘要或快照。例如，对于汇总购物篮的视图组件，通常会有一个链接以控制器为目标，该控制器提供购物篮中产品的详细列表，可用于结帐和完成购买。    
 在这种情况下，您可以创建一个既是视图组件又是控制器或 Razor 页面的类。请将名为 Cities.cshtml.cs 的文件添加到 Pages 文件夹。
 此页面模型类使用 ViewComponent 属性进行修饰，这使其可以用作视图组件。 Name 参数指定将应用视图组件的名称。由于页面模型不能从 ViewComponent 基类继承，因此类型为 ViewComponentContext 的属性用 ViewComponentContext 属性修饰，这表明应该在 Invoke 或 InvokeAsync 方法之前为其分配一个定义表 24-5 中描述的属性的对象被调用。 View 方法不可用，所以我必须创建一个 ViewViewComponentResult 对象，它依赖于通过装饰属性接收的上下文对象。清单 24-30 更新了页面的视图部分以使用新的页面模型类。
+
+### Creating a Hybrid Controller Class
+相同的技术可以应用于控制器。将名为 CitiesController.cs 的类文件添加到 Controllers 文件夹，并添加如清单 24-33 所示的语句。
+控制器实例化方式的一个怪癖意味着不需要用 ViewComponentContext 属性装饰的属性，并且从 Controller 基类继承的 ViewData 属性可用于创建视图组件结果。  
+要为操作方法提供视图，请创建 Views/Cities 文件夹并向其中添加一个名为 Index.cshtml 的文件，其内容如清单 24-34 所示。
+要为视图组件提供视图，请创建 Views/Shared/Components/CitiesControllerHybrid 文件夹并向其中添加一个名为 Default.cshtml 的 Razor 视图。
+清单 24-36 在 Data.cshtml Razor 页面中应用了混合视图组件，替换了上一节中创建的混合类。
+```html
+<vc:cities-controller-hybrid />
+```
