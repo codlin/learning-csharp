@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using WebApp.TagHelpers;
+
 using WebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,7 @@ builder.Services.AddDbContext<DataContext>(opts =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CitiesData>();
+builder.Services.AddTransient<ITagHelperComponent, TimeTagHelperComponent>();
 
 var app = builder.Build();
 app.UseStaticFiles();

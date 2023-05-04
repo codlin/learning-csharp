@@ -302,3 +302,15 @@ show-when-gt 属性指定 div 元素应该显示的值，for 属性选择将被�
 
 ## Using Tag Helper Components
 标签助手组件提供了一种将标签助手作为服务应用的替代方法。当您需要设置标记帮助程序以支持另一个服务或中间件组件时，此功能可能很有用，这通常是同时具有客户端组件和服务器端组件的诊断工具或功能的情况，例如 Blazor，它是在第 4 部分中进行了描述。在接下来的部分中，我将向您展示如何创建和应用标签助手组件。
+
+### Creating a Tag Helper Component
+Tag helper 组件派生自 TagHelperComponent 类，该类提供与前面示例中使用的 TagHelper 基类类似的 API。要创建标签助手组件，请在 TagHelpers 文件夹中添加一个名为 TimeTagHelperComponent.cs 的类文件。
+标签助手组件不指定它们转换的元素，并且为已配置标签助手组件功能的每个元素调用 Process 方法。默认情况下，标签助手组件用于转换 head 和 body 元素。这意味着标签助手组件类必须检查输出元素的 TagName 属性，以确保它们只执行预期的转换。TimeTagHelperComponent.cs 中的标签助手组件查找 body 元素并使用 PreContent 属性在元素的其余内容之前插入一个包含时间戳的 div 元素。
+标签助手组件被注册为实现 ITagHelperComponent 接口的服务，如清单 25-31 所示。
+Listing 25-31. Registering a Tag Helper Component in the Program.cs File in the WebApp Folder
+```cs
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using WebApp.TagHelpers;
+...
+builder.Services.AddTransient<ITagHelperComponent, TimeTagHelperComponent>();
+```
