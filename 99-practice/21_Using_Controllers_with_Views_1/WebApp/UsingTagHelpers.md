@@ -203,3 +203,40 @@ Listing 25-20. Adding an Element in the Index.cshtml File in the Views/Home Fold
 ```html
 <div route-data="true"></div>
 ```
+
+### Working with Model Expressions
+标签助手可以对视图模型进行操作，定制它们执行的转换或它们创建的输出。要查看此功能的工作原理，请将名为 ModelRowTagHelper.cs 的类文件添加到 TagHelpers 文件夹。
+这个标签助手转换具有 for 属性的 tr 元素。这个标签助手的重要部分是 For 属性的类型，它用于接收 for 属性的值。
+```cs
+...
+public ModelExpression? For { get; set; }
+...
+```
+当您想对视图模型的一部分进行操作时，可以使用 ModelExpression 类，这可以通过向前跳转并显示如何在视图中应用标签助手来轻松解释，如清单 25-22 所示。
+注意：ModelExpression 功能只能用于视图模型或页面模型。它不能用于在视图中创建的变量，例如 @foreach 表达式。
+Listing 25-22. Using the Tag Helper in the Index.cshtml File in the Views/Home Folder
+```html
+<tr for="Name" />
+<tr for="Price" format="c" />
+<tr for="CategoryId" />
+```
+`for` 属性的值是**由视图模型类定义的属性的名称**。创建标签助手时，会检测 For 属性的类型，并为其分配一个描述所选属性的 ModelExpression 对象。  
+我不打算详细描述 ModelExpression 类，因为对类型的任何内省都会导致无穷无尽的类和属性列表。此外，ASP.NET Core 提供了一组有用的内置标签助手，它们使用视图模型来转换元素，如第 26 章所述，这意味着您无需创建自己的标签助手。  
+对于示例标签助手，我使用了三个值得描述的基本功能。第一个是获取模型属性的名称，以便我可以将其包含在输出元素中，如下所示：   
+```
+...
+th.InnerHtml.Append(For?.Name ?? String.Empty);
+...
+```
+Name 属性返回模型属性的名称。第二个功能是获取模型属性的类型，以便我可以确定是否格式化该值，如下所示： 
+```cs
+...
+if (Format != null && For?.Metadata.ModelType == typeof(decimal)) {
+...
+```
+第三个功能是获取属性的值，以便它可以包含在响应中。
+```cs
+...
+td.InnerHtml.Append(For?.Model.ToString() ?? String.Empty);
+...
+```
