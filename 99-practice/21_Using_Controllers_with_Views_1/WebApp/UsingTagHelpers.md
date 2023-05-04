@@ -299,3 +299,6 @@ Listing 25-28. Adding an Element in the Index.cshtml File in the Views/Home Fold
 ```
 show-when-gt 属性指定 div 元素应该显示的值，for 属性选择将被检查的模型属性。要创建将管理元素（包括响应）的标签助手，请将名为 SelectiveTagHelper.cs 的类文件添加到 WebApp/TagHelpers 文件夹，代码如清单 25-29 所示。
 标签助手使用模型表达式访问属性并调用 SuppressOutput 方法，除非超过阈值。
+
+## Using Tag Helper Components
+标签助手组件提供了一种将标签助手作为服务应用的替代方法。当您需要设置标记帮助程序以支持另一个服务或中间件组件时，此功能可能很有用，这通常是同时具有客户端组件和服务器端组件的诊断工具或功能的情况，例如 Blazor，它是在第 4 部分中进行了描述。在接下来的部分中，我将向您展示如何创建和应用标签助手组件。
