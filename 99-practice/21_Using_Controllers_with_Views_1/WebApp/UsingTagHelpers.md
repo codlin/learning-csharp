@@ -157,10 +157,19 @@ public override async Task ProcessAsync(TagHelperContext context, TagHelperOutpu
 ### Prepending and Appending Content and Elements
 TagHelperOutput 类提供了四个属性，可以轻松地将新内容注入视图，使其包围元素或元素的内容，如表 25-7 中所述。在接下来的部分中，我将解释如何在目标元素周围和内部插入内容。
 Table 25-7. The TagHelperOutput Properties for Appending Context and Elements
-```
 | Name | Description |
 |-|-|
 | PreElement | 此属性用于在目标元素之前将元素插入到视图中。|
 | PostElement | 此属性用于在目标元素之后将元素插入到视图中。|
 | PreContent | 此属性用于在任何现有内容之前将内容插入到目标元素中。|
 | PostContent | 此属性用于在任何现有内容之后将内容插入到目标元素中。|
+
+**Inserting Content Around the Output Element**
+第一个 TagHelperOuput 属性是 PreElement 和 PostElement，它们用于在输出元素之前和之后将元素插入到视图中。为了演示这些属性的使用，将名为 ContentWrapperTagHelper.cs 的类文件添加到 WebApp/TagHelpers 文件夹，其内容如清单 25-15 所示。
+Listing 25-15. The Contents of the WrapperTagHelper.cs File in the TagHelpers Folder
+**见文件**
+此标记助手转换具有值为 true 的 wrap 属性的元素，它使用 PreElement 和 PostElement 属性在输出元素之前和之后添加 div 元素。清单 25-16 将一个元素添加到由标签助手转换的索引视图中。
+Listing 25-16. Adding an Element in the Index.cshtml File in the Views/Home Folder
+```html
+<div class="m-2" wrap="true">Inner Content</div>
+```
