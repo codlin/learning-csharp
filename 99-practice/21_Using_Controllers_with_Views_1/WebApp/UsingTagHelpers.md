@@ -183,3 +183,23 @@ PreContent 和 PostContent 属性用于在原始内容周围的输出元素内�
     ...
 </tbody>
 ```
+
+### Getting View Context Data
+标签助手的一个常见用途是转换元素，使它们包含当前请求或视图模型/页面模型的详细信息，这需要访问上下文数据。要创建这种类型的标签助手，请将名为 RouteDataTagHelper.cs 的文件添加到 TagHelpers 文件夹，其内容如清单 25-19 所示。
+Listing 25-19. The Contents of the RouteDataTagHelper.cs File in the TagHelpers Folder
+**见文件**
+标签助手转换具有值为 true 的 route-data 属性的 div 元素，并使用路由系统获得的段变量列表填充输出元素。为了获取路由数据，我添加了一个名为 Context 的属性，并用两个属性对其进行修饰，如下所示：
+```cs
+...
+[ViewContext]
+[HtmlAttributeNotBound]
+public ViewContext Context { get; set; } = new();
+...
+```
+`ViewContext` 属性表示**当创建标签助手类的新实例时，应该为该属性的值分配一个 ViewContext 对象，它提供正在呈现的视图的详细信息，包括路由数据**，如第 13 章所述。  
+**如果在 div 元素上定义了匹配的属性，则 HtmlAttributeNotBound 属性会阻止将值分配给此属性。这是一个很好的做法**，尤其是当您正在编写供其他开发人员使用的标签助手时。
+清单 25-20 向 Home 控制器的 Index 视图添加了一个元素，该元素将被新的标签助手转换。
+Listing 25-20. Adding an Element in the Index.cshtml File in the Views/Home Folder
+```html
+<div route-data="true"></div>
+```
