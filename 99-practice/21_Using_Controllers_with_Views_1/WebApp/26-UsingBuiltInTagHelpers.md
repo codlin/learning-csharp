@@ -8,3 +8,10 @@ ASP.NET Core 提供了一组内置的标签助手，用于应用最常需要的�
 | 如何用它们？     | 使用标准 HTML 元素上的属性或通过自定义 HTML 元素应用标签助手。  |
 | 有那么坑或者限制？| 没有，这些标签助手经过充分测试且易于使用。除非您有特殊需求，否则使用这些标签助手比自定义实现更可取。|
 | 有没有其他选择？  | 这些标签助手是可选的，它们的使用不是必需的。|
+
+## Enabling the Built-in Tag Helpers
+内置标签助手全部在 Microsoft.AspNetCore.Mvc.TagHelpers 命名空间中定义，并通过将 @addTagHelpers 指令添加到各个视图或页面来启用，或者，如在示例项目的情况下，查看导入文件。这是 Views/Pages 文件夹中 _ViewImports.cshtml 文件中的必需指令，它为控制器视图启用内置标签助手： 
+```cs
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+```
+这些指令已添加到第 24 章的示例项目中以启用视图组件功能。
