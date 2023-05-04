@@ -147,9 +147,20 @@ public override async Task ProcessAsync(TagHelperContext context, TagHelperOutpu
 
     TagBuilder row = new TagBuilder("tr");
     row.InnerHtml.AppendHtml(header);
-    
+
     output.Content.SetHtmlContent(row);
     ...
 }
 ...
 ```
+
+### Prepending and Appending Content and Elements
+TagHelperOutput 类提供了四个属性，可以轻松地将新内容注入视图，使其包围元素或元素的内容，如表 25-7 中所述。在接下来的部分中，我将解释如何在目标元素周围和内部插入内容。
+Table 25-7. The TagHelperOutput Properties for Appending Context and Elements
+```
+| Name | Description |
+|-|-|
+| PreElement | 此属性用于在目标元素之前将元素插入到视图中。|
+| PostElement | 此属性用于在目标元素之后将元素插入到视图中。|
+| PreContent | 此属性用于在任何现有内容之前将内容插入到目标元素中。|
+| PostContent | 此属性用于在任何现有内容之后将内容插入到目标元素中。|
