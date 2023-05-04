@@ -66,6 +66,16 @@ Process 方法通过配置作为参数接收的 TagHelperOutput 对象来转换�
 Table 25-4. The TagHelperOutput Properties and Methods
 *忽略*
 
-在 TrTagHelper 类中，我使用 Attributes 字典向指定 Bootstrap 样式的 HTML 元素添加了一个类属性，包括 BgColor 和 TextColor 属性的值。效果是可以通过将 bg-color 和 text-color 属性设置为 Bootstrap 名称（例如 primary、info 和 danger）来指定 tr 元素的背景色。  
+在 TrTagHelper 类中，我使用 Attributes 字典向指定 Bootstrap 样式的 HTML 元素添加了一个类属性，包括 BgColor 和 TextColor 属性的值。效果是可以通过将 bg-color 和 text-color 属性设置为 Bootstrap 名称（例如 primary、info 和 danger）来指定 tr 元素的背景色。
+
+### Registering Tag Helpers
 **标签助手类必须在使用前使用 @addTagHelper 指令注册**。可以应用标签助手的视图或页面集取决于 @addTagHelper 指令的使用位置。对于单个视图或页面，该指令出现在 CSHTML 文件本身中。**为了使标记帮助程序更广泛地可用，可以将其添加到视图导入文件中，该文件在控制器的 Views 文件夹和 Razor Pages 的 Pages 文件夹中定义**。  
 我希望我在本章中创建的标签助手在应用程序的任何地方都可用，这意味着 @addTagHelper 指令被添加到 Views 和 Pages 文件夹中的 _ViewImports.cshtml 文件中。第 24 章中用于应用视图组件的 vc 元素是一个标签助手，这就是为什么启用标签助手所需的指令已经在 _ViewImports.cshtml 文件中。
+```cs
+@addTagHelper *, WebApp
+```
+**参数的第一部分指定标签助手类的名称，支持通配符，第二部分指定定义它们的程序集的名称**。此 @addTagHelper 指令使用通配符来选择 WebApp 程序集中的所有命名空间，其效果是可以在任何控制器视图中使用项目中任何位置定义的标记助手。 Pages 文件夹中的 Razor Pages _ViewImports.cshtml 文件中有相同的语句。  
+另一个 @addTagHelper 指令启用 Microsoft 提供的内置标签助手，这在第 26 章中有描述。
+```cs
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+```
