@@ -286,3 +286,16 @@ Listing 25-27. Applying a Tag Helper in the Index.cshtml File in the Views/Home 
     </tr>
 </tbody>
 ```
+
+### Suppressing the Output Element
+通过在作为 Process 方法的参数接收的 TagHelperOutput 对象上调用 SuppressOuput 方法，可以使用标记助手来防止元素包含在 HTML 响应中。在清单 25-28 中，我向 Home 控制器的 Index 视图添加了一个元素，只有当视图模型的 Price 属性超过指定值时才应显示该元素。
+Listing 25-28. Adding an Element in the Index.cshtml File in the Views/Home Folder
+```html
+<div show-when-gt="500" for="Price">
+    <h5 class="bg-danger text-white text-center p-2">
+        Warning: Expensive Item
+    </h5>
+</div>
+```
+show-when-gt 属性指定 div 元素应该显示的值，for 属性选择将被检查的模型属性。要创建将管理元素（包括响应）的标签助手，请将名为 SelectiveTagHelper.cs 的类文件添加到 WebApp/TagHelpers 文件夹，代码如清单 25-29 所示。
+标签助手使用模型表达式访问属性并调用 SuppressOutput 方法，除非超过阈值。
