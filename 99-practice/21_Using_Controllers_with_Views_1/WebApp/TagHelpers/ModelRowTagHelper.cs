@@ -15,7 +15,7 @@ public class ModelRowTagHelper : TagHelper
         output.TagMode = TagMode.StartTagAndEndTag;
 
         TagBuilder th = new("th");
-        th.InnerHtml.Append(For?.Name ?? string.Empty);
+        th.InnerHtml.Append(For?.Name.Split(".").Last() ?? String.Empty);
         output.Content.AppendHtml(th);
 
         TagBuilder td = new("td");

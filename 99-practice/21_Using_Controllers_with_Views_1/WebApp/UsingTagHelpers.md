@@ -240,3 +240,29 @@ if (Format != null && For?.Metadata.ModelType == typeof(decimal)) {
 td.InnerHtml.Append(For?.Model.ToString() ?? String.Empty);
 ...
 ```
+
+**Working with the Page Model**
+可以在 Razor Pages 中应用带有模型表达式的标记帮助程序，尽管选择属性的表达式必须说明 Model 属性返回页面模型类的方式。清单 25-23 将标签助手应用于 Editor Razor 页面，其页面模型定义了一个 Product 属性。
+Listing 25-23. Applying a Tag Helper in the Editor.cshtml File in the Pages Folder
+```html
+ <tbody>
+    <tr for="Product.Name" />
+    <tr for="Product.Price" format="c" />
+</tbody>
+``
+for 属性的值通过 Product 属性选择嵌套属性，该属性为标签助手提供它需要的 ModelExpression。模型表达式不能与 null 条件运算符一起使用，这给本示例带来了问题，因为 Product 属性的类型是 Product?。清单 25-24 将属性类型更改为 Product 并分配了一个默认值。 （我在第 27 章展示了解决这个问题的不同方法。）
+Listing 25-24. Changing a Property Type in the Editor.cshtml.cs File in the Pages Folder
+```cs
+public class EditorModel : PageModel {
+    ...
+    public Product Product { get; set; } = new();
+    public async Task OnGetAsync(long id) {
+        Product = await context.Products.FindAsync(id) ?? new();
+    }
+}
+```
+页面模型的一个结果是 ModelExpression.Name 属性将返回 Product.Name，例如，而不仅仅是名称。清单 25-25 更新了标签助手，使其只显示模型表达式名称的最后一部分。
+Listing 25-25. Processing Names in the ModelRowTagHelper.cs File in the TagHelpers Folder
+```cs
+th.InnerHtml.Append(For?.Name.Split(".").Last() ?? String.Empty);
+```
