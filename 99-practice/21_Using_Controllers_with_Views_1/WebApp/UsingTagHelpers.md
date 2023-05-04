@@ -102,3 +102,33 @@ Table 25-5. The HtmlTargetElement Properties
 | Attributes | 此属性用于指定标签助手应仅应用于具有给定属性集的元素，以逗号分隔的列表形式提供。以星号结尾的属性名称将被视为前缀，因此 bg-* 将匹配 bg-color、bgsize 等。|
 | ParentTag | 此属性用于指定标签助手应仅应用于给定类型的元素中包含的元素。|
 | TagStructure | 此属性用于指定标签助手应仅应用于其标签结构对应于 TagStructure 枚举中给定值的元素，该枚举定义了 Unspecified、NormalOrSelfClosing 和 WithoutEndTag。|
+
+### Widening the Scope of a Tag Helper
+HtmlTargetElement 属性也可用于扩大标签助手的范围，使其匹配更广泛的元素。这是通过将属性的第一个参数设置为星号（* 字符）来完成的，它可以匹配任何元素。清单 25-9 更改了应用于示例标签助手的属性，以便它匹配任何具有 bg-color 和 text-color 属性的元素。
+```cs
+[HtmlTargetElement("*", Attributes = "bg-color,text-color")]
+public class TrTagHelper : TagHelper { ... }
+```
+平衡 TagHelpers 文件夹中 TrTagHelper.cs 文件中的范围
+```cs
+[HtmlTargetElement("tr", Attributes = "bg-color,text-color")]
+[HtmlTargetElement("td", Attributes = "bg-color")]
+public class TrTagHelper : TagHelper { ... }
+```
+如果需要对一个元素应用多个标签助手，可以通过设置从 TagHelper 基类继承的 Order 属性来控制它们执行的顺序。管理序列可以帮助最小化标签助手之间的冲突，尽管仍然很容易遇到问题。
+
+## Advanced Tag Helper Features
+### Creating Shorthand Elements
+标签助手不仅限于转换标准 HTML 元素，还可以用于用常用内容替换自定义元素。这可能是一个有用的特性，可以使视图更简洁并使它们的意图更明显。为了演示，清单 25-12 用自定义 HTML 元素替换了 Index 视图中的 thead 元素。
+清单 25-12在 Views/Home 文件夹中的 Index.cshtml 文件中添加自定义 HTML 元素
+```html
+<tablehead bg-color="dark">Product Summary</tablehead>
+```
+tablehead 元素不是 HTML 规范的一部分，浏览器无法理解。相反，我将使用此元素作为生成 thead 元素及其 HTML 表格内容的简写。  
+将名为 TableHeadTagHelper.cs 的类添加到 TagHelpers 文件夹，并使用它来定义如清单 25-13 所示的类。
+提示： 在处理不属于 HTML 规范的自定义元素时，您必须应用 HtmlTargetElement 属性并指定元素名称，如清单 25-13 所示。基于类名将标签助手应用于元素的约定仅适用于标准元素名称。
+Listing 25-13. The Contents of TableHeadTagHelper.cs in the TagHelpers Folder
+**见文件**
+此标签助手是异步的并重写 ProcessAsync 方法，以便它可以访问它转换的元素的现有内容。 ProcessAsync方法使用TagHelperOuput对象的属性生成一个完全不同的元素：TagName属性用于指定一个thead元素，TagMode属性用于指定该元素使用开始和结束标签编写，Attributes.SetAttribute方法用于定义类属性，Content属性用于设置元素内容。元素的现有内容是通过异步 GetChildContentAsync 方法获取的，该方法返回一个 TagHelperContent 对象。这是由 TagHelperOutput.Content 属性返回的同一对象，并允许使用相同类型通过表 25-6 中描述的方法检查和更改元素的内容。
+Table 25-6. Useful TagHelperContent Methods
+**略**
