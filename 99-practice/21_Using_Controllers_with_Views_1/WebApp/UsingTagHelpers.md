@@ -173,3 +173,13 @@ Listing 25-16. Adding an Element in the Index.cshtml File in the Views/Home Fold
 ```html
 <div class="m-2" wrap="true">Inner Content</div>
 ```
+
+**Inserting Content Inside the Output Element**
+PreContent 和 PostContent 属性用于在原始内容周围的输出元素内插入内容。要演示此功能，请将名为 HighlightTagHelper.cs 的类文件添加到 TagHelpers 文件夹，并使用它来定义清单 25-17 中所示的标签助手。
+这个标签助手在输出元素的内容周围插入 b 和 i 元素。清单 25-18 将 wrap 属性添加到 Index 视图中的一个表格单元格。
+```html
+<tbody>
+    <tr><th>Name</th><td highlight="true">@Model?.Name</td></tr>
+    ...
+</tbody>
+```
