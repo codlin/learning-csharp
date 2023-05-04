@@ -314,3 +314,13 @@ using WebApp.TagHelpers;
 ...
 builder.Services.AddTransient<ITagHelperComponent, TimeTagHelperComponent>();
 ```
+
+### Expanding Tag Helper Component Element Selection
+默认情况下，只有 head 和 body 元素由标签助手组件处理，但可以通过创建一个从可怕命名的 TagHelperComponentTagHelper 类派生的类来选择其他元素。将名为 TableFooterTagHelperComponent.cs 的类文件添加到 TagHelpers 文件夹。
+TableFooterSelector 类派生自 TagHelperComponentTagHelper，并装饰有 HtmlTargetElement 属性，该属性扩展了应用程序的标签助手组件处理的元素范围。在这种情况下，属性选择表元素。  
+在同一个文件中定义的 TableFooterTagHelperComponent 类是一个标签帮助器组件，它通过添加一个代表表格页脚的 tfoot 元素来转换表格元素。  
+**注意**：请记住，当您创建一个新的 TagHelperComponentTagHelper 时，所有标签助手组件都将接收由 HtmlTargetAttribute 元素选择的元素。标签助手组件必须注册为服务才能接收用于转换的元素，但标签助手组件标签助手（这是我多年来见过的最糟糕的命名选择之一）是自动发现和应用的。清单 25-33 添加了标签助手组件服务。
+Listing 25-33. Registering a Tag Helper Component in the Program.cs File in the WebApp Folder
+```cs
+builder.Services.AddTransient<ITagHelperComponent, TableFooterTagHelperComponent>();
+```
