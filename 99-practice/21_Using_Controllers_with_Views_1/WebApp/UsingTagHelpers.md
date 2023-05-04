@@ -266,3 +266,23 @@ Listing 25-25. Processing Names in the ModelRowTagHelper.cs File in the TagHelpe
 ```cs
 th.InnerHtml.Append(For?.Name.Split(".").Last() ?? String.Empty);
 ```
+
+### Coordinating Between Tag Helpers
+TagHelperContext.Items 属性提供了一个字典，供对元素及其后代进行操作的标签助手使用。为了演示 Items 集合的使用，将一个名为 CoordinatingTagHelpers.cs 的类文件添加到 WebApp/TagHelpers 文件夹。
+第一个标签助手对具有 theme 属性的 tr 元素进行操作。协调标签助手`Coordinating tag helpers`可以转换它们自己的元素，但此示例只是将 theme 属性的值添加到 Items 字典，以便标签助手可以对 tr 元素中包含的元素进行操作。第二个标签助手对 th 和 td 元素进行操作，并使用 Items 字典中的主题值为其输出元素设置 Bootstrap 样式。  
+清单 25-27 将元素添加到 Home 控制器的 Index 视图中，这些元素应用了协调标签助手。  
+请注意，我添加了在清单 25-27 中转换的 th 和 td 元素，而不是依赖标签助手来生成它们。标签助手不应用于由其他标签助手生成的元素，并且仅影响视图中定义的元素。
+Listing 25-27. Applying a Tag Helper in the Index.cshtml File in the Views/Home Folder
+```html
+<tbody>
+    <tr theme="primary">
+        <th>Name</th><td>@Model?.Name</td>
+    </tr>
+    <tr theme="secondary">
+        <th>Price</th><td>@Model?.Price.ToString("c")</td>
+    </tr>
+    <tr theme="info">
+        <th>Category</th><td>@Model?.CategoryId</td>
+    </tr>
+</tbody>
+```
