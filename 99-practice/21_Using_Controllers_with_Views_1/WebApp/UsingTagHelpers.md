@@ -132,3 +132,24 @@ Listing 25-13. The Contents of TableHeadTagHelper.cs in the TagHelpers Folder
 此标签助手是异步的并重写 ProcessAsync 方法，以便它可以访问它转换的元素的现有内容。 ProcessAsync方法使用TagHelperOuput对象的属性生成一个完全不同的元素：TagName属性用于指定一个thead元素，TagMode属性用于指定该元素使用开始和结束标签编写，Attributes.SetAttribute方法用于定义类属性，Content属性用于设置元素内容。元素的现有内容是通过异步 GetChildContentAsync 方法获取的，该方法返回一个 TagHelperContent 对象。这是由 TagHelperOutput.Content 属性返回的同一对象，并允许使用相同类型通过表 25-6 中描述的方法检查和更改元素的内容。
 Table 25-6. Useful TagHelperContent Methods
 **略**
+
+### Creating Elements Programmatically
+当生成新的 HTML 元素时，您可以使用标准的 C# 字符串格式来创建您需要的内容，这是我在清单 25-13 中采用的方法。这行得通，但可能会很尴尬，需要密切注意以避免拼写错误。一种更可靠的方法是使用 TagBuilder 类，它在 Microsoft.AspNetCore.Mvc.Rendering 命名空间中定义，并允许以更结构化的方式创建元素。表 25-6 中描述的 TagHelperContent 方法接受 TagBuilder 对象，这使得在标签助手中创建 HTML 内容变得容易，如清单 25-14 所示。
+Listing 25-14. Creating HTML Elements in the TableHeadTagHelper.cs File in the TagHelpers Folder
+```cs
+using Microsoft.AspNetCore.Mvc.Rendering;
+...
+public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output) {
+    ...
+    TagBuilder header = new TagBuilder("th");
+    header.Attributes["colspan"] = "2";
+    header.InnerHtml.Append(content);
+
+    TagBuilder row = new TagBuilder("tr");
+    row.InnerHtml.AppendHtml(header);
+    
+    output.Content.SetHtmlContent(row);
+    ...
+}
+...
+```
