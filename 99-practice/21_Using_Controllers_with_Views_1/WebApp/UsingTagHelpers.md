@@ -88,3 +88,17 @@ Listing 25-7. Using a Tag Helper in the Index.cshtml File in the Views/Home Fold
 ```
 示例 25-7 中应用了属性的 tr 元素已经被转换，但这并不是图中显示的唯一变化。**默认情况下，标签助手适用于特定类型的所有元素，这意味着视图中的所有 tr 元素都已使用标签助手类中定义的默认值进行转换，因为没有定义任何属性**。 （有些表行没有显示文本的原因是因为 Bootstrap table-striped 类，它对交替行应用不同的样式。）  
 实际上，问题更严重，因为视图导入文件中的 @addTagHelper 指令意味着example 标签助手应用于控制器和 Razor Pages 呈现的任何视图中使用的所有 tr 元素。例如，使用浏览器请求 http://localhost:5000/cities，您将看到来自 Cities Razor Page 的响应中的 tr 元素也发生了转换，如图 25-3 所示。
+
+### Narrowing the Scope of a Tag Helper
+可以使用 HtmlTargetElement 元素控制由标签助手转换的元素范围，如清单 25-8 所示。
+Listing 25-8. Narrowing Scope in the TrTagHelper.cs File in the TagHelpers Folder
+```cs
+[HtmlTargetElement("tr", Attributes = "bg-color,text-color", ParentTag = "thead")]
+public class TrTagHelper : TagHelper { ... }
+```
+Table 25-5. The HtmlTargetElement Properties
+| Name | Description |
+|-|-|
+| Attributes | 此属性用于指定标签助手应仅应用于具有给定属性集的元素，以逗号分隔的列表形式提供。以星号结尾的属性名称将被视为前缀，因此 bg-* 将匹配 bg-color、bgsize 等。|
+| ParentTag | 此属性用于指定标签助手应仅应用于给定类型的元素中包含的元素。|
+| TagStructure | 此属性用于指定标签助手应仅应用于其标签结构对应于 TagStructure 枚举中给定值的元素，该枚举定义了 Unspecified、NormalOrSelfClosing 和 WithoutEndTag。|
