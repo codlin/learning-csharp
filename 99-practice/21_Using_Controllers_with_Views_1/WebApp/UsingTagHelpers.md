@@ -9,3 +9,63 @@ Table 25-1. Putting Tag Helpers in Context
 | 如何使用它们？  | 应用标签助手的 HTML 元素是根据类的名称或 HTMLTargetElement 属性来选择的。呈现视图时，元素由标签助手转换并包含在发送给客户端的 HTML 中。|
 | 有什么坑？     | 使用标签助手可以很容易得意忘形并生成复杂的 HTML 内容部分，这使用视图组件更容易实现，如第 24 章所述。 |
 | 有什么替代品？  | 您不必使用标签助手，但它们可以轻松地在 ASP.NET Core 应用程序中生成复杂的 HTML。|
+
+## Creating a Tag Helper
+理解标签助手的最佳方式是创建一个标签助手，它揭示了它们的操作方式以及它们如何适应 ASP.NET Core 应用程序。在接下来的部分中，我将完成创建和应用标签助手的过程，该标签助手将为 tr 元素设置 Bootstrap CSS 类，以便像这样的元素：
+```html
+...
+<tr tr-color="primary">
+    <th colspan="2">Product Summary</th>
+</tr>
+...
+```
+会被转换为：
+```html
+...
+<tr class="bg-primary text-white text-center">
+    <th colspan="2">Product Summary</th>
+</tr>
+...
+```
+标签助手将识别 tr-color 属性并使用它的值来设置发送到浏览器的元素的类属性。这不是最引人注目或最有用的转换，但它为解释标签助手的工作原理提供了基础。
+
+### Defining the Tag Helper Class
+标签助手可以在项目的任何地方定义，但将它们放在一起会有所帮助，因为它们需要在使用前注册。创建 WebApp/TagHelpers 文件夹并向其中添加一个名为 TrTagHelper.cs 的类文件，代码如清单 25-6 所示。
+标签助手派生自 TagHelper 类，该类在 Microsoft.AspNetCore.Razor.TagHelpers 命名空间中定义。 TagHelper 类定义了一个 Process 方法，该方法被子类覆盖以实现转换元素的行为。标签助手的名称结合了它转换的元素的名称，后跟 TagHelper。在这个例子中，类名 TrTagHelper 表明这是一个对 tr 元素进行操作的标签助手。可以使用属性来扩大或缩小可以应用标签助手的元素范围，如本章后面所述，但默认行为由类名定义。
+可以通过重写 ProcessAsync 方法而不是 Process 方法来创建异步标记帮助器，但这对于大多数帮助器来说不是必需的，它们往往会对 HTML 元素进行小而集中的更改。您可以在“高级标记帮助程序功能”部分中查看异步标记帮助程序的示例。
+
+**Receiving Context Data**
+标签助手通过 TagHelperContext 类的实例接收有关它们正在转换的元素的信息，该实例作为 Process 方法的参数接收，并定义表 25-3 中描述的属性。
+Table 25-3. The TagHelperContext Properties
+| Name | Description |
+|-|-|
+| AllAttributes | 此属性返回应用于正在转换的元素的属性的只读字典，按名称和索引索引。|
+| Items | 此属性返回一个字典，用于在标签助手之间进行协调，如“标签助手之间的协调”部分所述。|
+| UniqueId | 此属性返回正在转换的元素的唯一标识符。 |
+虽然您可以通过 AllAttributes 字典访问元素属性的详细信息，但更方便的方法是定义一个属性，其名称对应于您感兴趣的属性，如下所示：
+```cs
+...
+public string BgColor { get; set; } = "dark";
+public string TextColor { get; set; } = "white";
+...
+```
+When a tag helper is being used, the properties it defines are inspected and assigned the value of any
+whose name matches attributes applied to the HTML element.
+当使用标签助手时，将检查它定义的属性，并为其分配名称与应用于HTML元素的属性相匹配的任何属性的值。  
+作为`Process`的一部分，属性值将被转换以匹配 C# 属性的类型，以便 bool 属性可用于接收 true 和 false 属性值，因此 int 属性可用于接收数字属性值，例如 1 和2. 对应的 HTML 元素属性中没有的 C# 类属性不会被设置，这意味着您应该检查以确保您没有处理 null 或提供默认值。    
+属性的名称会自动从默认的 HTML 样式 bg-color 转换为 C# 样式 BgColor。您可以使用除 asp-（Microsoft 使用）和 data-（为发送到客户端的自定义属性保留）之外的任何属性前缀。示例标签助手将使用 bg-color 和 text-color 属性进行配置，这将为 BgColor 和 TextColor 属性提供值，并用于在 Process 方法中配置 tr 元素，如下所示：
+```cs
+...
+output.Attributes.SetAttribute("class", $"bg-{BgColor} text-center text-{TextColor}");
+...
+```
+将 HTML 属性名称用于标签助手属性并不总是会产生可读或可理解的类。您可以使用 HtmlAttributeName 属性断开属性名称和它表示的属性之间的链接，该属性可用于指定属性表示的 HTML 属性。  
+
+**Producing Output**
+Process 方法通过配置作为参数接收的 TagHelperOutput 对象来转换元素。 TagHelperOuput 对象首先描述出现在视图中的 HTML 元素，然后通过表 25-4 中描述的属性和方法进行修改。
+Table 25-4. The TagHelperOutput Properties and Methods
+*忽略*
+
+在 TrTagHelper 类中，我使用 Attributes 字典向指定 Bootstrap 样式的 HTML 元素添加了一个类属性，包括 BgColor 和 TextColor 属性的值。效果是可以通过将 bg-color 和 text-color 属性设置为 Bootstrap 名称（例如 primary、info 和 danger）来指定 tr 元素的背景色。  
+**标签助手类必须在使用前使用 @addTagHelper 指令注册**。可以应用标签助手的视图或页面集取决于 @addTagHelper 指令的使用位置。对于单个视图或页面，该指令出现在 CSHTML 文件本身中。**为了使标记帮助程序更广泛地可用，可以将其添加到视图导入文件中，该文件在控制器的 Views 文件夹和 Razor Pages 的 Pages 文件夹中定义**。  
+我希望我在本章中创建的标签助手在应用程序的任何地方都可用，这意味着 @addTagHelper 指令被添加到 Views 和 Pages 文件夹中的 _ViewImports.cshtml 文件中。第 24 章中用于应用视图组件的 vc 元素是一个标签助手，这就是为什么启用标签助手所需的指令已经在 _ViewImports.cshtml 文件中。
