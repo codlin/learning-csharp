@@ -110,3 +110,56 @@ Globbing 是一种确保视图包含应用程序所需的 JavaScript 文件的�
 **UNDERSTANDING SOURCE MAPS**
 JavaScript 文件被缩小以使其更小，这意味着它们可以更快地交付给客户端并使用更少的带宽。缩小过程从文件中删除所有空格并重命名函数和变量，以便有意义的名称（例如 myHelpfullyNamedFunction）将由较少数量的字符表示，例如 x1。当使用浏览器的 JavaScript 调试器来跟踪缩小代码中的问题时，像 x1 这样的名称几乎不可能跟踪代码的进度。  
 具有 map 文件扩展名的文件是源映射，浏览器通过在缩小代码和开发人员可读的未缩小源文件之间提供映射来帮助调试缩小代码。当您打开浏览器的 F12 开发者工具时，浏览器会自动请求源映射并使用它们来帮助调试应用程序的客户端代码。
+
+#### **Narrowing the Globbing Pattern**
+没有应用程序需要清单 26-9 中的模式选择的所有文件。许多包包括多个包含相似内容的 JavaScript 文件，通常会删除不太受欢迎的功能以节省带宽。 jQuery 包中包含 jquery.slim.js 文件，该文件包含与 jquery.js 文件相同的代码，但没有处理异步 HTTP 请求和动画效果的功能。  
+这些文件中的每一个都有一个带有 min.js 文件扩展名的对应文件，它表示一个缩小的文件。缩小通过删除所有空格并重命名函数和变量以使用更短的名称来减小 JavaScript 文件的大小。  
+每个包只需要一个 JavaScript 文件，如果您只需要缩小版本（大多数项目都是这种情况），那么您可以限制 globbing 模式匹配的文件集，如清单 26-10 所示。
+```html
+<head>
+    ...
+    <script asp-src-include="lib/jquery**/*slim.min.js"></script>
+</head>
+```
+重新启动 ASP.NET Core 和浏览器以再次请求 http://localhost:5000/home/list 并检查应用程序发送的 HTML。您将看到只选择了缩小的文件。
+```html
+<head>
+    ...
+    <script src="/lib/jquery/jquery.slim.min.js"></script>
+</head>
+```
+
+**Excluding Files**
+当您要选择名称包含特定术语（例如 slim）的文件时，缩小 JavaScript 文件的模式会有所帮助。当您想要的文件没有该术语时，例如当您想要缩小文件的完整版本时，它没有帮助。幸运的是，您可以使用 asp-src-exclude 属性从与 asp-src-include 属性匹配的列表中删除文件，如清单 26-12 所示。
+```html
+<head>
+    ...
+    <script asp-src-include="/lib/jquery/**/*.min.js" asp-src-exclude="**.slim.**"></script>
+</head>
+```
+重新启动 ASP.NET Core 和浏览器以再次请求 http://localhost:5000/home/list 并检查应用程序发送的 HTML。您将看到只选择了缩小的文件。
+```html
+<head>
+    ...
+    <script src="/lib/jquery/jquery.min.js"></script>
+</head>
+```
+
+**UNDERSTANDING CACHE BUSTING**
+静态内容（例如图像、CSS 样式表和 JavaScript 文件）通常被缓存以阻止对很少更改的内容的请求到达应用程序服务器。缓存可以通过不同的方式完成：服务器可以告诉浏览器缓存内容，应用程序可以使用缓存服务器来补充应用程序服务器，或者可以使用内容分发网络来分发内容。并非所有缓存都在您的控制之下。例如，大公司通常会安装缓存以减少带宽需求，因为很大一部分请求往往会转到相同的站点或应用程序。  
+缓存的一个问题是，当您部署它们时，客户端不会立即收到新版本的静态文件，因为它们的请求仍在由以前缓存的内容提供服务。最终，缓存的内容将过期，新的内容将被使用，但这会留下一段时期，应用程序控制器生成的动态内容与缓存交付的静态内容不同步。这可能会导致布局问题或意外的应用程序行为，具体取决于已更新的内容。  
+解决此问题称为缓存破坏。这个想法是允许缓存处理静态内容，但立即反映在服务器上所做的任何更改。标签助手类通过向静态内容的 URL 添加查询字符串来支持缓存清除，其中包括充当版本号的校验和。例如，对于 JavaScript 文件，ScriptTagHelper 类通过 asp-append-version 属性支持缓存无效化，如下所示：
+```html
+...
+<script asp-src-include="/lib/jquery/**/*.min.js" asp-src-exclude="**.slim.**" asp-append-version="true">
+</script>
+...
+```
+启用缓存清除功能会在发送到浏览器的 HTML 中生成如下元素：
+```html
+...
+<script src="/lib/jquery/jquery.min.js?v=_xUj-3OJU5yExlq6GSYGSHk7tPXikyn"></script>
+...
+```
+标签助手将使用相同的版本号，直到您更改文件的内容，例如通过更新 JavaScript 库，此时将计算不同的校验和。版本号的加入意味着每次更改文件时，客户端都会请求不同的URL，缓存将其视为请求新的内容无法满足之前缓存的内容，并传递给应用服务器。然后内容会正常缓存直到下一次更新，这会产生另一个具有不同版本的 URL。
+
