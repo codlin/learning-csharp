@@ -163,3 +163,41 @@ JavaScript 文件被缩小以使其更小，这意味着它们可以更快地交
 ```
 标签助手将使用相同的版本号，直到您更改文件的内容，例如通过更新 JavaScript 库，此时将计算不同的校验和。版本号的加入意味着每次更改文件时，客户端都会请求不同的URL，缓存将其视为请求新的内容无法满足之前缓存的内容，并传递给应用服务器。然后内容会正常缓存直到下一次更新，这会产生另一个具有不同版本的 URL。
 
+#### **Working with Content Delivery Networks**
+内容分发网络 (CDN) 用于将对应用程序内容的请求卸载`offload`到离用户较近的服务器。浏览器不是从您的服务器请求 JavaScript 文件，而是从解析为地理上本地服务器的主机名请求它，这减少了加载文件所需的时间，并减少了您必须为应用程序提供的带宽量。如果您有大量分散在不同地域的用户，那么注册 CDN 可能具有商业意义，但即使是最小和最简单的应用程序也可以从使用主要技术公司运营的免费 CDN 来交付通用 JavaScript 包中受益，比如jQuery。  
+对于本章，我将使用 CDNJS，它与库管理器工具用于在 ASP.NET Core 项目中安装客户端包的 CDN 相同。可以在 https://cdnjs.com 搜索包；对于清单 26-4 中安装的包和版本 jQuery 3.6.0，有六个 CDNJS URL。  
+```shell
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.map
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.js
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.map
+```
+这些 URL 为 jQuery 的完整版和精简版提供常规 JavaScript 文件、缩小的 JavaScript 文件和缩小文件的源映射。   
+CDN 的问题在于它们不受您组织的控制，这意味着它们可能会失败，使您的应用程序保持运行但无法按预期工作，因为 CDN 内容不可用。 ScriptTagHelper 类提供了在客户端无法加载 CDN 内容时回退到本地文件的能力，如清单 26-13 所示。   
+Listing 26-13. Using CDN Fallback in the _SimpleLayout.cshtml File in the Views/Shared Folder
+```html
+...
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        asp-fallback-src="/lib/jquery/jquery.min.js" asp-fallback-test="window.jQuery">
+</script>
+...
+```
+src 属性用于指定 CDN URL。 asp-fallback-src 属性用于指定一个本地文件，如果 CDN 无法传送由常规 src 属性指定的文件，将使用该文件。为了确定 CDN 是否正常工作，asp-fallback-test 属性用于定义将在浏览器中评估的 JavaScript 片段。如果片段评估为 false，则将请求回退文件。   
+**提示** asp-fallback-src-include 和 asp-fallback-src-exclude 属性可用于选择具有通配模式的本地文件。但是，鉴于 CDN 脚本元素选择单个文件，我建议使用 asp-fallback-src 属性选择相应的本地文件，如示例所示。
+使用浏览器请求 http://localhost:5000/home/list，你会看到 HTML 响应包含两个脚本元素，如下所示：
+```html
+...
+<head>
+    ...
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        (window.jQuery||document.write("\u003Cscript src=\u0022/lib/jquery/jquery.min.js\u0022\u003E\u003C/script\u003E"));
+    </script>
+</head>
+...
+```
+第一个脚本元素从 CDN 请求 JavaScript 文件。第二个脚本元素评估由 asp-fallback-test 属性指定的 JavaScript 片段，它检查第一个脚本元素是否有效。如果该片段评估为真，则不会采取任何操作，因为 CDN 正常工作。如果该片段的计算结果为 false，则会向 HTML 文档添加一个新的脚本元素，指示浏览器从回退 URL 加载 JavaScript 文件。  
+测试回退设置很重要，因为在 CDN 停止工作并且您的用户无法访问您的应用程序之前，您不会发现它们是否失败。检查回退的最简单方法是将 src 属性指定的文件的名称更改为您知道不存在的名称（我在文件名后附加了 FAIL 一词），然后查看浏览器的网络请求使用 F12 开发者工具。您应该会看到 CDN 文件的错误，然后是对回退文件的请求。     
+**注意** CDN回退功能依赖于浏览器同步加载和执行脚本元素的内容，并按照它们的定义顺序。有许多技术可以通过使进程异步来加速 JavaScript 的加载和执行，但这些技术可能导致在浏览器从 CDN 检索文件并执行其内容之前执行回退测试，从而导致请求即使 CDN 运行良好并且首先击败了 CDN 的使用，回退文件也是如此。**不要将异步脚本加载与 CDN 回退功能混合使用**。
