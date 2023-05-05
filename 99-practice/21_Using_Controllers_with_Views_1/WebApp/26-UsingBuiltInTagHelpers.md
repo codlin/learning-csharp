@@ -201,3 +201,64 @@ src 属性用于指定 CDN URL。 asp-fallback-src 属性用于指定一个本�
 第一个脚本元素从 CDN 请求 JavaScript 文件。第二个脚本元素评估由 asp-fallback-test 属性指定的 JavaScript 片段，它检查第一个脚本元素是否有效。如果该片段评估为真，则不会采取任何操作，因为 CDN 正常工作。如果该片段的计算结果为 false，则会向 HTML 文档添加一个新的脚本元素，指示浏览器从回退 URL 加载 JavaScript 文件。  
 测试回退设置很重要，因为在 CDN 停止工作并且您的用户无法访问您的应用程序之前，您不会发现它们是否失败。检查回退的最简单方法是将 src 属性指定的文件的名称更改为您知道不存在的名称（我在文件名后附加了 FAIL 一词），然后查看浏览器的网络请求使用 F12 开发者工具。您应该会看到 CDN 文件的错误，然后是对回退文件的请求。     
 **注意** CDN回退功能依赖于浏览器同步加载和执行脚本元素的内容，并按照它们的定义顺序。有许多技术可以通过使进程异步来加速 JavaScript 的加载和执行，但这些技术可能导致在浏览器从 CDN 检索文件并执行其内容之前执行回退测试，从而导致请求即使 CDN 运行良好并且首先击败了 CDN 的使用，回退文件也是如此。**不要将异步脚本加载与 CDN 回退功能混合使用**。
+
+### Managing CSS Stylesheets
+LinkTagHelper 类是链接元素的内置标签助手，用于管理视图中 CSS 样式表的包含。这个标签助手支持表 26-6 中描述的属性，我将在以下部分中对其进行演示。
+Table 26-6. The Built-in Tag Helper Attributes for link Elements
+| Name | Description |
+|-|-|
+| asp-href-include | 此属性用于为输出元素的 href 属性选择文件。|
+| asp-href-exclude | 此属性用于从输出元素的 href 属性中排除文件。|
+| asp-append-version | 此属性用于启用缓存清除，如“了解缓存清除”边栏中所述。|
+| asp-fallback-href | 如果 CDN 出现问题，此属性用于指定回退文件。|
+| asp-fallback-hrefinclude | 此属性用于选择在出现 CDN 问题时将使用的文件。|
+| asp-fallback-hrefexclude | 此属性用于从出现 CDN 问题时将使用的集合中排除文件。|
+| asp-fallback-hreftest-class | 此属性用于指定将用于测试 CDN 的 CSS 类。|
+| asp-fallback-hreftest-property | 此属性用于指定将用于测试 CDN 的 CSS 属性。|
+| asp-fallback-hreftest-value | 此属性用于指定将用于测试 CDN 的 CSS 值。|
+
+#### **Selecting Stylesheets**
+LinkTagHelper 与 ScriptTagHelper 共享许多功能，包括支持通配模式以选择或排除 CSS 文件，因此不必单独指定它们。能够准确地选择 CSS 文件与选择 JavaScript 文件一样重要，因为样式表可以有常规版本和缩小版本，并且支持源映射。流行的 Bootstrap 包，我在本书中一直使用它来设置 HTML 元素的样式，它在 wwwroot/lib/bootstrap/css 文件夹中包含它的 CSS 样式表。
+Listing 26-14. Selecting a Stylesheet in the _SimpleLayout.cshtml File in the Views/Shared Folder
+```html
+<head>
+    ....
+    <link asp-href-include="/lib/bootstrap/css/*.min.css"
+        asp-href-exclude="**/*-reboot*,**/*-grid*,**/*-utilities*, **/*.rtl.*"
+        rel="stylesheet" />
+</head>
+```
+选择 JavaScript 文件时需要同样注意细节，因为很容易为同一文件的多个版本或您不想要的文件生成链接元素。
+
+#### **Working with Content Delivery Networks**
+LinkTag 帮助程序类提供了一组属性，用于在 CDN 不可用时回退到本地内容，尽管测试样式表是否已加载的过程比测试 JavaScript 文件更复杂。清单 26-15 使用 CDNJS URL 作为 Bootstrap CSS 样式表。   
+```html
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"
+        asp-fallback-href="/lib/bootstrap/css/bootstrap.min.css" asp-fallback-test-class="btn"
+        asp-fallback-test-property="display" asp-fallback-test-value="inline-block" rel="stylesheet" />
+```
+href 属性用于指定 CDN URL，我已经使用 asp-fallback-href 属性来选择在 CDN 不可用时将使用的文件。然而，测试 CDN 是否有效需要使用三个不同的属性，并了解由正在使用的 CSS 样式表定义的 CSS 类。  
+使用浏览器请求 http://localhost:5000/home/list 并检查响应中的 HTML 元素。您会看到布局中的链接元素已转换为三个独立的元素，如下所示：
+```html
+<link href="https://cdnjs.cloudflare.com/.../bootstrap.min.css" rel="stylesheet"/>
+<meta name="x-stylesheet-fallback-test" content="" class="btn" />
+<script>
+    !function(a,b,c,d){var e,f=document,
+    g=f.getElementsByTagName("SCRIPT"),
+    h=g[g.length1].previousElementSibling,
+    i=f.defaultView&&f.defaultView.getComputedStyle ?
+    f.defaultView.getComputedStyle(h) : h.currentStyle;
+    if(i&&i[a]!==b)for(e=0;e<c.length;e++)
+    f.write('<link href="'+c[e]+'" '+d+"/>")}("display","inline-block",
+    ["/lib/bootstrap/css/bootstrap.min.css"],
+    "rel=\u0022stylesheet\u0022 ");
+</script>
+``` 
+为了使转换更容易理解，我格式化了 JavaScript 代码并缩短了 URL。  
+第一个元素是一个常规链接，其 href 属性指定 CDN 文件。第二个元素是 meta 元素，它指定视图中 asp-fallback-test-class 属性的类。我在清单中指定了 btn 类，这意味着将像这样的元素添加到发送到浏览器的 HTML 中：  
+```html
+<meta name="x-stylesheet-fallback-test" content="" class="btn">
+```
+您指定的 CSS 类必须在将从 CDN 加载的样式表中定义。我指定的 btn 类提供了 Bootstrap 按钮元素的基本格式。    
+asp-fallback-test-property 属性用于指定将 CSS 类应用于元素时设置的 CSS 属性，而 asp-fallback-test-value 属性用于指定将设置的值。   
+tag helper 创建的 script 元素包含 JavaScript 代码，该代码将元素添加到指定的类中，然后测试 CSS 属性的值以确定 CDN 样式表是否已加载。如果不是，则为回退文件创建链接元素。 Bootstrap btn 类将 display 属性设置为 inline-block，这提供了查看浏览器是否能够从 CDN 加载 Bootstrap 样式表的测试。
