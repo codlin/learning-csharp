@@ -69,3 +69,20 @@ string url = Url.Action("List", "Home");
 ```
 该语句生成一个 URL，该 URL 以 Home 控制器上的 List 操作为目标，并将其分配给名为 url 的字符串变量。
 
+## Using the JavaScript and CSS Tag Helpers
+ASP.NET Core 提供了标签助手，用于通过脚本和链接元素管理 JavaScript 文件和 CSS 样式表。正如您将在接下来的部分中看到的那样，这些标签助手功能强大且灵活，但需要密切注意以避免产生意外结果。 
+
+### Managing JavaScript Files
+ScriptTagHelper 类是脚本元素的内置标记助手，用于使用表 26-4 中描述的属性管理 JavaScript 文件在视图中的包含，我将在接下来的部分中对其进行描述。 
+Table 26-4. The Built-in Tag Helper Attributes for script Elements
+| Name | Description |
+|-|-|
+| asp-src-include | 此属性用于指定将包含在视图中的 JavaScript 文件。|
+| asp-src-exclude | 此属性用于指定将从视图中排除的 JavaScript 文件。|
+| asp-append-version | 该属性用于缓存清除，如“了解缓存清除”边栏中所述。|
+| asp-fallback-src | 此属性用于指定在内容分发网络出现问题时使用的回退 JavaScript 文件。|
+| asp-fallback-src-include | 此属性用于选择在存在内容分发网络问题时将使用的 JavaScript 文件。|
+| asp-fallback-src-exclude | 此属性用于排除 JavaScript 文件以在存在内容分发网络问题时显示它们的用途。|
+| asp-fallback-test | 此属性用于指定将用于确定 JavaScript 代码是否已从内容分发网络正确加载的 JavaScript 片段。|
+
+asp-src-include 属性用于使用通配模式将 JavaScript 文件包含在视图中。通配模式支持一组用于匹配文件的通配符，表 26-5 描述了最常见的通配模式。
