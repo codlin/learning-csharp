@@ -326,3 +326,6 @@ distributed-cache 元素可用于将内容存储在共享缓存中，这可确�
 ### Setting Cache Expiry
 expires-* 属性允许您指定缓存内容何时过期，表示为绝对时间或相对于当前时间的时间，或者指定不请求缓存内容的持续时间。在清单 26-18 中，我使用了 expires-after 属性来指定内容应该缓存 15 秒。
 Listing 26-18. Setting Cache Expiry in the _SimpleLayout.cshtml File in the Views/Shared Folder
+```html
+<cache expires-after="@TimeSpan.FromSeconds(15)">
+```
