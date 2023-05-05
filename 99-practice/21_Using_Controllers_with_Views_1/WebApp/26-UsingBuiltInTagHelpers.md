@@ -329,3 +329,9 @@ Listing 26-18. Setting Cache Expiry in the _SimpleLayout.cshtml File in the View
 ```html
 <cache expires-after="@TimeSpan.FromSeconds(15)">
 ```
+
+#### **Setting a Fixed Expiry Point**
+您可以使用 expires-on 属性指定缓存内容过期的固定时间，该属性接受 DateTime 值，如清单 26-19 所示。
+```html
+<cache expires-on="@DateTime.Parse("2100-01-01")">
+```
