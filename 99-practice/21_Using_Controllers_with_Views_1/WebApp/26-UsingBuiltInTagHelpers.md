@@ -262,3 +262,25 @@ href 属性用于指定 CDN URL，我已经使用 asp-fallback-href 属性来选
 您指定的 CSS 类必须在将从 CDN 加载的样式表中定义。我指定的 btn 类提供了 Bootstrap 按钮元素的基本格式。    
 asp-fallback-test-property 属性用于指定将 CSS 类应用于元素时设置的 CSS 属性，而 asp-fallback-test-value 属性用于指定将设置的值。   
 tag helper 创建的 script 元素包含 JavaScript 代码，该代码将元素添加到指定的类中，然后测试 CSS 属性的值以确定 CDN 样式表是否已加载。如果不是，则为回退文件创建链接元素。 Bootstrap btn 类将 display 属性设置为 inline-block，这提供了查看浏览器是否能够从 CDN 加载 Bootstrap 样式表的测试。
+
+## Working with Image Elements
+ImageTagHelper 类用于通过 img 元素的 src 属性为图像提供缓存清除，允许应用程序利用缓存，同时确保立即反映对图像的修改。 ImageTagHelper 类在定义 asp-appendversion 属性的 img 元素中运行，该属性在表 26-7 中进行了描述以供快速参考。
+Table 26-7. The Built-in Tag Helper Attribute for Image Elements
+| Name | Description |
+|-|-|
+| asp-append-version | 此属性用于启用缓存清除，如“了解缓存清除”边栏中所述。|
+
+Listing 26-16. Adding an Image in the _SimpleLayout.cshtml File in the Views/Shared Folder
+```html
+<div class="m-2">
+    <img src="/images/city.png" asp-append-version="true" class="m-2" />
+    @RenderBody()
+</div>
+```
+检查 HTML 响应，您会看到用于请求图像文件的 URL 包含版本校验和，如下所示：
+```html
+...
+<img src="/images/city.png?v=KaMNDSZFAJufRcRDpKh0K_IIPNc7E" class="m-2">
+...
+```
+添加校验和可确保对文件的任何更改都将通过任何缓存，避免陈旧的内容。
