@@ -50,3 +50,22 @@ asp-action 和 asp-controller 属性指定操作方法的名称和定义它的�
 ...
 ```
 在这种情况下，asp-route-id 属性提供的值意味着无法使用默认 URL，因此路由系统生成了一个 URL，其中包含控制器和操作名称的段，以及将要使用的段为操作方法提供参数。在这两种情况下，由于只指定了一个操作方法，标签助手创建的 URL 以呈现视图的控制器为目标。单击锚点元素将发送一个以 Home 控制器的 Index 方法为目标的 HTTP GET 请求。
+
+### Using Anchor Elements for Razor Pages
+asp-page 属性用于将 Razor 页面指定为锚元素的 href 属性的目标。页面路径以 / 字符为前缀，@page 指令定义的路由段的值使用 asp-route-[name] 属性定义。清单 26-8 添加了一个定位元素，该元素以 Pages/Suppliers 文件夹中定义的列表页面为目标。
+
+**GENERATING URLS (AND NOT LINKS)**
+标签助手仅在锚元素中生成 URL。如果您需要生成 URL 而不是链接，则可以使用 Url 属性，该属性在控制器、页面模型和视图中可用。该属性返回一个实现 IUrlHelper 接口的对象，该接口提供一组生成 URL 的方法和扩展方法。下面是一个在视图中生成 URL 的 Razor 片段： 
+```html
+...
+<div>@Url.Page("/suppliers/list")</div>
+...
+```
+该片段生成一个 div 元素，其内容是指向 /Suppliers/List Razor Page 的 URL。控制器或页面模型类中使用相同的接口，例如以下语句：
+```cs
+...
+string url = Url.Action("List", "Home");
+...
+```
+该语句生成一个 URL，该 URL 以 Home 控制器上的 List 操作为目标，并将其分配给名为 url 的字符串变量。
+

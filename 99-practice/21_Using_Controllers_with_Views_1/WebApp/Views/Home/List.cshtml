@@ -1,6 +1,6 @@
 @model IEnumerable<Product>
 @{
-    Layout = "_SimpleLayout"; 
+    Layout = "_SimpleLayout";
 }
 <h6 class="bg-secondary text-white text-center m-2 p-2">Products</h6>
 <div class="m-2">
@@ -21,4 +21,6 @@
             }
         </tbody>
     </table>
+    <a asp-page="/suppliers/list" class="btn btn-secondary">Suppliers</a>
+    <div>@Url.Page("/suppliers/list")</div>
 </div>
