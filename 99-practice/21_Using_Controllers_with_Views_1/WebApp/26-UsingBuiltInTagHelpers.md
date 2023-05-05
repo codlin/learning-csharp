@@ -85,4 +85,28 @@ Table 26-4. The Built-in Tag Helper Attributes for script Elements
 | asp-fallback-src-exclude | 此属性用于排除 JavaScript 文件以在存在内容分发网络问题时显示它们的用途。|
 | asp-fallback-test | 此属性用于指定将用于确定 JavaScript 代码是否已从内容分发网络正确加载的 JavaScript 片段。|
 
+#### **Selecting JavaScript Files**
 asp-src-include 属性用于使用通配模式将 JavaScript 文件包含在视图中。通配模式支持一组用于匹配文件的通配符，表 26-5 描述了最常见的通配模式。
+Table 26-5. Common Globbing Patterns
+**忽略**
+Globbing 是一种确保视图包含应用程序所需的 JavaScript 文件的有用方法，即使文件的确切路径发生变化，这通常发生在文件名中包含版本号或包添加其他文件时。  
+清单 26-9 使用 asp-src-include 属性包含 wwwroot/lib/jquery 文件夹中的所有 JavaScript 文件，这是使用清单 26-4 中的命令安装的 jQuery 包的位置。
+```html
+<head>
+    ...
+    <script asp-src-include="lib/jquery/**/*.js"></script>
+</head>
+```
+重新启动 ASP.NET Core 和浏览器以请求 http://localhost:5000/home/list 并检查发送到浏览器的 HTML。您将看到布局中的单个脚本元素已转换为每个 JavaScript 文件的脚本元素，如下所示：
+```html
+<head>
+    ...
+    <script src="/lib/jquery/jquery.js"></script>
+    <script src="/lib/jquery/jquery.min.js"></script>
+    <script src="/lib/jquery/jquery.slim.js"></script>
+    <script src="/lib/jquery/jquery.slim.min.js"></script>
+</head>
+```
+**UNDERSTANDING SOURCE MAPS**
+JavaScript 文件被缩小以使其更小，这意味着它们可以更快地交付给客户端并使用更少的带宽。缩小过程从文件中删除所有空格并重命名函数和变量，以便有意义的名称（例如 myHelpfullyNamedFunction）将由较少数量的字符表示，例如 x1。当使用浏览器的 JavaScript 调试器来跟踪缩小代码中的问题时，像 x1 这样的名称几乎不可能跟踪代码的进度。  
+具有 map 文件扩展名的文件是源映射，浏览器通过在缩小代码和开发人员可读的未缩小源文件之间提供映射来帮助调试缩小代码。当您打开浏览器的 F12 开发者工具时，浏览器会自动请求源映射并使用它们来帮助调试应用程序的客户端代码。
