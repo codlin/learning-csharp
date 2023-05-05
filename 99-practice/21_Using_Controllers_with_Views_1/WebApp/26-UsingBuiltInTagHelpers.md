@@ -341,10 +341,31 @@ Listing 26-20. Using a Sliding Expiry in the _SimpleLayout.cshtml File in the Vi
 您可以通过重新启动 ASP.NET Core 并请求 http://localhost:5000/home/list 并定期重新加载页面来查看 express-sliding 属性的效果。  
 如果您在 10 秒内重新加载页面，将使用缓存的内容，并推迟10秒。如果等待超过 10 秒重新加载页面，那么缓存的内容将被丢弃，视图组件将用于生成新内容，并且该过程将重新开始。
 
-### **Using Cache Variations**
+#### **Using Cache Variations**
 默认情况下，所有请求都会收到相同的缓存内容。 CacheTagHelper 类可以维护缓存内容的不同版本，并使用它们来满足不同类型的 HTTP 请求，使用名称以 vary-by 开头的属性之一指定。清单 26-21 显示了使用 vary-by-route 属性根据路由系统匹配的操作值创建缓存变体。
 Listing 26-21. Creating a Variation in the _SimpleLayout.cshtml File in the Views/Shared Folder
 ```html
 <cache expires-sliding="@TimeSpan.FromSeconds(10)" vary-by-route="action">
 ```
 如果重新启动 ASP.NET Core 并使用两个浏览器选项卡请求 http://localhost:5000/home/index 和 http://localhost:5000/home/list，您将看到每个窗口都收到自己的缓存内容它自己的过期时间，因为每个请求都会产生不同的动作路由值。
+
+## Using the Hosting Environment Tag Helper
+EnvironmentTagHelper 类应用于自定义环境元素，并根据托管环境确定发送到浏览器的 HTML 中是否包含内容区域，我在第 15 章和第 16 章中对此进行了描述。环境元素依赖于 names 属性，我已在表 26-9 中对其进行了描述。
+Table 26-9. The Built-in Tag Helper Attribute for environment Elements
+| Name | Description |
+|-|-|
+| names | 此属性用于指定以逗号分隔的托管环境名称列表，环境元素中包含的内容将包含在发送给客户端的 HTML 中。|
+在清单 26-22 中，我向共享布局添加了环境元素，包括开发和生产托管环境视图中的不同内容。
+Listing 26-22. Using environment in the _SimpleLayout.cshtml File in the Views/Shared Folder
+```html
+<div class="m-2">
+    <environment names="development">
+        <h2 class="bg-info text-white m-2 p-2">This is Development</h2>
+    </environment>
+    <environment names="production">
+        <h2 class="bg-danger text-white m-2 p-2">This is Production</h2>
+    </environment>
+    @RenderBody()
+</div>
+```
+在清单 26-22 中，我向共享布局添加了环境元素，包括开发和生产托管环境视图中的不同内容。
