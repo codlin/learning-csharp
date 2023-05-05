@@ -18,8 +18,9 @@ builder.Services.AddSingleton<CitiesData>();
 
 var app = builder.Build();
 app.UseStaticFiles();
-app.MapControllers();
-app.MapDefaultControllerRoute();
+// app.MapControllers();
+// app.MapDefaultControllerRoute();
+app.MapControllerRoute("forms", "controllers/{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DataContext>();
