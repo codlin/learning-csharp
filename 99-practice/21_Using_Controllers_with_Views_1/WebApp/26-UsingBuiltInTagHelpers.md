@@ -284,3 +284,45 @@ Listing 26-16. Adding an Image in the _SimpleLayout.cshtml File in the Views/Sha
 ...
 ```
 添加校验和可确保对文件的任何更改都将通过任何缓存，避免陈旧的内容。
+
+## Using the Data Cache
+CacheTagHelper 类允许缓存内容片段以加速视图或页面的呈现。要缓存的内容使用 cache 元素表示，该元素使用表 26-8 中所示的属性进行配置。
+缓存是重用部分内容的有用工具，因此不必为每个请求生成它们。但是有效地使用缓存需要仔细的思考和计划。虽然缓存可以提高应用程序的性能，但它也会产生奇怪的效果，例如用户收到陈旧的内容、包含不同版本内容的多个缓存以及由于从应用程序的先前版本缓存的内容混合而导致的更新部署被破坏包含新版本的内容。**除非您有明确定义的性能问题需要解决，否则不要启用缓存，并确保您了解缓存将产生的影响**。  
+Table 26-8. The Built-in Tag Helper Attributes for cache Elements
+| Name | Description |
+|-|-|
+| enabled | 这个bool属性用来控制缓存元素的内容是否被缓存。省略此属性将启用缓存。|
+| expires-on | 此属性用于指定缓存内容过期的绝对时间，以 DateTime 值表示。|
+| expires-after | 此属性用于指定缓存内容过期的相对时间，以 TimeSpan 值表示。|
+| expires-sliding | 此属性用于指定自上次使用以来缓存内容将过期的时间，以 TimeSpan 值表示。|
+| vary-by-header | 此属性用于指定将用于管理缓存内容的不同版本的请求标头的名称。|
+| vary-by-query | 此属性用于指定将用于管理缓存内容的不同版本的查询字符串键的名称。|
+| vary-by-route | 此属性用于指定将用于管理缓存内容的不同版本的路由变量的名称。|
+| vary-by-cookie | 此属性用于指定将用于管理缓存内容的不同版本的 cookie 的名称。|
+| vary-by-user | 该布尔属性用于指定是否使用经过身份验证的用户的名称来管理缓存内容的不同版本。|
+| vary-by | 评估此属性以提供用于管理不同版本内容的密钥。|
+| priority | 此属性用于指定当内存缓存空间不足并清除未过期的缓存内容时将考虑的相对优先级。| 
+清单 26-17 将上一节中的 img 元素替换为包含时间戳的内容。
+Listing 26-17. Caching Content in the _SimpleLayout.cshtml File in the Views/Shared Folder
+```html
+<div class="m-2">
+    <h6 class="bg-primary text-white m-2 p-2">
+        Uncached timestamp: @DateTime.Now.ToLongTimeString()
+    </h6>
+    <cache>
+        <h6 class="bg-primary text-white m-2 p-2">
+            Cached timestamp: @DateTime.Now.ToLongTimeString()
+        </h6>
+    </cache>
+    @RenderBody()
+</div>
+```
+`cache`元素用于表示应该缓存的内容区域，并已应用于包含时间戳的 h6 元素之一。
+重启 ASP.NET Core 和浏览器请求 http://localhost:5000/home/list，两个时间戳将相同。重新加载浏览器，你会看到缓存的内容用于其中一个 h6 元素，时间戳没有改变。  
+**USING DISTRIBUTED CACHING FOR CONTENT**
+CacheTagHelper 类使用的缓存是基于内存的，这意味着它的容量受可用 RAM 的限制，并且每个应用程序服务器维护一个单独的缓存。当可用容量不足时，内容将从缓存中弹出，当应用程序停止或重新启动时，所有内容都会丢失。   
+distributed-cache 元素可用于将内容存储在共享缓存中，这可确保所有应用程序服务器使用相同的数据并且缓存在重启后仍然存在。分布式缓存元素配置有与缓存元素相同的属性，如表 26-8 中所述。有关设置分布式缓存的详细信息，请参阅第 17 章。
+
+### Setting Cache Expiry
+expires-* 属性允许您指定缓存内容何时过期，表示为绝对时间或相对于当前时间的时间，或者指定不请求缓存内容的持续时间。在清单 26-18 中，我使用了 expires-after 属性来指定内容应该缓存 15 秒。
+Listing 26-18. Setting Cache Expiry in the _SimpleLayout.cshtml File in the Views/Shared Folder
