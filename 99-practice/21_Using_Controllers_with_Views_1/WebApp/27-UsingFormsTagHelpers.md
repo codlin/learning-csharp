@@ -22,3 +22,8 @@ Index 操作方法选择一个名为 Form 的视图，它将向用户呈现一�
 接下来，将名为 Results.cshtml 的 Razor 视图添加到 Views/Form 文件夹。
 此视图将表单数据显示回用户。我将在第 31 章向您展示如何以更有用的方式处理表单数据，但本章的重点是创建表单，看到表单中包含的数据就足以开始了。 
 重新启动 ASP.NET Core 并使用浏览器请求 http://localhost:5000/controllers/form 以查看 HTML 表单。在文本字段中输入一个值并单击提交以发送一个 POST 请求，该请求将由 SubmitForm 操作处理。表单数据将存储为临时数据，浏览器将被重定向，产生如图 27-3 所示的响应。
+
+### Creating a Razor Page to Handle Forms
+可以使用 Razor Pages 实现相同的模式。需要一个页面来呈现和处理表单数据，第二个页面显示结果。将名为 FormHandler.cshtml 的 Razor 页面添加到 Pages 文件夹。
+OnGetAsync 处理程序方法从数据库中检索产品，视图使用该产品为 HTML 表单中的输入元素设置值。该表单配置为发送 HTTP POST 请求，该请求将由 OnPost 处理程序方法处理。表单数据存储为临时数据，浏览器将重定向到名为 FormResults 的表单。要创建浏览器将被重定向到的页面，请将名为 FormResults.cshtml 的 Razor 页面添加到 Pages 文件夹。  
+清单 27-8 中的页面模型类装饰有 IgnoreAntiforgeryToken 属性，这在“使用防伪功能”部分中有描述。
