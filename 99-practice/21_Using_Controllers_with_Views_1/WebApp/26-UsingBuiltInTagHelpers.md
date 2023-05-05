@@ -335,3 +335,8 @@ Listing 26-18. Setting Cache Expiry in the _SimpleLayout.cshtml File in the View
 ```html
 <cache expires-on="@DateTime.Parse("2100-01-01")">
 ```
+#### **Setting a Last-Used Expiry Period**
+expires-sliding 属性用于指定一个时间段，如果内容尚未从缓存中检索到，则在该时间段之后内容将过期。在示例 26-20 中，我指定了 10 秒的滑动到期时间。
+Listing 26-20. Using a Sliding Expiry in the _SimpleLayout.cshtml File in the Views/Shared Folder
+您可以通过重新启动 ASP.NET Core 并请求 http://localhost:5000/home/list 并定期重新加载页面来查看 express-sliding 属性的效果。  
+如果您在 10 秒内重新加载页面，将使用缓存的内容，并推迟10秒。如果等待超过 10 秒重新加载页面，那么缓存的内容将被丢弃，视图组件将用于生成新内容，并且该过程将重新开始。
