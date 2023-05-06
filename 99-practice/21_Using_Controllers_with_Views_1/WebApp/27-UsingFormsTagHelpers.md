@@ -417,3 +417,33 @@ public class FormHandlerModel : PageModel
 ```
 测试验证功能的方式与控制器相同，并且需要在将表单提交给应用程序之前使用浏览器的开发人员工具更改 HTML 文档。
 
+### Using Anti-forgery Tokens with JavaScript Clients
+默认情况下，防伪功能依赖于 ASP.NET Core 应用程序能够在提交表单时浏览器发回的 HTML 表单中包含一个元素。这对 JavaScript 客户端不起作用，因为 ASP.NET Core 应用程序提供数据而不是 HTML，因此无法插入隐藏元素并在未来的请求中接收它。  
+对于 Web 服务，防伪令牌可以作为 JavaScript 可读 cookie 发送，JavaScript 客户端代码读取它并将其作为标头包含在其 POST 请求中。一些 JavaScript 框架，例如 Angular，会自动检测 cookie 并在请求中包含一个标头。对于其他框架和自定义 JavaScript 代码，需要额外的工作。  
+清单 27-31 显示了 ASP.NET Core 应用程序配置防伪造功能以与 JavaScript 客户端一起使用所需的更改。  
+Listing 27-31. Configuring the Anti-forgery Token in the Program.cs File in the WebApp Folder
+```cs
+using Microsoft.AspNetCore.Antiforgery;
+...
+builder.Services.Configure<AntiforgeryOptions>(opts => {
+    opts.HeaderName = "X-XSRF-TOKEN";
+});
+...
+IAntiforgery antiforgery = app.Services.GetRequiredService<IAntiforgery>();
+app.Use(async (context, next) =>
+{
+    if (!context.Request.Path.StartsWithSegments("/api"))
+    {
+        string? token = antiforgery.GetAndStoreTokens(context).RequestToken;
+        if (token != null)
+        {
+            context.Response.Cookies.Append("XSRF-TOKEN", token, new CookieOptions { HttpOnly = false });
+        }
+    }
+    await next();
+});
+```
+选项模式用于通过 AntiforgeryOptions 类配置防伪造功能。 HeaderName 属性用于指定标头的名称，通过该标头将接受防伪标记，在本例中为 X-XSRF-TOKEN。  
+需要自定义一个中间件组件来设置cookie，在本例中名为XSRF-TOKEN。 cookie 的值是通过 IAntiForgery 服务获取的，必须将 HttpOnly 选项设置为 false，以便浏览器允许 JavaScript 代码读取 cookie。  
+要创建一个使用 cookie 和标头的简单 JavaScript 客户端，请将名为 JavaScriptForm.cshtml 的 Razor 页面添加到 Pages 文件夹。  
+此 Razor 页面中的 JavaScript 代码通过向 FormHandler Razor 页面发送 HTTP POST 请求来响应按钮单击。 XSRF-TOKEN cookie 的值被读取并包含在 X-XSRF-TOKEN 请求标头中。来自 FormHandler 页面的响应是到结果页面的重定向，浏览器将自动遵循该页面。来自结果页面的响应由 JavaScript 代码读取并插入到一个元素中，以便可以将其显示给用户。要测试 JavaScript 代码，请重新启动 ASP.NET Core，使用浏览器请求 http://localhost:5000/pages/jsform，然后单击按钮。 JavaScript 代码将提交表单并显示响应。
