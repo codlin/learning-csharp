@@ -42,3 +42,15 @@ Table 27-3. The Built-in Tag Helper Attributes for Form Elements
 | asp-route | 此属性用于指定将用于为 action 属性生成 URL 的路由名称。|
 | aspantiforgery | 此属性控制是否将防伪信息添加到视图中，如“使用防伪功能”部分所述。|
 | aspfragment | 此属性指定生成的 URL 的片段。 |
+
+**Setting the Form Target**
+FormTagHelper 转换表单元素，以便它们以操作方法或 Razor 页面为目标，而无需硬编码 URL。此标签助手支持的属性的工作方式与第 26 章中描述的锚元素相同，并使用属性提供有助于通过 ASP.NET Core 路由系统生成 URL 的值。清单 27-10 修改了 Form 视图中的 form 元素以应用标签助手。
+Listing 27-10. Using a Tag Helper in the Form.cshtml File in the Views/Form Folder
+```html
+<form asp-action="submitform" method="post">
+```
+asp-action 属性用于指定将接收 HTTP 请求的操作的名称。路由系统用于生成 URL，就像第 26 章中描述的锚元素一样。示例 27-10 中没有使用 asp-controller 属性，这意味着呈现视图的控制器将在 URL 中使用. asp-page 属性还用于选择一个 Razor 页面作为表单的目标，如清单 27-11 所示。
+Listing 27-11. Setting the Form Target in the FormHandler.cshtml File in the Pages Folder
+```html
+<form asp-page="FormHandler" method="post">
+```
