@@ -312,3 +312,31 @@ Listing 27-24. Using a select Element in the Form.cshtml File in the Views/Form 
 ...
 ```
 选择选项元素的任务由 OptionTagHelper 类执行，该类通过 TagHelperContext.Items 集合从 SelectTagHelper 接收指令，如第 25 章所述。结果是选择元素显示与 Product 对象关联的类别的 CategoryId 值。
+
+**Populating a select Element**
+显式定义 select 元素的 option 元素是一种有用的方法（上一节的方式），适用于始终具有相同可能值的选择，但在您需要提供的选项来自于数据模型，或你需要在多个视图中使用相同的选项集但不想手动维护重复的内容时，这种方法无济于事。   
+asp-items 属性用于为标记帮助程序提供 SelectListItem 对象的列表序列，将为其生成选项元素。清单 27-25 修改了 Form 控制器的 Index 操作，以通过视图包为视图提供一系列 SelectListItem 对象。
+Listing 27-25. Providing a Data Sequence in the FormController.cs File in the Controllers Folder
+```cs
+using Microsoft.AspNetCore.Mvc.Rendering;
+...
+ViewBag.Categories = new SelectList(context.Categories, "CategoryId", "Name");
+```
+可以直接创建 SelectListItem 对象，但 ASP.NET Core 提供了 SelectList 类来适配现有的数据序列。在这种情况下，我将从数据库中获得的 Category 对象序列传递给 SelectList 构造函数，连同应用作选项元素的值和标签的属性的名称。在清单 27-26 中，我更新了 Form 视图以使用 SelectList。
+Listing 27-26. Using a SelectList in the Form.cshtml File in the Views/Form Folder
+```html
+<select class="form-control" asp-for="CategoryId"
+    asp-items="@ViewBag.Categories">
+</select>
+```
+重启 ASP.NET Core 并使用浏览器请求 http://localhost:5000/controllers/form/index/5。呈现给用户的内容没有视觉上的变化，但用于填充选择元素的选项元素已从数据库中生成，如下所示：
+```html
+<select class="form-control" data-val="true"
+        data-val-required="The CategoryId field is required."
+        id="CategoryId" name="CategoryId">
+    <option value="1">Watersports</option>
+    <option selected="selected" value="2">Soccer</option>
+    <option value="3">Chess</option>
+</select>
+```
+这种方法意味着呈现给用户的选项将自动反映添加到数据库中的新类别。

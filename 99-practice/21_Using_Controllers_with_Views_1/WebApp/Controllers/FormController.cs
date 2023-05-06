@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-
 using WebApp.Models;
 
 namespace WebApp.Controllers;
@@ -13,6 +13,7 @@ public class FormController : Controller
     }
     public async Task<IActionResult> Index(long id = 1)
     {
+        ViewBag.Categories = new SelectList(context.Categories, "CategoryId", "Name");
         return View("Form", await context.Products.Include(p => p.Category)
             .Include(p => p.Supplier).FirstAsync(p => p.ProductId == id));
     }
