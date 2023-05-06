@@ -195,3 +195,69 @@ Listing 27-19. Removing an Attribute in the Form.cshtml File in the Views/Form F
 ```html
 <input class="form-control" asp-for="Price" />
 ```
+
+### Displaying Values from Related Data in input Elements
+使用 Entity Framework Core 时，您经常需要显示从相关数据中获取的数据值，这可以使用 asp-for 属性轻松完成，因为模型表达式允许选择嵌套的导航属性。首先，清单 27-20 在提供给视图的视图模型对象中包含相关数据。
+Listing 27-20. Including Related Data in the FormController.cs File in the Controllers Folder
+```cs
+using Microsoft.EntityFrameworkCore;
+...
+public async Task<IActionResult> Index(long id = 1) {
+    return View("Form", await context.Products.Include(p => p.Category)
+        .Include(p => p.Supplier).FirstAsync(p => p.ProductId == id));
+}
+```
+请注意，我不需要担心处理相关数据中的循环引用，因为视图模型对象未序列化。循环引用问题仅对 Web 服务控制器很重要。在清单 27-21 中，我更新了 Form 视图以包含使用 asp-for 属性选择相关数据的输入元素。
+Listing 27-21. Displaying Related Data in the Form.cshtml File in the Views/Form Folder
+```html
+...
+<div class="form-group">
+    <label>Category</label>
+    @{
+        #pragma warning disable CS8602
+    }
+    <input class="form-control" asp-for="Category.Name" />
+    @{
+        #pragma warning restore CS8602
+    }
+</div>
+<div class="form-group">
+    <label>Supplier</label>
+    @{
+        #pragma warning disable CS8602
+    }
+    <input class="form-control" asp-for="Supplier.Name" />
+    @{
+        #pragma warning restore CS8602
+    }
+</div>
+...
+```
+asp-for 属性的值是相对于视图模型对象表示的，可以包含嵌套属性，允许我选择 Entity Framework Core 已分配给 Category 和 Supplier 导航属性的相关对象的 Name 属性。  
+正如我在第 25 章中解释的那样，空条件运算符不能在模型表达式中使用。这在选择可空相关数据属性（例如 Product.Category 和 Product.Supplier 属性）时会出现问题。在第 25 章中，我通过更改属性的类型使其不可为空来解决此限制，但这并不总是可行的，尤其是当可空属性已用于指示特定条件时。  
+在清单 27-21 中，我使用了 #pragma warning 表达式来禁用警告 CS8602 的代码分析，这是在未安全访问可为 null 的值时生成的警告。标签助手在处理 asp-for 属性时能够处理空值，这意味着警告并不表示潜在的问题。  
+您可以选择简单地忽略编译器产生的警告，但我更愿意解决潜在的问题或明确禁用警告，以便很明显警告已被调查并故意忽略，而不是没有被注意到。   
+Razor Pages 中使用了相同的技术，只是属性是相对于页面模型对象表示的，如清单 27-22 所示。
+Listing 27-22. Displayed Related Data in the FormHandler.cshtml File in the Pages Folder
+```html
+@using Microsoft.EntityFrameworkCore
+...
+<input class="form-control" asp-for="Product.Name" />
+...
+<div class="form-group">
+<label>Price</label>
+<input class="form-control" asp-for="Product.Price" />
+</div>
+<div class="form-group">
+<label>Category</label>
+@{ #pragma warning disable CS8602 }
+<input class="form-control" asp-for="Product.Category.Name" />
+@{ #pragma warning restore CS8602 }
+</div>
+<div class="form-group">
+<label>Supplier</label>
+@{ #pragma warning disable CS8602 }
+<input class="form-control" asp-for="Product.Supplier.Name" />
+@{ #pragma warning restore CS8602 }
+</div>
+```

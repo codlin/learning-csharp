@@ -1,12 +1,37 @@
 @page "/pages/form/{id:long?}"
 @model FormHandlerModel
 @using Microsoft.AspNetCore.Mvc.RazorPages
+
 <div class="m-2">
     <h5 class="bg-primary text-white text-center p-2">HTML Form</h5>
     <form asp-page="FormHandler" method="post" id="htmlform">
         <div class="form-group">
             <label>Name</label>
-            <input class="form-control" name="Name" value="@Model.Product?.Name" />
+            <input class="form-control" asp-for="Product.Name" />
+        </div>
+        <div class="form-group">
+            <label>Price</label>
+            <input class="form-control" asp-for="Product.Price" />
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            @{
+                #pragma warning disable CS8602
+            }
+            <input class="form-control" asp-for="Product.Category.Name" />
+            @{
+                #pragma warning restore CS8602
+            }
+        </div>
+        <div class="form-group">
+            <label>Supplier</label>
+            @{
+                #pragma warning disable CS8602
+            }
+            <input class="form-control" asp-for="Product.Supplier.Name" />
+            @{
+                #pragma warning restore CS8602
+            }
         </div>
         <button type="submit" class="btn btn-primary mt-2">Submit</button>
     </form>
@@ -26,7 +51,8 @@
         public Product? Product { get; set; }
         public async Task OnGetAsync(long id = 1)
         {
-            Product = await context.Products.FindAsync(id);
+            Product = await context.Products.Include(p => p.Category)
+            .Include(p => p.Supplier).FirstAsync(p => p.ProductId == id);
         }
         public IActionResult OnPost()
         {
