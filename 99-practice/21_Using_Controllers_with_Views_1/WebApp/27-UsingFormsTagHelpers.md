@@ -340,3 +340,30 @@ Listing 27-26. Using a SelectList in the Form.cshtml File in the Views/Form Fold
 </select>
 ```
 这种方法意味着呈现给用户的选项将自动反映添加到数据库中的新类别。
+
+## Working with Text Areas
+textarea 元素用于向用户请求大量文本，通常用于非结构化数据，例如笔记或观察。 TextAreaTagHelper 负责转换文本区域元素并支持表 27-9 中描述的单个属性。
+Table 27-9. The Built-in Tag Helper Attributes for TextArea Elements
+| Name | Description |
+|-|-|
+| asp-for | 此属性用于指定 textarea 元素表示的视图模型属性。|
+
+TextAreaTagHelper 比较简单，为 asp-for 属性提供的值用于设置 textarea 元素上的 id 和 name 属性。 asp-for 属性选择的属性值用作 textarea 元素的内容。清单 27-27 将 Supplier.Name 属性的输入元素替换为应用了 asp-for 属性的文本区域。
+Listing 27-27. Using a Text Area in the Form.cshtml File in the Views/Form Folder
+```html
+<textarea class="form-control" asp-for="Supplier.Name"></textarea>
+```
+重新启动 ASP.NET Core 并使用浏览器请求 http://localhost:5000/controllers/form 并检查浏览器接收到的 HTML 以查看 textarea 元素的转换。
+```html
+...
+<div class="form-group">
+    <label for="Supplier_Name">Supplier</label>
+    <textarea class="form-control" data-val="true"
+            data-val-required="The Name field is required." id="Supplier_Name"
+            name="Supplier.Name">
+        Splash Dudes
+    </textarea>
+</div>
+...
+```
+TextAreaTagHelper 相对简单，但它与我在本章中描述的其余表单元素标签助手保持一致。
