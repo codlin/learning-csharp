@@ -245,19 +245,36 @@ Listing 27-22. Displayed Related Data in the FormHandler.cshtml File in the Page
 <input class="form-control" asp-for="Product.Name" />
 ...
 <div class="form-group">
-<label>Price</label>
-<input class="form-control" asp-for="Product.Price" />
+    <label>Category</label>
+    @{
+        #pragma warning disable CS8602
+    }
+    <input class="form-control" asp-for="Product.Category.Name" />
+    @{
+        #pragma warning restore CS8602
+    }
 </div>
 <div class="form-group">
-<label>Category</label>
-@{ #pragma warning disable CS8602 }
-<input class="form-control" asp-for="Product.Category.Name" />
-@{ #pragma warning restore CS8602 }
+    <label>Supplier</label>
+    @{
+        #pragma warning disable CS8602
+    }
+    <input class="form-control" asp-for="Product.Supplier.Name" />
+    @{
+        #pragma warning restore CS8602
+    }
 </div>
-<div class="form-group">
-<label>Supplier</label>
-@{ #pragma warning disable CS8602 }
-<input class="form-control" asp-for="Product.Supplier.Name" />
-@{ #pragma warning restore CS8602 }
-</div>
+```
+
+## Working with label Elements
+LabelTagHelper 类用于转换标签元素，因此 for 属性的设置与用于转换输入元素的方法一致。表 27-7 描述了这个标签助手支持的属性。
+Table 27-7. The Built-in Tag Helper Attribute for label Elements
+| Name | Description |
+|-|-|
+| asp-for | 此属性用于指定标签元素描述的视图模型属性。|
+标签助手设置标签元素的内容，使其包含所选视图模型属性的名称。标签助手还设置了 for 属性，表示与特定输入元素的关联。这有助于依赖屏幕阅读器的用户，并允许输入元素在其关联标签被单击时获得焦点。  
+清单 27-23 将 asp-for 属性应用于 Form 视图，以将每个 label 元素与表示相同视图模型属性的 input 元素相关联。
+Listing 27-23. Transforming label Elements in the Form.cshtml File in the Views/Form Folder
+```html
+<label asp-for="ProductId"></label>
 ```
