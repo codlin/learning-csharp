@@ -65,3 +65,87 @@ Listing 27-12. Transforming a Button in the Form.cshtml File in the Views/Form F
 ...
 ```
 添加到 form 元素的 id 属性的值被按钮用作 form 属性的值，它告诉浏览器在单击按钮时提交哪个表单。表 27-3 中描述的属性用于标识表单的目标，标签助手将在呈现视图时使用路由系统生成 URL。清单 27-13 将相同的技术应用于 Razor 页面。
+
+## Working with input Elements
+input 元素是 HTML 表单的支柱，它提供了用户向应用程序提供非结构化数据的主要方式。 InputTagHelper 类用于转换输入元素，以便它们反映它们用于收集的视图模型属性的数据类型和格式，使用表 27-4 中描述的属性。
+Table 27-4. The Built-in Tag Helper Attributes for input Elements
+| Name | Description |
+|-|-|
+| asp-for | 此属性用于指定输入元素表示的视图模型属性。|
+| aspformat | 此属性用于指定用于输入元素表示的视图模型属性值的格式。|
+asp-for 属性设置为视图模型属性的名称，然后用于设置输入元素的名称、ID、类型和值属性。清单 27-14 修改了控制器视图中的输入元素以使用 asp-for 属性。
+Listing 27-14. Configuring an Input Element in the Form.cshtml File in the Views/Form Folder
+```html
+<input class="form-control" asp-for="Name" />
+```
+这个标签助手使用一个模型表达式，在第 25 章中描述，这就是为什么在指定 aspfor 属性的值时没有使用 @ 字符。如果您重新启动 ASP.NET Core 并检查应用程序在使用浏览器请求 http://localhost:5000/controllers/form 时返回的 HTML，您将看到标签助手已将输入元素转换为如下所示：
+```html
+...
+<div class="form-group">
+    <label>Name</label>
+    <input class="form-control" type="text" data-val="true"
+        data-val-required="The Name field is required." id="Name"
+        name="Name" value="Kayak">
+</div>
+...
+```
+id 和 name 属性的值**是通过模型表达式获得的**，确保您在创建表单时不会引入拼写错误。其他属性更复杂，在后面的部分或第 29 章中进行了描述，我在第 29 章中解释了 ASP.NET Core 对验证数据的支持。
+
+**SELECTING MODEL PROPERTIES IN RAZOR PAGES**
+此属性和本章中描述的其他标签助手的 asp-for 属性可用于 Razor 页面，但转换元素中的 name 和 id 属性的值包括页面模型属性的名称。例如，此元素通过页面模型的 Product 属性选择 Name 属性：
+```html
+<input class="form-control" asp-for="Product.Name" />
+```
+转换后的元素将具有以下 id 和 name 属性：
+```html
+<input class="form-control" type="text" id="Product_Name" name="Product.Name" >
+```
+如第 28 章所述，当使用模型绑定功能接收表单数据时，这种差异很重要。
+
+### Transforming the input Element type Attribute
+input 元素的 type 属性告诉浏览器如何显示该元素以及它应该如何限制用户输入的值。清单 27-14 中的 input 元素被配置为文本类型，这是默认的 input 元素类型并且没有提供任何限制。清单 27-15 向表单添加了另一个输入元素，这将提供一个更有用的演示，说明如何处理 type 属性。
+Listing 27-15. Adding an input Element in the Form.cshtml File in the Views/Form Folder
+```html
+<div class="form-group">
+    <label>Id</label>
+    <input class="form-control" asp-for="ProductId" />
+</div>
+```
+新元素使用 asp-for 属性来选择视图模型的 ProductId 属性。重新启动 ASP。 NET Core 和浏览器请求 http://localhost:5000/controllers/form 以查看标签助手如何转换元素。
+```html
+...
+<div class="form-group">
+    <label>Id</label>
+    <input class="form-control" type="number" data-val="true"
+        data-val-required="The ProductId field is required."
+        id="ProductId" name="ProductId" value="1">
+</div>
+...
+```
+type 属性的值由 asp-for 属性指定的视图模型属性的类型决定。 ProductId 属性的类型是 C# long 类型，这导致标签助手将输入元素的类型属性设置为数字，这限制了该元素，使其只能接受数字字符。 data-val 和 data-val-required 属性被添加到输入元素以协助验证，这在第 29 章中进行了描述。表 27-5 描述了如何使用不同的 C# 类型来设置输入元素的类型属性。浏览器如何解释 type 属性是有自由度的。并非所有浏览器都响应 HTML 规范中定义的所有类型值，当它们响应时，它们的实现方式也有所不同。 type 属性对于您期望表单中的数据类型可能是一个有用的提示，但是您应该使用模型验证功能来确保用户提供可用的数据，如第 29 章所述。
+Table 27-5. C# Property Types and the Input Type Elements They Generate
+| C# Type | input Element type Attribute |
+|-|-|
+| byte, sbyte, int, uint, short, ushort, long, ulong | number |
+| float, double, decimal | text, 具有用于模型验证的附加属性，如第 29 章所述 |
+| bool | checkbox |
+| string | text |
+| DateTime | datetime |
+
+float、double 和 decimal 类型产生类型为文本的输入元素，因为并非所有浏览器都允许可用于表示此类型的合法值的所有字符范围。为了向用户提供反馈，标签助手将属性添加到输入元素，这些属性与第 29 章中描述的验证功能一起使用。  
+您可以通过在输入元素上显式定义类型属性来覆盖表 27-5 中显示的默认映射。标签助手不会覆盖您定义的值，它允许您指定类型属性值。  
+这种方法的缺点是您必须记住在为给定模型属性生成输入元素的所有视图中设置类型属性。一种更优雅且更可靠的方法是将表 27-6 中描述的属性之一应用于 C# 模型类中的属性。  
+如果模型属性不是表 27-5 中的类型之一并且没有用属性修饰，标签助手会将输入元素的类型属性设置为文本。
+
+Table 27-6. The Input Type Elements Attributes
+| Attribute | input Element type Attribute |
+|-|-|
+| [HiddenInput] | hidden |
+| [Text] | text  |
+| [Phone] | tel  |
+| [Url] | url  |
+| [EmailAddress] | email  |
+| [DataType(DataType.Password)] | password  |
+| [DataType(DataType.Time)] | time |
+| [DataType(DataType.Date)] | date |
+
