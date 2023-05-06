@@ -367,3 +367,43 @@ Listing 27-27. Using a Text Area in the Form.cshtml File in the Views/Form Folde
 ...
 ```
 TextAreaTagHelper 相对简单，但它与我在本章中描述的其余表单元素标签助手保持一致。
+
+## Using the Anti-forgery Feature
+我在定义处理表单数据的 controller action 方法和 page handler 方法时，过滤掉了名称以下划线开头的表单数据，像这样：
+```cs
+...
+[HttpPost]
+public IActionResult SubmitForm() {
+    foreach (string key in Request.Form.Keys
+    .Where(k => !k.StartsWith("_"))) {
+        TempData[key] = string.Join(", ", Request.Form[key]);
+    }
+    return RedirectToAction(nameof(Results));
+}
+...
+```
+我应用此过滤器来隐藏一项功能，以专注于表单中 HTML 元素提供的值。清单 27-28 从 action 方法中删除了过滤器，以便从 HTML 表单接收到的所有数据都存储在临时数据中。
+Listing 27-28. Removing a Filter in the FormController.cs File in the Controllers Folder
+```cs
+[HttpPost]
+public IActionResult SubmitForm() {
+    foreach (string key in Request.Form.Keys) {
+        ...
+    }
+    ....
+}
+```
+结果中显示的 _RequestVerificationToken 表单值是 FormTagHelper 应用的一项安全功能，用于防止跨站点请求伪造。跨站点请求伪造 (CSRF) 通过利用通常对用户请求进行身份验证的方式来利用 Web 应用程序。大多数 Web 应用程序（包括使用 ASP.NET Core 创建的应用程序）使用 cookie 来识别哪些请求与特定会话相关，通常与用户身份相关联。     
+CSRF（也称为 XSRF）依赖于用户在使用您的 Web 应用程序后访问恶意网站并且没有明确结束他们的会话。应用程序仍然认为用户的会话处于活动状态，并且浏览器存储的 cookie 尚未过期。恶意站点包含 JavaScript 代码，它会在未经用户同意的情况下向您的应用程序发送表单请求以执行操作——操作的确切性质将取决于受到攻击的应用程序。由于 JavaScript 代码由用户的浏览器执行，对应用程序的请求包含会话 cookie，应用程序在用户不知情或未同意的情况下执行操作。  
+如果表单元素不包含 action 属性————因为它是从具有 asp-controller、asp-action 和 asp-page 属性的路由系统生成的————那么 FormTagHelper 类会自动启用反 CSRF 功能，从而安全令牌作为 cookie 添加到响应中。包含相同安全令牌的隐藏输入元素被添加到 HTML 表单中，图 27-9 中显示的就是这个令牌。
+
+### Enabling the Anti-forgery Feature in a Controller
+默认情况下，控制器接受 POST 请求，即使它们不包含所需的安全令牌。为了启用防伪功能，将一个属性应用于控制器类，如清单 27-29 所示。
+Listing 27-29. Enabling the Anti-forgery Feature in the FormController.cs File in the Controllers Folder
+```cs
+[AutoValidateAntiforgeryToken]
+public class FormController : Controller
+```
+并非所有请求都需要防伪令牌，AutoValidateAntiforgeryToken 确保对除 GET、HEAD、OPTIONS 和 TRACE 之外的所有 HTTP 方法执行检查。
+另外两个属性可用于控制令牌验证。 IgnoreValidationToken 属性禁止对操作方法或控制器进行验证。 ValidateAntiForgeryToken 属性执行相反的操作并强制执行验证，即使对于通常不需要验证的请求（例如 HTTP GET 请求）也是如此。我建议使用 AutoValidateAntiforgeryToken 属性，如清单中所示。  
+测试反 CSRF 功能有点棘手。我通过请求包含表单的 URL（本例中为 http://localhost:5000/controllers/forms）然后使用浏览器的 F12 开发人员工具定位并从表单中删除隐藏的输入元素（或更改元素的值）。当我填充并提交表单时，缺少一部分所需数据，请求将失败。
