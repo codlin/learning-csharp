@@ -179,3 +179,19 @@ Listing 27-17. Formatting a Data Value in the Form.cshtml File in the Views/Form
 <input ... value="79,500.00">
 ```
 应谨慎使用此功能，因为您必须确保应用程序的其余部分配置为支持您使用的格式并且您创建的格式仅包含输入元素类型的合法字符。
+
+**Applying Formatting via the Model Class**
+如果您始终希望对模型属性使用相同的格式，则可以使用 DisplayFormat 属性修饰 C# 类，该属性在 System.ComponentModel.DataAnnotations 命名空间中定义。 DisplayFormat 属性需要两个参数来格式化数据值：DataFormatString 参数指定格式化字符串，将 ApplyFormatInEditMode 设置为 true 指定在将值应用于用于编辑的元素（包括输入元素）时应使用格式化。  
+清单 27-18 将该属性应用于 Product 类的 Price 属性，指定了与前面示例不同的格式化字符串。
+Listing 27-18. Applying a Formatting Attribute to the Product.cs File in the Models Folder
+```cs
+using System.ComponentModel.DataAnnotations;
+...
+[DisplayFormat(DataFormatString = "{0:c2}", ApplyFormatInEditMode = true)]
+public decimal Price { get; set; }
+```
+asp-format 属性优先于 DisplayFormat 属性，因此我从视图中删除了该属性，如清单 27-19 所示。
+Listing 27-19. Removing an Attribute in the Form.cshtml File in the Views/Form Folder
+```html
+<input class="form-control" asp-for="Price" />
+```
