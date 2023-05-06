@@ -278,3 +278,37 @@ Listing 27-23. Transforming label Elements in the Form.cshtml File in the Views/
 ```html
 <label asp-for="ProductId"></label>
 ```
+
+## Working with Select and Option Elements
+select 和 option 元素用于为用户提供一组固定的选择，而不是输入元素可能提供的开放数据输入。 SelectTagHelper 负责转换选择元素并支持表 27-8 中描述的属性。
+Table 27-8. The Built-in Tag Helper Attributes for select Elements
+| Name | Description |
+|-|-|
+| asp-for | 此属性用于指定 select 元素表示的视图或页面模型属性。|
+| aspitems | 此属性用于指定包含在 select 元素中的 option 元素的值源。|
+asp-for 属性设置 for 和 id 属性的值以反映它接收的模型属性。在清单 27-24 中，我将类别的 input 元素替换为一个 select 元素，该元素向用户显示固定范围的值。
+Listing 27-24. Using a select Element in the Form.cshtml File in the Views/Form Folder
+```html
+<select class="form-control" asp-for="CategoryId">
+    <option value="1">Watersports</option>
+    <option value="2">Soccer</option>
+    <option value="3">Chess</option>
+</select>
+```
+我已经使用选项元素手动填充了 select 元素，这些元素提供了一系列类别供用户选择。如果您使用浏览器请求 http://localhost:5000/controllers/form/index/5 并检查 HTML 响应，您将看到标签助手已经像这样转换了 select 元素：
+```html
+<select class="form-control" data-val="true"
+        data-val-required="The CategoryId field is required."
+        id="CategoryId" name="CategoryId">
+    <option value="1">Watersports</option>
+    <option value="2" selected="selected">Soccer</option>
+    <option value="3">Chess</option>
+</select>
+```
+请注意，selected 属性已添加到与视图模型的 CategoryId 值相对应的选项元素，如下所示：
+```html
+...
+<option value="2" selected="selected">Soccer</option>
+...
+```
+选择选项元素的任务由 OptionTagHelper 类执行，该类通过 TagHelperContext.Items 集合从 SelectTagHelper 接收指令，如第 25 章所述。结果是选择元素显示与 Product 对象关联的类别的 CategoryId 值。
