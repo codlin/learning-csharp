@@ -149,3 +149,33 @@ Table 27-6. The Input Type Elements Attributes
 | [DataType(DataType.Time)] | time |
 | [DataType(DataType.Date)] | date |
 
+### Formatting input Element Values
+当 action 方法为视图提供视图模型对象时，标签助手使用赋予 asp-for 属性的属性值来设置输入元素的 value 属性。 asp-format 属性用于指定数据值的格式。为了演示默认格式，清单 27-16 向 Form 视图添加了一个新的输入元素。
+Listing 27-16. Adding an Element in the Form.cshtml File in the Views/Form Folder
+重新启动 ASP.NET Core，使用浏览器导航到 http://localhost:5000/controllers/form/index/5，并检查浏览器接收到的 HTML。默认情况下，输入元素的值是使用模型属性的值设置的，如下所示： 
+```html
+...
+<input class="form-control" type="text" data-val="true"
+    data-val-number="The field Price must be a number."
+    data-val-required="The Price field is required."
+    id="Price" name="Price" value="79500.00">
+...
+```
+这种具有两位小数的格式是值在数据库中的存储方式。在第 26 章中，我使用 Column 属性选择了一个 SQL 类型来存储 Price 值，如下所示：
+```cs
+...
+[Column(TypeName = "decimal(8, 2)")]
+public decimal Price { get; set; }
+...
+``` 
+这种类型指定了八位的最大精度，其中两位将出现在小数位之后。这允许最大值为 999,999.99，这足以代表大多数在线商店的价格。 
+asp-format 属性接受将传递给标准 C# 字符串格式化系统的格式字符串，如清单 27-17 所示。
+Listing 27-17. Formatting a Data Value in the Form.cshtml File in the Views/Form Folder
+```html
+<input class="form-control" asp-for="Price" asp-format="{0:#,###.00}" />
+```
+属性值是逐字使用的，这意味着您必须包括大括号字符和 0: 引用，以及您需要的格式。刷新浏览器，您将看到输入元素的值已被格式化，如下所示： 
+```html
+<input ... value="79,500.00">
+```
+应谨慎使用此功能，因为您必须确保应用程序的其余部分配置为支持您使用的格式并且您创建的格式仅包含输入元素类型的合法字符。
