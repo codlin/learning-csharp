@@ -407,3 +407,13 @@ public class FormController : Controller
 并非所有请求都需要防伪令牌，AutoValidateAntiforgeryToken 确保对除 GET、HEAD、OPTIONS 和 TRACE 之外的所有 HTTP 方法执行检查。
 另外两个属性可用于控制令牌验证。 IgnoreValidationToken 属性禁止对操作方法或控制器进行验证。 ValidateAntiForgeryToken 属性执行相反的操作并强制执行验证，即使对于通常不需要验证的请求（例如 HTTP GET 请求）也是如此。我建议使用 AutoValidateAntiforgeryToken 属性，如清单中所示。  
 测试反 CSRF 功能有点棘手。我通过请求包含表单的 URL（本例中为 http://localhost:5000/controllers/forms）然后使用浏览器的 F12 开发人员工具定位并从表单中删除隐藏的输入元素（或更改元素的值）。当我填充并提交表单时，缺少一部分所需数据，请求将失败。
+
+### Enabling the Anti-forgery Feature in a Razor Page
+Razor Pages 中默认启用防伪造功能，这就是我在创建 FormHandler 页面时将 IgnoreAntiforgeryToken 属性应用于清单 27-29 中的页面处理程序方法的原因。清单 27-30 删除了该属性以启用验证功能。
+Listing 27-30. Enabling Request Validation in the FormHandler.cshtml File in the Pages Folder
+```cs
+//[IgnoreAntiforgeryToken]
+public class FormHandlerModel : PageModel 
+```
+测试验证功能的方式与控制器相同，并且需要在将表单提交给应用程序之前使用浏览器的开发人员工具更改 HTML 文档。
+
