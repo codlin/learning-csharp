@@ -3,13 +3,16 @@
 @using Microsoft.AspNetCore.Mvc.RazorPages
 <div class="m-2">
     <h5 class="bg-primary text-white text-center p-2">HTML Form</h5>
-    <form asp-page="FormHandler" method="post">
+    <form asp-page="FormHandler" method="post" id="htmlform">
         <div class="form-group">
             <label>Name</label>
             <input class="form-control" name="Name" value="@Model.Product?.Name" />
         </div>
         <button type="submit" class="btn btn-primary mt-2">Submit</button>
     </form>
+    <button form="htmlform" asp-page="FormHandler" class="btn btn-primary mt-2">
+        Submit (Outside Form)
+    </button>
 </div>
 @functions {
     [IgnoreAntiforgeryToken]

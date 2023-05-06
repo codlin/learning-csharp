@@ -54,3 +54,14 @@ Listing 27-11. Setting the Form Target in the FormHandler.cshtml File in the Pag
 ```html
 <form asp-page="FormHandler" method="post">
 ```
+
+### Transforming Form Buttons
+发送表单的按钮可以在表单元素之外定义。在这些情况下，按钮有一个 form 属性，其值对应于它相关的 form 元素的 id 属性，以及一个指定表单目标 URL 的 formaction 属性。标签助手将通过 asp-action、asp-controller 或 asppage 属性生成 formaction 属性，如清单 27-12 所示。
+Listing 27-12. Transforming a Button in the Form.cshtml File in the Views/Form Folder
+```html
+<form asp-action="submitform" method="post" id="htmlform">
+...
+<button form="htmlform" asp-action="submitform" class="btn btn-primary mt-2">
+...
+```
+添加到 form 元素的 id 属性的值被按钮用作 form 属性的值，它告诉浏览器在单击按钮时提交哪个表单。表 27-3 中描述的属性用于标识表单的目标，标签助手将在呈现视图时使用路由系统生成 URL。清单 27-13 将相同的技术应用于 Razor 页面。
