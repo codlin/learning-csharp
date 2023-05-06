@@ -27,3 +27,18 @@ Index 操作方法选择一个名为 Form 的视图，它将向用户呈现一�
 可以使用 Razor Pages 实现相同的模式。需要一个页面来呈现和处理表单数据，第二个页面显示结果。将名为 FormHandler.cshtml 的 Razor 页面添加到 Pages 文件夹。
 OnGetAsync 处理程序方法从数据库中检索产品，视图使用该产品为 HTML 表单中的输入元素设置值。该表单配置为发送 HTTP POST 请求，该请求将由 OnPost 处理程序方法处理。表单数据存储为临时数据，浏览器将重定向到名为 FormResults 的表单。要创建浏览器将被重定向到的页面，请将名为 FormResults.cshtml 的 Razor 页面添加到 Pages 文件夹。  
 清单 27-8 中的页面模型类装饰有 IgnoreAntiforgeryToken 属性，这在“使用防伪功能”部分中有描述。
+
+## Using Tag Helpers to Improve HTML Forms
+### Working with Form Elements
+FormTagHelper 类是表单元素的内置标签助手，用于管理 HTML 表单的配置，以便它们以正确的操作或页面处理程序为目标，而无需对 URL 进行硬编码。这个标签助手支持表 27-3 中描述的属性。
+Table 27-3. The Built-in Tag Helper Attributes for Form Elements
+| Name | Description |
+|-|-|
+| aspcontroller | 该属性用于为动作属性 URL 指定路由系统的控制器值。如果省略，则将使用呈现视图的控制器。|
+| asp-action | 该属性用于为动作属性URL指定动作值到路由系统的动作方法。如果省略，则将使用呈现视图的动作。|
+| asp-page | 此属性用于指定 Razor 页面的名称。|
+| asp-pagehandler | 此属性用于指定将用于处理请求的处理程序方法的名称。您可以在第 9 章的 SportsStore 应用程序中看到此属性的示例。|
+| asp-route-* | 名称以 asp-route- 开头的属性用于为操作属性 URL 指定附加值，以便 asp-route-id 属性用于向路由系统提供 id 段的值。|
+| asp-route | 此属性用于指定将用于为 action 属性生成 URL 的路由名称。|
+| aspantiforgery | 此属性控制是否将防伪信息添加到视图中，如“使用防伪功能”部分所述。|
+| aspfragment | 此属性指定生成的 URL 的片段。 |
