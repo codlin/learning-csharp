@@ -120,3 +120,31 @@ public IActionResult SubmitForm(Product product) {
 ```
 该清单更改了 SubmitForm 操作方法，以便它定义 Product 参数。在调用 action 方法之前，创建一个新的 Product 对象，并将模型绑定过程应用于它的每个公共属性。然后使用 Product 对象作为参数调用 SubmitForm 方法。要查看模型绑定过程，请重新启动 ASP.NET Core，导航至 http://localhost:5000/controllers/Form，然后单击“提交”按钮。模型绑定过程将从请求中提取数据值并产生如图 28-8 所示的结果。模型绑定过程创建的 Product 对象被序列化为 JSON 数据，以便可以将其存储为临时数据，以便于查看请求数据。
 复杂类型的数据绑定过程仍然是尽力而为的功能，这意味着将为 Product 类定义的每个公共属性寻找一个值，但缺少值不会阻止调用操作方法。相反，找不到值的属性将保留为属性类型的默认值。该示例为 Name 和 Price 属性提供了值，但 ProductId、CategoryId 和 SupplierId 属性为零，而 Category 和 Supplier 属性为空。
+
+### Binding to a Property
+使用参数进行模型绑定不符合 Razor Pages 开发风格，因为参数通常会重复页面模型类定义的属性，如清单 28-11 所示。
+Listing 28-11. Binding a Complex Type in the FormHandler.cshtml File in the Pages Folder
+```cs
+public IActionResult OnPost(Product product) {
+    TempData["product"] = System.Text.Json.JsonSerializer.Serialize(product);
+    return RedirectToPage("FormResults");
+}
+```
+此代码有效，但 OnPost 处理程序方法有自己的 Product 对象版本，镜像 OnGetAsync 处理程序使用的属性。一种更优雅的方法是使用现有属性进行模型绑定，如清单 28-12 所示。
+Listing 28-12. Using a Property for Model Binding in the FormHandler.cshtml File in the Pages Folder
+```cs
+<input class="form-control" asp-for="Product.Name" />
+...
+<input class="form-control" asp-for="Product.Price" />
+...
+[BindProperty]
+public Product Product { get; set; } = new();
+...
+public IActionResult OnPost() {
+    TempData["product"] = System.Text.Json.JsonSerializer.Serialize(Product);
+    return RedirectToPage("FormResults");
+}
+```
+**用 BindProperty 特性装饰一个属性表明它的属性应该服从模型绑定过程，这意味着 OnPost 处理程序方法可以在不声明参数的情况下获取它需要的数据。当使用 BindProperty 属性时，模型绑定器在定位数据值时使用属性名称，因此不需要添加到输入元素的显式名称属性**。默认情况下，BindProperty 不会为 GET 请求绑定数据，但这可以通过将 BindProperty 属性的 SupportsGet 参数设置为 true 来更改。   
+BindProperties 特性可应用于需要对其定义的所有公共属性进行模型绑定过程的类，这比将 BindProperty 应用于许多单独的属性更方便。使用 BindNever 属性修饰属性以将它们从模型绑定中排除。
+
