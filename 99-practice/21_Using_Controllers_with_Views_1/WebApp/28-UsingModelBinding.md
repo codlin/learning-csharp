@@ -36,3 +36,16 @@ http://localhost:5000/controllers/Form/Index/5?id=1
 另一方面，如果你请求一个没有 id 段的 URL，那么查询字符串将被检查，这意味着像这样的 URL 也将允许模型绑定系统为 id 参数提供一个值以便它可以调用 Index 方法。    
 http://localhost:5000/controllers/Form/Index?id=4
 
+## Binding Simple Data Types
+请求数据值必须转换为 C# 值，以便它们可用于调用操作或页面处理程序方法。**简单类型是源自请求中可以从字符串解析的一项数据的值**。这包括数值、布尔值、日期，当然还有字符串值。    
+简单类型的数据绑定使得从请求中提取单个数据项变得容易，而无需通过上下文数据来找出它的定义位置。清单 28-5 将参数添加到由 Form 控制器方法定义的 SubmitForm 操作方法，以便模型绑定器将用于提供 `name` 和 `price` 的值。  
+Listing 28-5. Adding Method Parameters in the FormController.cs File in the Controllers Folder
+```cs
+[HttpPost]
+public IActionResult SubmitForm(string name, decimal price) {
+    TempData["name param"] = name;
+    TempData["price param"] = price.ToString();
+    return RedirectToAction(nameof(Results));
+}
+```
+当 ASP.NET Core 收到将由 SubmitForm 操作方法处理的请求时，模型绑定系统将用于获取名称和价格值。参数的使用简化了操作方法，并负责将请求数据转换为 C# 数据类型，以便在调用操作方法之前将价格值转换为 C# 小数类型。 （在此示例中，我必须将小数转换回字符串以将其存储为临时数据。我在第 31 章中演示了处理表单数据的更多有用方法。）重新启动 ASP.NET Core 并使用浏览器请求 http:/ /localhost:5000/controllers/ 形式。单击提交按钮，您将看到模型绑定功能从请求中提取的值，如图 28-3 所示。
