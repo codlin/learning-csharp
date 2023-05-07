@@ -365,3 +365,28 @@ Listing 28-27. Selecting the Query String in the Bindings.cshtml File in the Pag
 使用 FromQuery 属性意味着查询字符串在创建 Product 数组时用作模型绑定器的值源，您可以通过启动 ASP.NET Core 并请求 http://
 localhost:5000/pages/bindings?data[0].name=Skis&data[0].price=500 来查看它，产生如图 28-20 所示的响应。  
 在此示例中，我使用了 GET 请求，因为它允许轻松设置查询字符串。尽管在这样一个简单的示例中它是无害的，但在发送修改应用程序状态的 GET 请求时必须小心。如前所述，在 GET 请求中进行更改可能会导致问题。
+
+### Using Headers for Model Binding
+FromHeader 属性允许将 HTTP 请求标头用作绑定数据的源。在清单 28-28 中，我向 Form 控制器添加了一个简单的操作方法，该方法定义了一个参数，该参数将从标准 HTTP 请求标头进行模型绑定。   
+Listing 28-28. Model Binding from a Header in the FormController.cs File in the Controllers Folder  
+```cs
+public string Header([FromHeader] string accept) {
+   return $"Header: {accept}";
+}
+```
+Header 操作方法定义了一个 accept 参数，其值将从当前请求的 Accept 标头中获取并作为方法结果返回。重启 ASP.NET Core 请求 http://localhost:5000/controllers/form/header，你会看到这样的结果： 
+```html
+Header: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,
+image/apng,*/*;q=0.8,application/signed-exchange;v=b3
+```
+并不是所有的 HTTP header 名称都可以通过 action 方法参数的名称轻松选择，因为模型绑定系统不会从 C# 命名约定转换为 HTTP 标头使用的命名约定。在这些情况下，您必须使用 Name 属性配置 FromHeader 属性以指定标头的名称，如清单 28-29 所示。  
+Listing 28-29. Selecting a Header by Name in the FormController.cs File in the Controllers Folder
+```cs
+public string Header([FromHeader(Name = "Accept-Language")] string accept) {
+    return $"Header: {accept}";
+}
+```
+我不能将 Accept-Language 用作 C# 参数的名称，并且模型绑定器不会自动将 AcceptLanguage 之类的名称转换为 Accept-Language 以便它与标头匹配。相反，我使用 Name 属性来配置属性，使其与正确的标头相匹配。如果您重新启动 ASP.NET Core 并请求 http://localhost:5000/controllers/form/header，您将看到这样的结果，它会根据您的区域设置而有所不同：
+```html
+Header: en-GB,en-US;q=0.9,en;q=0.8
+```

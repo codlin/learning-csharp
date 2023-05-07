@@ -13,15 +13,20 @@ public class FormController : Controller
     {
         context = dbContext;
     }
-    public async Task<IActionResult> Index([FromQuery] long? id) 
+    public async Task<IActionResult> Index([FromQuery] long? id)
     {
         ViewBag.Categories = new SelectList(context.Categories, "CategoryId", "Name");
         return View("Form", await context.Products.Include(p => p.Category)
             .Include(p => p.Supplier).FirstOrDefaultAsync(p => id == null || p.ProductId == id));
     }
 
-        public IActionResult Results()
+    public IActionResult Results()
     {
         return View();
+    }
+
+    public string Header([FromHeader(Name = "Accept-Language")] string accept)
+    {
+        return $"Header: {accept}";
     }
 }
