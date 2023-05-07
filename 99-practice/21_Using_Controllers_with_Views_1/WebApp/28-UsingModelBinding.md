@@ -354,3 +354,14 @@ public async Task<IActionResult> Index([FromQuery] long? id)
 ```
 该属性指定模型绑定过程的源，您可以通过重新启动 ASP 查看它。 NET Core 并使用浏览器请求 http://localhost:5000/controllers/Form/Index/5?id=1。将使用查询字符串代替路由系统匹配的值，生成如图 28-19 所示的响应。如果查询字符串不包含适合模型绑定过程的值，则不会使用其他位置。  
 在指定模型绑定源（例如查询字符串）时，您仍然可以绑定复杂类型。对于参数类型中的每个简单属性，模型绑定过程将查找具有相同名称的查询字符串键。
+
+### Selecting a Binding Source for a Property
+相同的属性可用于对页面模型或控制器定义的绑定属性进行建模，如清单 28-27 所示。   
+Listing 28-27. Selecting the Query String in the Bindings.cshtml File in the Pages Folder
+```cs
+//[BindProperty(Name = "Data")]
+[FromQuery(Name = "Data")]
+```
+使用 FromQuery 属性意味着查询字符串在创建 Product 数组时用作模型绑定器的值源，您可以通过启动 ASP.NET Core 并请求 http://
+localhost:5000/pages/bindings?data[0].name=Skis&data[0].price=500 来查看它，产生如图 28-20 所示的响应。  
+在此示例中，我使用了 GET 请求，因为它允许轻松设置查询字符串。尽管在这样一个简单的示例中它是无害的，但在发送修改应用程序状态的 GET 请求时必须小心。如前所述，在 GET 请求中进行更改可能会导致问题。
