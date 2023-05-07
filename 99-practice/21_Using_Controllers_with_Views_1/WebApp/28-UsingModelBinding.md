@@ -265,3 +265,23 @@ Listing 28-22. Binding to a List in the Bindings.cshtml File in the Pages Folder
 public SortedSet<string> Data { get; set; } = new SortedSet<string>();
 ```
 我将 Data 属性的类型更改为 SortedSet<string>。模型绑定过程将使用输入元素的值填充集合，这些值将按字母顺序排序。我在输入元素名称属性上保留了索引符号，但它们没有任何效果，因为集合类将按字母顺序对其值进行排序。要查看效果，请重启 ASP.NET Core ，使用浏览器请求 http://localhost:5000/pages/bindings ，编辑文本字段，然后单击提交按钮。模型绑定过程将使用表单值填充排序集，这些值将按顺序显示，如图 28-16 所示。
+
+### Binding to Dictionaries
+对于 name 属性使用索引表示法表示的元素，模型绑定器在绑定到 Dictionary 时将使用索引作为键，从而允许将一系列元素转换为键值对，如示例 28-23 所示。  
+Listing 28-23. Binding to a Dictionary in the Bindings.cshtml File in the Pages Folder
+```html
+<input class="form-control" name="Data[first]" value="Item 1" />
+<input class="form-control" name="Data[second]" value="Item 2" />
+<input class="form-control" name="Data[third]" value="Item 3" />
+...
+<table class="table table-sm table-striped">
+    <tbody>
+        @foreach (string key in Model.Data.Keys) {
+        <tr>
+        <th>@key</th><td>@Model.Data[key]</td>
+        </tr>
+        }
+    </tbody>
+</table>
+```
+为集合提供值的所有元素必须共享一个公共前缀，在此示例中为 Data，后跟方括号中的键值。此示例的键是字符串 first、second 和 third，它们将用作用户在文本字段中提供的内容的键。要查看绑定过程，请重新启动 ASP.NET Core，请求 http://localhost:5000/pages/bindings，编辑文本字段，然后提交表单。来自表单数据的键和值将显示在一个表中，如图 28-17 所示。
