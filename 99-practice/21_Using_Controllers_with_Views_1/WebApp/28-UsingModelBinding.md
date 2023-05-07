@@ -148,3 +148,27 @@ public IActionResult OnPost() {
 **用 BindProperty 特性装饰一个属性表明它的属性应该服从模型绑定过程，这意味着 OnPost 处理程序方法可以在不声明参数的情况下获取它需要的数据。当使用 BindProperty 属性时，模型绑定器在定位数据值时使用属性名称，因此不需要添加到输入元素的显式名称属性**。默认情况下，BindProperty 不会为 GET 请求绑定数据，但这可以通过将 BindProperty 属性的 SupportsGet 参数设置为 true 来更改。   
 BindProperties 特性可应用于需要对其定义的所有公共属性进行模型绑定过程的类，这比将 BindProperty 应用于许多单独的属性更方便。使用 BindNever 属性修饰属性以将它们从模型绑定中排除。
 
+### Binding Nested Complex Types
+如果受模型绑定约束的属性是使用复杂类型定义的，则使用属性名称作为前缀重复模型绑定过程。例如，Product 类定义了 Category 属性，其类型是复杂的 Category 类型。清单 28-13 向 HTML 表单添加元素，为模型绑定器提供 Category 类定义的属性值。  
+Listing 28-13. Adding Nested Form Elements in the Form.cshtml File in the Views/Form Folder
+```html
+<div class="form-group">
+    <label>Category Name</label>
+    @{
+        #pragma warning disable CS8602
+    }
+    <input class="form-control" name="Category.Name" value="@Model.Category.Name" />
+    @{
+        #pragma warning restore CS8602
+    }
+</div>
+```
+name 属性组合了属性名称，以句点分隔。在这种情况下，元素是为分配给视图模型的 Category 属性的对象的 Name 属性，因此 name 属性设置为Category.Name。当应用 asp-for 属性时，输入元素标签助手将自动使用此格式作为 name 属性，如清单 28-14 所示。  
+Listing 28-14. Using a Tag Helper in the Form.cshtml File in the Views/Form Folder
+```html
+<input class="form-control" asp-for="Category.Name" />
+```
+标签助手是一种更可靠的为嵌套属性创建元素的方法，并且避免了拼写错误产生被模型绑定过程忽略的元素的风险。要查看新元素的效果，请请求 http://localhost:5000/controllers/Form 并单击提交按钮。  
+在模型绑定过程中，将创建一个新的 Category 对象并将其分配给 Product 对象的 Category 属性。模型绑定器找到了 Category 对象的 Name 属性的值，如图所示，但是 CategoryId 属性没有值，保留为默认值。
+
+有时您生成的 HTML 与一种类型的对象有关，但您希望将其绑定到另一种对象。这意味着包含视图的前缀将不符合模型绑定器期望的结构，并且您的数据将无法正确处理。清单 28-15 通过更改控制器的 SubmitForm 操作方法定义的参数类型演示了这个问题。新参数是一个类别，但模型绑定过程将无法正确挑选出数据值，即使表单视图发送的表单数据将包含类别对象的名称属性的值。相反，模型绑定器将找到 Product 对象的 Name 值并使用它，您可以通过重新启动 ASP.NET Core、请求 http://localhost:5000/controllers/ 表单并提交表单数据来查看，这将产生如图 28-10 所示的第一个响应。这个问题通过将 Bind 属性应用于参数并使用 Prefix 参数为模型绑定器指定前缀来解决，如清单 28-16 所示。
