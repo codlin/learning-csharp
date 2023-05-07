@@ -243,4 +243,17 @@ BindNever 属性从模型绑定器中排除一个属性，这与从上一节中�
 
 ## Binding to Arrays and Collections
 ### Binding to Arrays
-默认模型绑定器的一个优雅特性是它如何支持数组。要查看此功能的工作原理，请将名为 Bindings.cshtml 的 Razor 页面添加到 Pages 文件夹，其内容如清单 28-20 所示。
+默认模型绑定器的一个优雅特性是它如何支持数组。要查看此功能的工作原理，请将名为 Bindings.cshtml 的 Razor 页面添加到 Pages 文件夹。
+数组的模型绑定需要将提供数组值的所有元素的名称属性设置为相同的值。此页面显示三个输入元素，所有这些元素的名称属性值为数据。为了让模型联编程序找到数组值，我用 BindProperty 属性修饰了页面模型的 Data 属性，并使用了 Name 参数。提交 HTML 表单时，将创建一个新数组并使用所有三个输入元素的值填充这些值，这些值将显示给用户。要查看绑定过程，请重新启动 ASP.NET Core，请求 http://localhost:5000/pages/bindings，编辑表单字段，然后单击“提交”按钮。 Data 数组的内容使用@foreach 表达式显示在列表中。
+
+**Specifying Index Positions for Array Values**
+默认情况下，数组按照从浏览器接收表单值的顺序填充，这通常是定义 HTML 元素的顺序。如果需要覆盖默认值，可以使用 name 属性指定值在数组中的位置，如清单 28-21 所示。
+Listing 28-21. Specifying Array Position in the Bindings.cshtml File in the Pages Folder
+```html
+<input class="form-control" name="Data[1]" value="Item 1" />
+...
+<input class="form-control" name="Data[0]" value="Item 2" />
+...
+<input class="form-control" name="Data[2]" value="Item 3" /
+...
+```
