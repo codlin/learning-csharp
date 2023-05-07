@@ -29,11 +29,17 @@ public class FormController : Controller
     //     }
     //     return RedirectToAction(nameof(Results));
     // }
+    // [HttpPost]
+    // public IActionResult SubmitForm(string name, decimal price)
+    // {
+    //     TempData["name param"] = name;
+    //     TempData["price param"] = price.ToString();
+    //     return RedirectToAction(nameof(Results));
+    // }
     [HttpPost]
-    public IActionResult SubmitForm(string name, decimal price)
+    public IActionResult SubmitForm(Product product)
     {
-        TempData["name param"] = name;
-        TempData["price param"] = price.ToString();
+        TempData["product"] = System.Text.Json.JsonSerializer.Serialize(product);
         return RedirectToAction(nameof(Results));
     }
     public IActionResult Results()

@@ -107,3 +107,16 @@ public async Task<IActionResult> Index(long? id) {
 ...
 ```
 只有当请求不包含合适的值时，id 参数才会为 null，这允许传递给 FirstOrDefaultAsync 方法的表达式在没有值时默认为数据库中的第一个对象，并查询任何其他值。要查看效果，请重启 ASP.NET Core 并请求 http://localhost:5000/controllers/Form 和 http://localhost:5000/controllers/Form/index/0。第一个 URL 不包含 id 值，因此选择了数据库中的第一个对象。第二个 URL 提供的 id 值为零，不对应于数据库中的任何对象。
+
+## Binding Complex Types
+模型绑定系统在处理复杂类型时大放异彩，复杂类型是无法从单个字符串值解析的任何类型。模型绑定过程检查复杂类型并对它定义的每个公共属性执行绑定过程。这意味着我可以使用活页夹创建完整的 Product 对象，而不是处理名称和价格等单个值，如清单 28-10 所示。
+Listing 28-10. Binding a Complex Type in the FormController.cs File in the Controllers Folder
+```cs
+[HttpPost]
+public IActionResult SubmitForm(Product product) {
+    TempData["product"] = System.Text.Json.JsonSerializer.Serialize(product);
+    return RedirectToAction(nameof(Results));
+}
+```
+该清单更改了 SubmitForm 操作方法，以便它定义 Product 参数。在调用 action 方法之前，创建一个新的 Product 对象，并将模型绑定过程应用于它的每个公共属性。然后使用 Product 对象作为参数调用 SubmitForm 方法。要查看模型绑定过程，请重新启动 ASP.NET Core，导航至 http://localhost:5000/controllers/Form，然后单击“提交”按钮。模型绑定过程将从请求中提取数据值并产生如图 28-8 所示的结果。模型绑定过程创建的 Product 对象被序列化为 JSON 数据，以便可以将其存储为临时数据，以便于查看请求数据。
+复杂类型的数据绑定过程仍然是尽力而为的功能，这意味着将为 Product 类定义的每个公共属性寻找一个值，但缺少值不会阻止调用操作方法。相反，找不到值的属性将保留为属性类型的默认值。该示例为 Name 和 Price 属性提供了值，但 ProductId、CategoryId 和 SupplierId 属性为零，而 Category 和 Supplier 属性为空。
