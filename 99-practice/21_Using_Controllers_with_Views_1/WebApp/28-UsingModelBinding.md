@@ -97,5 +97,13 @@ Listing 28-8. Avoiding a Query Error in the FormController.cs File in the Contro
 一些应用程序需要区分缺失值和用户提供的任何值。在这些情况下，可以使用可为 null 的参数类型，如清单 28-9 所示。
 Listing 28-9. Using a Nullable Parameter in the FormController.cs File in the Controllers Folder
 ```cs
+...
+public async Task<IActionResult> Index(long? id) {
+    ViewBag.Categories = new SelectList(context.Categories, "CategoryId", "Name");
+    return View("Form", await context.Products.Include(p => p.Category)
+    .Include(p => p.Supplier)
+    .FirstOrDefaultAsync(p => id == null || p.ProductId == id));
+}
+...
 ```
-只有当请求不包含合适的值时，id 参数才会为 null，这允许传递给 FirstOrDefaultAsync 方法的表达式在没有值时默认为数据库中的第一个对象，并查询任何其他值。要查看效果，请重启 ASP.NET Core 并请求 http://localhost:5000/controllers/Form 和 http://localhost:5000/controllers/Form/index/0。第一个 URL 不包含 id 值，因此选择了数据库中的第一个对象。第二个 URL 提供的 id 值为零，不对应于数据库中的任何对象。图 28-7 显示了这两个结果。
+只有当请求不包含合适的值时，id 参数才会为 null，这允许传递给 FirstOrDefaultAsync 方法的表达式在没有值时默认为数据库中的第一个对象，并查询任何其他值。要查看效果，请重启 ASP.NET Core 并请求 http://localhost:5000/controllers/Form 和 http://localhost:5000/controllers/Form/index/0。第一个 URL 不包含 id 值，因此选择了数据库中的第一个对象。第二个 URL 提供的 id 值为零，不对应于数据库中的任何对象。
