@@ -15,21 +15,11 @@
             <input class="form-control" asp-for="Product.Price" />
         </div>
         <div class="form-group">
-            <label>Category</label>
+            <label>Category Name</label>
             @{
                 #pragma warning disable CS8602
             }
             <input class="form-control" asp-for="Product.Category.Name" />
-            @{
-                #pragma warning restore CS8602
-            }
-        </div>
-        <div class="form-group">
-            <label>Supplier</label>
-            @{
-                #pragma warning disable CS8602
-            }
-            <input class="form-control" asp-for="Product.Supplier.Name" />
             @{
                 #pragma warning restore CS8602
             }
@@ -53,7 +43,10 @@
 
         [BindProperty]
         public Product? Product { get; set; }
-        
+
+        [BindProperty(Name = "Product.Category")]
+        public Category Category { get; set; } = new();
+
         public async Task OnGetAsync(long id = 1)
         {
             Product = await context.Products.Include(p => p.Category)
@@ -71,6 +64,7 @@
         public IActionResult OnPost()
         {
             TempData["product"] = System.Text.Json.JsonSerializer.Serialize(Product);
+            TempData["category"] = System.Text.Json.JsonSerializer.Serialize(Category);
             return RedirectToPage("FormResults");
         }
     }

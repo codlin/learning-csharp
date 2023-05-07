@@ -36,12 +36,26 @@ public class FormController : Controller
     //     TempData["price param"] = price.ToString();
     //     return RedirectToAction(nameof(Results));
     // }
+    // [HttpPost]
+    // public IActionResult SubmitForm(Product product)
+    // {
+    //     TempData["product"] = System.Text.Json.JsonSerializer.Serialize(product);
+    //     return RedirectToAction(nameof(Results));
+    // }
+
+    // [HttpPost]
+    // public IActionResult SubmitForm(Category category)
+    // {
+    //     TempData["category"] = System.Text.Json.JsonSerializer.Serialize(category);
+    //     return RedirectToAction(nameof(Results));
+    // }
     [HttpPost]
-    public IActionResult SubmitForm(Product product)
+    public IActionResult SubmitForm([Bind(Prefix = "Category")] Category category)
     {
-        TempData["product"] = System.Text.Json.JsonSerializer.Serialize(product);
+        TempData["category"] = System.Text.Json.JsonSerializer.Serialize(category);
         return RedirectToAction(nameof(Results));
     }
+
     public IActionResult Results()
     {
         return View();

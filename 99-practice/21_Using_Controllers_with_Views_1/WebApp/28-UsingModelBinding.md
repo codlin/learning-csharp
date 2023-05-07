@@ -171,4 +171,44 @@ Listing 28-14. Using a Tag Helper in the Form.cshtml File in the Views/Form Fold
 标签助手是一种更可靠的为嵌套属性创建元素的方法，并且避免了拼写错误产生被模型绑定过程忽略的元素的风险。要查看新元素的效果，请请求 http://localhost:5000/controllers/Form 并单击提交按钮。  
 在模型绑定过程中，将创建一个新的 Category 对象并将其分配给 Product 对象的 Category 属性。模型绑定器找到了 Category 对象的 Name 属性的值，如图所示，但是 CategoryId 属性没有值，保留为默认值。
 
-有时您生成的 HTML 与一种类型的对象有关，但您希望将其绑定到另一种对象。这意味着包含视图的前缀将不符合模型绑定器期望的结构，并且您的数据将无法正确处理。清单 28-15 通过更改控制器的 SubmitForm 操作方法定义的参数类型演示了这个问题。新参数是一个类别，但模型绑定过程将无法正确挑选出数据值，即使表单视图发送的表单数据将包含类别对象的名称属性的值。相反，模型绑定器将找到 Product 对象的 Name 值并使用它，您可以通过重新启动 ASP.NET Core、请求 http://localhost:5000/controllers/ 表单并提交表单数据来查看，这将产生如图 28-10 所示的第一个响应。这个问题通过将 Bind 属性应用于参数并使用 Prefix 参数为模型绑定器指定前缀来解决，如清单 28-16 所示。
+**Specifying Custom Prefixes for Nested Complex Types**
+有时您生成的 HTML 与一种类型的对象有关，但您希望将其绑定到另一种对象。这意味着包含视图的前缀将不符合模型绑定器期望的结构，并且您的数据将无法正确处理。清单 28-15 通过更改控制器的 SubmitForm 操作方法定义的参数类型演示了这个问题。  
+Listing 28-15. Changing a Parameter in the FormController.cs File in the Controllers Folder
+```cs
+...
+[HttpPost]
+public IActionResult SubmitForm(Category category) {
+    TempData["category"] = System.Text.Json.JsonSerializer.Serialize(category);
+    return RedirectToAction(nameof(Results));
+}
+...
+```
+新参数是Category，但模型绑定过程将无法正确挑选出数据值，即使表单视图发送的表单数据将包含类别对象的名称属性的值。相反，模型绑定器将找到 Product 对象的 Name 值并使用它，您可以通过重新启动 ASP.NET Core、请求 http://localhost:5000/controllers/ 表单并提交表单数据来查看，这将产生如图 28-10 所示的第一个响应。  
+**这个问题通过将 Bind 属性应用于参数并使用 Prefix 参数为模型绑定器指定前缀来解决**，如清单 28-16 所示。  
+Listing 28-16. Setting a Prefix in the FormController.cs File in the Controllers Folder
+```cs
+...
+[HttpPost]
+public IActionResult SubmitForm([Bind(Prefix ="Category")] Category category) {
+    TempData["category"] = System.Text.Json.JsonSerializer.Serialize(category);
+    return RedirectToAction(nameof(Results));
+}
+...
+```
+语法很笨拙，但属性确保模型绑定器可以找到操作方法所需的数据。在这种情况下，将前缀设置为 Category 可确保使用正确的数据值来绑定 Category 参数。重新启动 ASP.NET Core，请求 http://localhost:5000/controllers/form，并提交表单，这会产生如图 28-10 所示的第二个响应。  
+使用 BindProperty 属性时，使用 Name 参数指定前缀，如清单 28-17 所示。  
+Listing 28-17. Specifying a Model Binding Prefix in the FormHandler.cshtml File in the Pages Folder
+```html
+<div class="form-group">
+    <label>Category Name</label>
+        @{ #pragma warning disable CS8602 }
+    <input class="form-control" asp-for="Product.Category.Name" />
+        @{ #pragma warning restore CS8602 }
+</div>
+...
+[BindProperty(Name = "Product.Category")]
+public Category Category { get; set; } = new();
+...
+TempData["category"] = System.Text.Json.JsonSerializer.Serialize(Category);
+```
+此清单添加了一个输入元素，该元素使用 asp-for 属性来选择 Product.Category 属性。页面处理程序类定义了一个 Category 属性，该属性使用 BindProperty 属性进行修饰并使用 Name 参数进行配置。要查看模型绑定过程的结果，请重新启动 ASP.NET Core，使用浏览器请求 http://localhost:5000/pages/form，然后单击提交按钮。模型绑定会为两个装饰属性找到值，这会产生如图 28-11 所示的响应。
