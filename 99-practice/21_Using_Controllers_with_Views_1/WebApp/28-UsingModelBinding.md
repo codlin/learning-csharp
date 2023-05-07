@@ -240,3 +240,7 @@ public decimal Price { get; set; }
 ```
 BindNever 属性从模型绑定器中排除一个属性，这与从上一节中使用的列表中省略它具有相同的效果。要查看效果，请重新启动 ASP.NET Core 以使对 Product 类的更改生效，请求 http://localhost:5000/pages/form 并提交表单。与前面的示例一样，模型绑定器忽略 Price 属性的值，如图 28-13 所示。  
 还有一个 BindRequired 属性，它告诉模型绑定过程请求必须包含属性值。如果请求没有所需的值，则会产生模型验证错误，如第 29 章所述。
+
+## Binding to Arrays and Collections
+### Binding to Arrays
+默认模型绑定器的一个优雅特性是它如何支持数组。要查看此功能的工作原理，请将名为 Bindings.cshtml 的 Razor 页面添加到 Pages 文件夹，其内容如清单 28-20 所示。
