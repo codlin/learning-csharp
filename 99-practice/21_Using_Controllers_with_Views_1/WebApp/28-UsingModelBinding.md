@@ -226,3 +226,17 @@ return RedirectToAction(nameof(Results));
 }
 ```
 我已返回到操作方法参数的 Product 类型，该参数已使用 Bind 属性进行修饰以指定应包含在模型绑定过程中的属性的名称。此示例告诉模型绑定功能查找 Name 和 Category 属性的值，这从过程中排除了任何其他属性。重新启动 ASP.NET Core，导航到 http://localhost:5000/controllers/Form，然后提交表单。即使浏览器将 Price 属性的值作为 HTTP POST 请求的一部分发送，它也会被模型绑定器忽略，如图 28-12 所示。
+
+**Selectively Binding in the Model Class**
+如果你正在使用 Razor Pages 或者你想在整个应用程序中使用相同的属性集来进行模型绑定，你可以将 BindNever 属性直接应用于模型类，如清单 28-19 所示。   
+Listing 28-19. Decorating a Property in the Product.cs File in the Models Folder 
+```cs
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+...
+[Column(TypeName = "decimal(8, 2)")]
+[BindNever]
+public decimal Price { get; set; }
+...
+```
+BindNever 属性从模型绑定器中排除一个属性，这与从上一节中使用的列表中省略它具有相同的效果。要查看效果，请重新启动 ASP.NET Core 以使对 Product 类的更改生效，请求 http://localhost:5000/pages/form 并提交表单。与前面的示例一样，模型绑定器忽略 Price 属性的值，如图 28-13 所示。  
+还有一个 BindRequired 属性，它告诉模型绑定过程请求必须包含属性值。如果请求没有所需的值，则会产生模型验证错误，如第 29 章所述。
