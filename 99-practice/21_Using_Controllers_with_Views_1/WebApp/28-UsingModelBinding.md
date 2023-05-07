@@ -329,3 +329,28 @@ Listing 28-25. Removing an Attribute in the Product.cs File in the Models Folder
 public decimal Price { get; set; }
 ```
 重启 ASP.NET Core 并使用浏览器请求 http://localhost:5000/pages/bindings。在文本字段中输入名称和价格并提交表单，您将看到根据显示在表中的数据创建的 Product 对象的详细信息，如图 28-18 所示。
+
+## Specifying a Model Binding Source
+正如我在本章开头所解释的，默认模型绑定过程在四个位置查找数据：表单数据值、请求主体（仅适用于 Web 服务控制器）、路由数据和请求查询字符串。    
+默认搜索顺序并不总是有用，因为您总是希望数据来自请求的特定部分，或者因为您想要使用默认不搜索的数据源。模型绑定功能包括一组用于覆盖默认搜索行为的属性，如表 28-3 中所述。
+Table 28-3. The Model Binding Source Attributes
+| Name | Description |
+|-|-|
+| FromForm | 该属性用于选择表单数据作为绑定数据的来源。默认情况下，参数的名称用于定位表单值，但这可以使用 Name 属性进行更改，该属性允许指定不同的名称。|
+| FromRoute | 该属性用于选择路由系统作为绑定数据的来源。默认情况下，参数的名称用于定位路由数据值，但这可以使用 Name 属性进行更改，该属性允许指定不同的名称。|
+| FromQuery | 该属性用于选择查询字符串作为绑定数据的来源。默认情况下，参数的名称用于定位查询字符串值，但这可以使用 Name 属性更改，这允许指定不同的查询字符串键。|
+| FromHeader | 此属性用于选择请求标头作为绑定数据的来源。默认情况下，参数的名称用作标头名称，但这可以使用 Name 属性进行更改，该属性允许指定不同的标头名称。|
+| FromBody | 此属性用于指定请求正文应用作绑定数据的来源，当您希望从非表单编码的请求中接收数据时需要此属性，例如在提供 Web 服务的 API 控制器中。|
+
+FromForm、FromRoute 和 FromQuery 属性允许您指定模型绑定数据将从标准位置之一获取，但没有正常的搜索顺序。在本章的前面，我使用了这个 URL：
+```shell
+http://localhost:5000/controllers/Form/Index/5?id=1
+```
+这个 URL 包含两个可能的值，可用于 Form 控制器上的 Index 操作方法的 id 参数。路由系统会将 URL 的最后一段分配给一个名为 id 的变量，该变量在控制器的默认 URL 模式中定义，查询字符串也包含一个 id 值。默认搜索模式意味着模型绑定数据将从路由数据中获取，查询字符串将被忽略。    
+在清单 28-26 中，我将 FromQuery 属性应用于 Index 操作方法定义的 id 参数，它覆盖了默认的搜索顺序。  
+Listing 28-26. Selecting the Query String in the FormController.cs File in the Controllers Folder
+```cs
+public async Task<IActionResult> Index([FromQuery] long? id) 
+```
+该属性指定模型绑定过程的源，您可以通过重新启动 ASP 查看它。 NET Core 并使用浏览器请求 http://localhost:5000/controllers/Form/Index/5?id=1。将使用查询字符串代替路由系统匹配的值，生成如图 28-19 所示的响应。如果查询字符串不包含适合模型绑定过程的值，则不会使用其他位置。  
+在指定模型绑定源（例如查询字符串）时，您仍然可以绑定复杂类型。对于参数类型中的每个简单属性，模型绑定过程将查找具有相同名称的查询字符串键。
