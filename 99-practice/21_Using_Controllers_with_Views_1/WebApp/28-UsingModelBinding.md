@@ -49,3 +49,21 @@ public IActionResult SubmitForm(string name, decimal price) {
 }
 ```
 当 ASP.NET Core 收到将由 SubmitForm 操作方法处理的请求时，模型绑定系统将用于获取名称和价格值。参数的使用简化了操作方法，并负责将请求数据转换为 C# 数据类型，以便在调用操作方法之前将价格值转换为 C# 小数类型。 （在此示例中，我必须将小数转换回字符串以将其存储为临时数据。我在第 31 章中演示了处理表单数据的更多有用方法。）重新启动 ASP.NET Core 并使用浏览器请求 http:/ /localhost:5000/controllers/ 形式。单击提交按钮，您将看到模型绑定功能从请求中提取的值，如图 28-3 所示。
+
+**Binding Simple Data Types in Razor Pages**
+Razor Pages 可以使用模型绑定，但必须注意**确保表单元素的`名称属性`的值与处理程序方法`参数的名称`相匹配**，如果使用 asp-for 属性选择一个嵌套属性。  
+为确保名称匹配，可以显式定义名称属性，如清单 28-6 所示，这也简化了 HTML 表单，使其与控制器示例匹配。  
+Listing 28-6. Using Model Binding in the FormHandler.cshtml File in the Pages Folder
+```html
+<input class="form-control" asp-for="Product.Name" name="name"/>
+...
+<input class="form-control" asp-for="Product.Price" name="price" />
+
+public IActionResult OnPost(string name, decimal price) {
+    TempData["name param"] = name;
+    TempData["price param"] = price.ToString();
+    ...
+}
+```
+标签助手会将输入元素的名称属性设置为 Product.Name 和 Product.Price，防止模型绑定器匹配值。显式设置 name 属性会覆盖标签助手并确保模型绑定过程正常工作。  
+使用浏览器请求http://localhost:5000/pages/form 并点击提交按钮，您将看到模型绑定器找到的值。
