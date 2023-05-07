@@ -390,3 +390,31 @@ public string Header([FromHeader(Name = "Accept-Language")] string accept) {
 ```html
 Header: en-GB,en-US;q=0.9,en;q=0.8
 ```
+
+### Using Request Bodies as Binding Sources
+并非所有客户端发送的数据都作为表单数据发送，例如当 JavaScript 客户端将 JSON 数据发送到 API 控制器时。 FromBody 属性指定请求主体应该被解码并用作模型绑定数据的来源。在清单 28-30 中，我向 Form 控制器添加了一个新的操作方法，其参数用 FromBody 属性修饰。  
+使用 ApiController 属性修饰的控制器不需要 FromBody 属性。   
+Listing 28-30. Adding an Action Method in the FormController.cs File in the Controllers Folder    
+```cs
+[HttpPost]
+[IgnoreAntiforgeryToken]
+public Product Body([FromBody] Product model) {
+    return model;
+}
+```
+要测试模型绑定过程，请重新启动 ASP.NET Core，打开一个新的 PowerShell 命令提示符，然后运行清单 28-31 中的命令向应用程序发送请求。  
+我将 IgnoreAntiforgeryToken 添加到清单 28-31 中的操作方法，因为我要发送的请求不会包含我在第 27 章中描述的防伪令牌。  
+Listing 28-31. Sending a Request  
+```powershell
+Invoke-RestMethod http://localhost:5000/controllers/form/body -Method POST -Body (@{ Name="Soccer Boots"; Price=89.99} | ConvertTo-Json) -ContentType "application/json"
+```
+JSON 编码的请求主体用于模型绑定action 方法参数，它产生以下响应：
+```
+productId : 0
+name : Soccer Boots
+price : 89.99
+categoryId : 0
+category :
+supplierId : 0
+supplier :
+```
