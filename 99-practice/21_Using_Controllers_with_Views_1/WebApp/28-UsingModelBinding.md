@@ -50,7 +50,7 @@ public IActionResult SubmitForm(string name, decimal price) {
 ```
 当 ASP.NET Core 收到将由 SubmitForm 操作方法处理的请求时，模型绑定系统将用于获取名称和价格值。参数的使用简化了操作方法，并负责将请求数据转换为 C# 数据类型，以便在调用操作方法之前将价格值转换为 C# 小数类型。 （在此示例中，我必须将小数转换回字符串以将其存储为临时数据。我在第 31 章中演示了处理表单数据的更多有用方法。）重新启动 ASP.NET Core 并使用浏览器请求 http:/ /localhost:5000/controllers/ 形式。单击提交按钮，您将看到模型绑定功能从请求中提取的值，如图 28-3 所示。
 
-**Binding Simple Data Types in Razor Pages**
+### Binding Simple Data Types in Razor Pages
 Razor Pages 可以使用模型绑定，但必须注意**确保表单元素的`名称属性`的值与处理程序方法`参数的名称`相匹配**，如果使用 asp-for 属性选择一个嵌套属性。  
 为确保名称匹配，可以显式定义名称属性，如清单 28-6 所示，这也简化了 HTML 表单，使其与控制器示例匹配。  
 Listing 28-6. Using Model Binding in the FormHandler.cshtml File in the Pages Folder
@@ -67,3 +67,35 @@ public IActionResult OnPost(string name, decimal price) {
 ```
 标签助手会将输入元素的名称属性设置为 Product.Name 和 Product.Price，防止模型绑定器匹配值。显式设置 name 属性会覆盖标签助手并确保模型绑定过程正常工作。  
 使用浏览器请求http://localhost:5000/pages/form 并点击提交按钮，您将看到模型绑定器找到的值。
+
+### Understanding Default Binding Values
+模型绑定是一个尽力而为的功能，这意味着**模型绑定器将尝试获取方法参数的值，但如果无法找到数据值，仍将调用该方法**。您可以通过删除 Form 控制器的 Index 操作方法中 id 参数的默认值来查看其工作原理，如清单 28-7 所示。  
+Listing 28-7. Removing a Default Parameter Value in the FormController.cs File in the Controllers Folder
+```cs
+...
+public async Task<IActionResult> Index(long id)
+```
+重新启动 ASP.NET Core 并请求 http://localhost:5000/controllers/Form。 URL 不包含模型绑定器可用于 id 参数的值，并且没有查询字符串或表单数据，但该方法仍被调用，产生如图 28-5 所示的错误。  
+```
+An unhandled exception occurred while processing the request.
+InvalidOperationException: Sequence contains no elements.
+...
+WebApp.Controllers.FormController.Index(long id) in FormController.cs
+    return View("Form", await context.Products.Include(p => p.Category)
+```
+模型绑定系统不报告此异常。相反，它发生在执行 Entity Framework Core 查询时。 MVC 框架必须为 id 参数提供一些值来调用 Index 操作方法，因此它使用默认值并希望最好。对于长参数，默认值为 0，这就是导致异常的原因。 Index 操作方法使用 id 值作为键来查询数据库中的 Product 对象，如下所示：  
+```cs
+.FirstAsync(p => p.ProductId == id));
+```
+当没有可用于模型绑定的值时，操作方法尝试使用 id 为零来查询数据库。没有这样的对象，导致 Entity Framework Core 尝试处理结果时出现如图所示的错误。  
+必须编写应用程序来处理默认参数值，这可以通过多种方式完成。您可以将回退值添加到控制器（如第 21 章所示）或页面（如第 23 章所示）使用的路由 URL 模式。您可以在操作或页面处理程序方法中定义参数时分配默认值，这是我目前在本书的这一部分所采用的方法。或者您可以简单地编写适应默认值的方法而不会导致错误，如清单 28-8 所示。  
+Listing 28-8. Avoiding a Query Error in the FormController.cs File in the Controllers Folder
+```cs
+.FirstOrDefaultAsync(p => p.ProductId == id));
+```
+如果数据库中没有匹配的对象，Entity Framework Core FirstOrDefaultAsync 方法将返回 null，并且不会尝试加载相关数据。标签助手处理空值并显示空字段，您可以通过重新启动 ASP.NET Core 并请求 http://localhost:5000/controllers/Form 来查看。   
+一些应用程序需要区分缺失值和用户提供的任何值。在这些情况下，可以使用可为 null 的参数类型，如清单 28-9 所示。
+Listing 28-9. Using a Nullable Parameter in the FormController.cs File in the Controllers Folder
+```cs
+```
+只有当请求不包含合适的值时，id 参数才会为 null，这允许传递给 FirstOrDefaultAsync 方法的表达式在没有值时默认为数据库中的第一个对象，并查询任何其他值。要查看效果，请重启 ASP.NET Core 并请求 http://localhost:5000/controllers/Form 和 http://localhost:5000/controllers/Form/index/0。第一个 URL 不包含 id 值，因此选择了数据库中的第一个对象。第二个 URL 提供的 id 值为零，不对应于数据库中的任何对象。图 28-7 显示了这两个结果。

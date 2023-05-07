@@ -13,11 +13,11 @@ public class FormController : Controller
     {
         context = dbContext;
     }
-    public async Task<IActionResult> Index(long id = 1)
+    public async Task<IActionResult> Index(long id)
     {
         ViewBag.Categories = new SelectList(context.Categories, "CategoryId", "Name");
         return View("Form", await context.Products.Include(p => p.Category)
-            .Include(p => p.Supplier).FirstAsync(p => p.ProductId == id));
+            .Include(p => p.Supplier).FirstOrDefaultAsync(p => p.ProductId == id));
     }
     // [HttpPost]
     // public IActionResult SubmitForm()
