@@ -257,3 +257,11 @@ Listing 28-21. Specifying Array Position in the Bindings.cshtml File in the Page
 <input class="form-control" name="Data[2]" value="Item 3" /
 ...
 ```
+
+### Binding to Simple Collections
+模型绑定过程可以创建集合和数组。对于列表和集合等序列集合，仅更改模型绑定器使用的属性或参数的类型，如清单 28-22 所示。
+Listing 28-22. Binding to a List in the Bindings.cshtml File in the Pages Folder
+```cs
+public SortedSet<string> Data { get; set; } = new SortedSet<string>();
+```
+我将 Data 属性的类型更改为 SortedSet<string>。模型绑定过程将使用输入元素的值填充集合，这些值将按字母顺序排序。我在输入元素名称属性上保留了索引符号，但它们没有任何效果，因为集合类将按字母顺序对其值进行排序。要查看效果，请重启 ASP.NET Core ，使用浏览器请求 http://localhost:5000/pages/bindings ，编辑文本字段，然后单击提交按钮。模型绑定过程将使用表单值填充排序集，这些值将按顺序显示，如图 28-16 所示。
