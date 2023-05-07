@@ -212,3 +212,17 @@ public Category Category { get; set; } = new();
 TempData["category"] = System.Text.Json.JsonSerializer.Serialize(Category);
 ```
 此清单添加了一个输入元素，该元素使用 asp-for 属性来选择 Product.Category 属性。页面处理程序类定义了一个 Category 属性，该属性使用 BindProperty 属性进行修饰并使用 Name 参数进行配置。要查看模型绑定过程的结果，请重新启动 ASP.NET Core，使用浏览器请求 http://localhost:5000/pages/form，然后单击提交按钮。模型绑定会为两个装饰属性找到值，这会产生如图 28-11 所示的响应。
+
+### Selectively Binding Properties
+一些模型类定义了敏感的属性，用户不应为其指定值。例如，用户可以更改产品对象的类别，但不能更改价格。您可能会想简单地创建省略敏感属性 HTML 元素的视图，但这不会阻止恶意用户制作包含值的 HTTP 请求，这被称为**过度绑定攻击**。**为了防止模型绑定器使用敏感属性的值，可以指定应该绑定的属性列表**，如清单 28-18 所示。
+Listing 28-18. Selectively Binding Properties in the FormController.cs File in the Controllers Folder
+```cs
+[HttpPost]
+public IActionResult SubmitForm([Bind("Name", "Category")] Product product) {
+TempData["name"] = product.Name;
+TempData["price"] = product.Price.ToString();
+TempData["category name"] = product.Category?.Name;
+return RedirectToAction(nameof(Results));
+}
+```
+我已返回到操作方法参数的 Product 类型，该参数已使用 Bind 属性进行修饰以指定应包含在模型绑定过程中的属性的名称。此示例告诉模型绑定功能查找 Name 和 Category 属性的值，这从过程中排除了任何其他属性。重新启动 ASP.NET Core，导航到 http://localhost:5000/controllers/Form，然后提交表单。即使浏览器将 Price 属性的值作为 HTTP POST 请求的一部分发送，它也会被模型绑定器忽略，如图 28-12 所示。
