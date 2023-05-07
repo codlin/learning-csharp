@@ -418,3 +418,42 @@ category :
 supplierId : 0
 supplier :
 ```
+
+## Manually Model Binding
+当您为操作或处理程序方法定义参数或应用 BindProperty 属性时，会自动应用模型绑定。如果您始终遵循命名约定并且始终希望应用该过程，则自动模型绑定效果很好。如果你需要控制绑定过程或者你想有选择地执行绑定，那么你可以手动执行模型绑定，如清单 28-32 所示。  
+Listing 28-32. Manually Binding in the Bindings.cshtml File in the Pages Folder
+```html
+<form asp-page="Bindings" method="post">
+    <div class="form-group">
+        <label>Name</label>
+        <input class="form-control" asp-for="Data.Name" />
+    </div>
+    <div class="form-group">
+        <label>Price</label>
+        <input class="form-control" asp-for="Data.Price" value="@(Model.Data.Price + 1)" />
+    </div>
+    <div class="form-check m-2">
+        <input class="form-check-input" type="checkbox" name="bind" value="true" checked />
+        <label class="form-check-label">Model Bind?</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a class="btn btn-secondary" asp-page="Bindings">Reset</a>
+</form>
+...
+<tr>
+    <td>@Model.Data.Name</td>
+    <td>@Model.Data.Price</td>
+</tr>
+...
+public async Task OnPostAsync([FromForm] bool bind)
+{
+    if (bind)
+    {
+        await TryUpdateModelAsync<Product>(Data,
+        "data", p => p.Name, p => p.Price);
+    }
+}
+```
+手动模型绑定是使用由 PageModel 和 ControllerBase 类提供的 TryUpdateModelAsync 方法执行的，这意味着它可用于 Razor Pages 和 MVC 控制器。  
+此示例混合了自动和手动模型绑定。 OnPostAsync 方法使用自动模型绑定来接收其绑定参数的值，该参数已使用 FromForm 属性进行修饰。如果参数值为 true，则使用 TryUpdateModelAsync 方法应用模型绑定。 TryUpdateModelAsync 方法的参数是将被模型绑定的对象、值的前缀以及一系列选择将包含在过程中的属性的表达式，尽管还有其他版本的 TryUpdateModelAsync 方法可用。    
+结果是，仅当用户选中添加到清单 28-32 中的表单的复选框时，才会执行 Data 属性的模型绑定过程。如果未选中该复选框，则不会发生模型绑定，并且会忽略表单数据。为了在使用模型绑定时使其明显可见，Price 属性的值在呈现窗体时递增。为查看效果，重启ASP.NET Core，请求http://localhost:5000/pages/bindings，提交表单，选中复选框，然后取消选中，如图28-21所示。
