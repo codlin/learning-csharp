@@ -285,3 +285,47 @@ Listing 28-23. Binding to a Dictionary in the Bindings.cshtml File in the Pages 
 </table>
 ```
 为集合提供值的所有元素必须共享一个公共前缀，在此示例中为 Data，后跟方括号中的键值。此示例的键是字符串 first、second 和 third，它们将用作用户在文本字段中提供的内容的键。要查看绑定过程，请重新启动 ASP.NET Core，请求 http://localhost:5000/pages/bindings，编辑文本字段，然后提交表单。来自表单数据的键和值将显示在一个表中，如图 28-17 所示。
+
+### Binding to Collections of Complex Types
+本节中的示例都是简单类型的集合，但同样的过程也可用于复杂类型。为了演示，清单 28-24 修改了 Razor 页面以收集用于绑定到 Product 对象数组的详细信息。   
+Listing 28-24. Binding to Complex Types in the Bindings.cshtml File in the Pages Folder
+```html
+@for (int i = 0; i < 2; i++)
+{
+    <div class="form-group">
+        <label>Name #@i</label>
+        <input class="form-control" name="Data[@i].Name" value="Product-@i" />
+    </div>
+    <div class="form-group">
+        <label>Price #@i</label>
+        <input class="form-control" name="Data[@i].Price" value="@(100 + i)" />
+    </div>
+}
+...
+<tr>
+    <th>Name</th>
+    <th>Price</th>
+</tr>
+@foreach (Product p in Model.Data)
+{
+    <tr>
+        <td>@p.Name</td>
+        <td>@p.Price</td>
+    </tr>
+}
+```
+输入元素的名称属性使用数组表示法，后跟句点，然后是它们表示的复杂类型属性的名称。要为 Name 和 Price 属性定义元素，这需要这样的元素：
+```
+...
+<input class="form-control" name="Data[0].Name" />
+...
+<input class="form-control" name="Data[0].Price" />
+...
+```
+在绑定过程中，模型绑定器将尝试为目标类型定义的所有公共属性定位值，为表格数据。此示例依赖于 Product 类定义的 Price 属性的模型绑定，该属性被排除在具有 BindNever 属性的绑定过程之外。从属性`property`,中删除属性`attribute`，如清单 28-25 所示。    
+Listing 28-25. Removing an Attribute in the Product.cs File in the Models Folder
+```cs
+//[BindNever]
+public decimal Price { get; set; }
+```
+重启 ASP.NET Core 并使用浏览器请求 http://localhost:5000/pages/bindings。在文本字段中输入名称和价格并提交表单，您将看到根据显示在表中的数据创建的 Product 对象的详细信息，如图 28-18 所示。
