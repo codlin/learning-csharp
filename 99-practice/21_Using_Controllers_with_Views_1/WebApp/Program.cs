@@ -1,8 +1,10 @@
 // using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.EntityFrameworkCore;
-using WebApp.Models;
 // using WebApp.TagHelpers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+using WebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DataContext>(opts =>
@@ -20,6 +22,8 @@ builder.Services.Configure<AntiforgeryOptions>(opts =>
 });
 // builder.Services.AddTransient<ITagHelperComponent, TimeTagHelperComponent>();
 // builder.Services.AddTransient<ITagHelperComponent, TableFooterTagHelperComponent>();
+builder.Services.Configure<MvcOptions>(opts => opts.ModelBindingMessageProvider
+    .SetValueMustNotBeNullAccessor(value => "Please enter a value"));
 
 var app = builder.Build();
 app.UseStaticFiles();

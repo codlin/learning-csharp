@@ -54,8 +54,322 @@ Listing 29-7. Including a Partial View in the Form.cshtml File in the Views/Form
 ```html
 <partial name="_Validation" />
 ```
-JavaScript 代码在浏览器解析完 HTML 文档中的所有元素时运行，其效果是突出显示已分配给 inputvalidaton-error 类的输入元素。您可以通过重新启动 ASP.NET Core、导航到 http://localhost:5000/controllers/form、清除 Name 字段的内容并提交表单来查看效果，结果如图 29-2 所示。图 29-2 清楚地表明 Name 字段有问题，但没有提供有关检测到的问题的任何详细信息。为用户提供更多信息需要使用不同的标签助手，它将问题的摘要添加到视图中，如清单 29-8 所示。 ValidationSummaryTagHelper 类检测 div 元素上的 asp-validation-summary 属性，并通过添加描述已记录的任何验证错误的消息进行响应。 asp-validation-summary 属性的值是来自 ValidationSummary 枚举的一个值，它定义了表 29-4 中显示的值，我稍后将对此进行演示。显示错误消息有助于用户理解无法处理表单的原因。重新启动 ASP。 NET Core，请求 http://localhost:5000/controllers/form，清除 Name 字段，然后提交表单。如图 29-3 所示，现在有一条错误消息说明已检测到问题。
-图 29-3 中显示的错误消息是由隐式验证过程生成的，该过程在模型绑定期间自动执行。隐式验证简单但有效，有两个基本检查：用户必须为所有使用不可空类型定义的属性提供值，ASP.NET Core 必须能够解析在 HTTP 中接收到的字符串值请求到相应的属性类型。提醒一下，这里是Product类的定义，它是用来接收表单数据的类： Name属性的类型是一个不可为空的字符串，这就是清除字段时报验证错误的原因在上一节中。 Name 属性没有解析问题，因为从 HTTP 请求接收的字符串值不需要任何类型转换。在 Price 字段中输入 10 并提交表格；您将看到一个错误，表明 ASP.NET Core 无法将 HTTP 请求中的字符串解析为 Price 属性所需的十进制值，如图 29-4 所示。隐式验证处理基础问题，但大多数应用程序需要额外的检查以确保它们接收到有用的数据。这称为显式验证，它是使用表 29-4 中描述的 ModelStateDictionary 方法完成的。为避免显示冲突的错误消息，显式验证通常仅在用户提供已通过隐式检查的值时进行。 ModelStateDictionary.GetValidationState 方法用于查看是否为模型属性记录了任何错误。 GetValidationState 方法从 ModelValidationState 枚举返回一个值，该枚举定义表 29-5 中描述的值。清单 29-9 为 Product 类定义的一些属性定义了显式验证检查。作为使用 ModelStateDictionary 的示例，请考虑如何验证 Price 属性。 Product 类的验证要求之一是确保用户为 Price 属性提供正值。这是 ASP.NET Core 无法从 Product 类推断出来的东西，因此需要显式验证。我首先确保 Price 属性不存在验证错误：我想确保用户提供的 Price 值大于零，但如果用户提供了模型联编程序无法转换为十进制值的值。在执行我自己的验证检查之前，我使用 GetValidationState 方法确定 Price 属性的验证状态：
-如果用户提供的值小于或等于零，那么我将使用 AddModelError 方法记录验证错误： AddModelError 方法的参数是属性名称和将显示给用户的字符串描述验证问题。对于 CategoryId 和 SupplierId 属性，我遵循类似的过程并使用 Entity Framework Core 来确保用户提供的值与存储在数据库中的 ID 相对应。执行显式验证检查后，我使用 ModelState.IsValid 属性查看是否有错误，这意味着隐式或显式验证错误将以相同的方式报告。要查看显式验证的效果，请重新启动 ASP.NET Core，请求 http://localhost:5000/controllers/form，然后在 Price、CategoryId 和 SupplierId 字段中输入 0。提交表单，您将看到如图 29-5 所示的验证错误。当涉及到显示的验证消息时，验证过程有一些不一致。并非模型绑定器生成的所有验证消息都对用户有帮助，您可以通过清除价格字段并提交表单来查看。空字段会产生以下消息：隐式验证过程在找不到属性值时将此消息添加到 ModelStateDictionary。例如，与字符串属性的缺失值相比，小数属性的缺失值会导致不同的消息，而且用处不大。这是因为执行验证检查的方式不同。一些验证错误的默认消息可以使用 DefaultModelBindingMessageProvider 类定义的方法替换为自定义消息，表 29-6 中描述了其中最有用的方法。表中描述的每个方法都接受一个函数，该函数被调用以获取验证消息以显示给用户。这些方法是通过 Program.cs 文件中的选项模式应用的，如清单 29-10 所示，我在其中替换了当值为 null 或无法转换时显示的默认消息。您指定的函数接收用户提供的值，尽管这在处理空值时不是特别有用。要查看自定义消息，请重新启动 ASP.NET Core，使用浏览器请求 http://localhost:5000/controllers/form，然后提交带有空价格字段的表单。响应将包含自定义错误消息，如图 29-6 所示。
-图 29-6 还显示了缺少名称字段时显示的消息，该消息不受表 29-6 中设置的影响。这是验证不可为 null 的模型属性的方式的一个怪癖，其行为就像 Required 属性已应用于不可为 null 的属性一样。我将在本章后面描述 Required 属性，并解释如何使用它来更改不可为空属性的错误消息。尽管自定义错误消息比默认错误消息更有意义，但它仍然没有那么有用，因为它没有清楚地指出问题与哪个字段有关。对于此类错误，将验证错误消息与包含问题数据的 HTML 元素一起显示更有用。这可以使用 ValidationMessageTag 标签助手来完成，它查找具有 asp-validationfor 属性的 span 元素，该属性用于指定应显示错误消息的属性。在清单 29-11 中，我为表单中的每个输入元素添加了属性级验证消息元素。由于 span 元素是内联显示的，因此必须小心呈现验证消息，以明确消息与哪个元素相关。您可以通过重新启动 ASP.NET Core、请求 http://localhost:5000/controllers/form、清除名称和价格字段并提交表单来查看新验证消息的效果。如图 29-7 所示，响应包括文本字段旁边的验证消息。验证摘要消息似乎是多余的，因为它重复了属性级消息。但摘要有一个有用的技巧，即能够显示适用于整个模型的消息，而不仅仅是单个属性。这意味着您可以报告由单个属性的组合引起的错误，否则很难用属性级消息来表达这些错误。在清单 29-12 中，我向 FormController.SubmitForm 操作添加了一个检查，当 Name 值以 Small 开头且 Price 值超过 100 时记录验证错误。如果用户输入以 Small 开头的名称值和大于 100 的价格值，则会记录模型级验证错误。只有当各个属性值没有验证问题时，我才会检查值的组合，这确保用户不会看到冲突的消息。与整个模型相关的验证错误使用带有空字符串作为第一个参数的 AddModelError 来记录。
-清单 29-13 将 asp-validation-summary 属性的值更改为 ModelOnly，这排除了属性级错误，这意味着摘要将仅显示适用于整个模型的那些错误。重新启动 ASP.NET Core 并请求 http://localhost:5000/controllers/form。在名称字段中输入 Small Kayak，在价格字段中输入 150，然后提交表格。响应将包括模型级错误消息，如图 29-8 所示。 Razor 页面验证依赖于上一节中控制器中使用的相同功能。清单 29-14 向 FormHandler 页面添加了显式验证检查和错误摘要。 PageModel 类定义了一个 ModelState 属性，该属性等同于我在控制器中使用的属性并允许记录验证错误。验证过程是相同的，但在记录错误时必须小心，以确保名称与 Razor Pages 使用的模式相匹配。当我在控制器中记录错误时，我使用 nameof 关键字来选择与错误相关的属性，如下所示： 这是一个常见的约定，因为它可以确保错别字不会导致错误记录错误。此表达式在 Razor 页面中不起作用，其中必须针对 Product.Price 而不是 Price 记录错误，以反映 Razor 页面中的 @Model 表达式返回页面模型对象，如下所示：要测试验证过程，重启ASP.NET Core，使用浏览器请求http://localhost:5000/pages/form，提交空字段或无法转换成Product类要求的C#类型值的表单。错误消息的显示与控制器的错误消息相同，如图 29-9 所示。 （值 1、2 和 3 对 CategoryId 和 SupplierId 字段都有效。）
+JavaScript 代码在浏览器解析完 HTML 文档中的所有元素时运行，其效果是突出显示已分配给 inputvalidaton-error 类的输入元素。您可以通过重新启动 ASP.NET Core、导航到 http://localhost:5000/controllers/form、清除 Name 字段的内容并提交表单来查看效果，结果如图 29-2 所示。  
+
+### Displaying Validation Messages
+图 29-2 清楚地表明 Name 字段有问题，但没有提供有关检测到的问题的任何详细信息。为用户提供更多信息需要使用不同的标签助手，它将问题的摘要添加到视图中，如清单 29-8 所示。   
+Listing 29-8. Displaying a Summary in the Form.cshtml File in the Views/Form Folder
+```html
+<form asp-action="submitform" method="post" id="htmlform">
+    <div asp-validation-summary="All" class="text-danger"></div>
+</form>
+```
+ValidationSummaryTagHelper 类检测 div 元素上的 asp-validation-summary 属性，并通过添加描述已记录的任何验证错误的消息进行响应。 asp-validation-summary 属性的值是来自 ValidationSummary 枚举的一个值，它定义了表 29-4 中显示的值，我稍后将对此进行演示。
+Table 29-4. The ValidationSummary Values  
+| Name | Description |
+|-|-|
+| All | 该值用于显示已记录的所有验证错误。|
+| ModelOnly | 此值仅用于显示整个模型的验证错误，不包括为单个属性记录的错误，如“显示模型级消息”部分所述。|
+| None | 该值用于禁用标签助手，这样它就不会转换 HTML 元素。|
+
+显示错误消息有助于用户理解无法处理表单的原因。重新启动 ASP.NET Core，请求 http://localhost:5000/controllers/form，清除 Name 字段，然后提交表单。如图 29-3 所示，现在有一条错误消息说明已检测到问题。  
+
+### Understanding the Implicit Validation Checks
+图 29-3 中显示的错误消息是由隐式验证过程生成的，该过程在模型绑定期间自动执行。  
+隐式验证简单但有效，有两个基本检查：用户必须为所有使用不可空类型定义的属性提供值，ASP.NET Core 必须能够解析在 HTTP 中接收到的字符串值请求到相应的属性类型。  
+提醒一下，这里是Product类的定义，它是用来接收表单数据的类： `Models/Product.cs`  
+Name属性的类型是一个不可为空的字符串，这就是清除字段时报验证错误的原因在上一节中。 Name 属性没有解析问题，因为从 HTTP 请求接收的字符串值不需要任何类型转换。在 Price 字段中输入 10 并提交表格；您将看到一个错误，表明 ASP.NET Core 无法将 HTTP 请求中的字符串解析为 Price 属性所需的十进制值。
+
+### Performing Explicit Validation
+隐式验证处理基础问题，但大多数应用程序需要额外的检查以确保它们接收到有用的数据。这称为**显式验证**，它是使用表 29-4 中描述的 ModelStateDictionary 方法完成的。  
+为避免显示冲突的错误消息，显式验证通常仅在用户提供已通过隐式检查的值时进行。 ModelStateDictionary.GetValidationState 方法用于查看是否为模型属性记录了任何错误。 GetValidationState 方法从 ModelValidationState 枚举返回一个值，该枚举定义表 29-5 中描述的值。
+Table 29-5. The ModelValidationState Values  
+| Name | Description |
+|-|-|
+| Unvalidated | 该值意味着没有对模型属性执行任何验证，通常是因为请求中没有与属性名称对应的值。|
+| Valid | 该值表示与该属性相关联的请求值是有效的。|
+| Invalid | 此值表示与该属性关联的请求值无效，不应使用。|
+| Skipped | 这个值意味着模型属性还没有被处理，这通常意味着有太多的验证错误以至于没有必要继续执行验证检查。|
+
+清单 29-9 为 Product 类定义的一些属性定义了显式验证检查。  
+Listing 29-9. Performing Explicit Validation in the FormController.cs File in the Controllers Folder  
+```cs
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+...
+if (ModelState.GetValidationState(nameof(Product.Price))
+    == ModelValidationState.Valid && product.Price <= 0)
+{
+    ModelState.AddModelError(nameof(Product.Price), "Enter a positive price");
+}
+if (ModelState.GetValidationState(nameof(Product.CategoryId))
+    == ModelValidationState.Valid && !context.Categories.Any(c => c.CategoryId == product.CategoryId))
+{
+    ModelState.AddModelError(nameof(Product.CategoryId), "Enter an existing category ID");
+}
+if (ModelState.GetValidationState(nameof(Product.SupplierId))
+    == ModelValidationState.Valid && !context.Suppliers.Any(s => s.SupplierId == product.SupplierId))
+{
+    ModelState.AddModelError(nameof(Product.SupplierId), "Enter an existing supplier ID");
+}
+```
+作为使用 ModelStateDictionary 的示例，请考虑如何验证 Price 属性。 Product 类的验证要求之一是确保用户为 Price 属性提供正值。这是 ASP.NET Core 无法从 Product 类推断出来的东西，因此需要显式验证。  
+我首先确保 Price 属性不存在验证错误：
+```cs
+...
+ModelState.GetValidationState(nameof(Product.Price)) == ModelValidationState.Valid
+...
+```
+我想确保用户提供的 Price 值大于零，但如果用户提供了模型联编程序无法转换为十进制值的值。在执行我自己的验证检查之前，我使用 GetValidationState 方法确定 Price 属性的验证状态：
+```cs
+...
+product.Price <= 0
+...
+```
+如果用户提供的值小于或等于零，那么我将使用 AddModelError 方法记录验证错误： 
+```cs
+ModelState.AddModelError(nameof(Product.Price), "Enter a positive price");
+```
+AddModelError 方法的参数是属性名称和将显示给用户的字符串描述验证问题。对于 CategoryId 和 SupplierId 属性，我遵循类似的过程并使用 Entity Framework Core 来确保用户提供的值与存储在数据库中的 ID 相对应。  
+执行显式验证检查后，我使用 ModelState.IsValid 属性查看是否有错误，这意味着隐式或显式验证错误将以相同的方式报告。  
+要查看显式验证的效果，请重新启动 ASP.NET Core，请求 http://localhost:5000/controllers/form，然后在 Price、CategoryId 和 SupplierId 字段中输入 0。提交表单，您将看到如图 29-5 所示的验证错误。  
+
+### Configuring the Default Validation Error Messages
+当涉及到显示的验证消息时，验证过程有一些不一致。并非模型绑定器生成的所有验证消息都对用户有帮助，您可以通过清除价格字段并提交表单来查看。空字段会产生以下消息：
+```log
+The value '' is invalid
+```
+隐式验证过程在找不到属性值时将此消息添加到 ModelStateDictionary 。例如，与字符串属性的缺失值相比，小数属性的缺失值会导致不同的消息，而且用处不大。这是因为执行验证检查的方式不同。一些验证错误的默认消息可以使用 DefaultModelBindingMessageProvider 类定义的方法替换为自定义消息，表 29-6 中描述了其中最有用的方法。  
+Table 29-6. Useful DefaultModelBindingMessageProvider Methods  
+**忽略**
+
+表中描述的每个方法都接受一个函数，该函数被调用以获取验证消息以显示给用户。这些方法是通过 Program.cs 文件中的选项模式应用的，如清单 29-10 所示，我在其中替换了当值为 null 或无法转换时显示的默认消息。  
+Listing 29-10. Changing a Validation Message in the Program.cs File in the WebApp Folder
+```cs
+using Microsoft.AspNetCore.Mvc;
+...
+builder.Services.Configure<MvcOptions>(opts => opts.ModelBindingMessageProvider
+    .SetValueMustNotBeNullAccessor(value => "Please enter a value"));
+```
+您指定的函数接收用户提供的值，尽管这在处理空值时不是特别有用。要查看自定义消息，请重新启动 ASP.NET Core，使用浏览器请求 http://localhost:5000/controllers/form，然后提交带有空价格字段的表单。响应将包含自定义错误消息，如图 29-6 所示。
+图 29-6 还显示了缺少名称字段时显示的消息，该消息不受表 29-6 中设置的影响。这是验证不可为 null 的模型属性的方式的一个怪癖，其行为就像 Required 属性已应用于不可为 null 的属性一样。我将在本章后面描述 Required 属性，并解释如何使用它来更改不可为空属性的错误消息。
+
+### Displaying Property-Level Validation Messages
+尽管自定义错误消息比默认错误消息更有意义，但它仍然没有那么有用，因为它没有清楚地指出问题与哪个字段有关。对于此类错误，将验证错误消息与包含问题数据的 HTML 元素一起显示更有用。这可以使用 ValidationMessageTag 标签助手来完成，它查找具有 asp-validationfor 属性的 span 元素，该属性用于指定应显示错误消息的属性。  
+在清单 29-11 中，我为表单中的每个输入元素添加了属性级验证消息元素。  
+Listing 29-11. Adding Property-Level Messages in the Form.cshtml File in the Views/Form Folder
+```html
+<div><span asp-validation-for="Name" class="text-danger"></span></div>
+...
+<div><span asp-validation-for="Price" class="text-danger"></span></div>
+...
+<div><span asp-validation-for="CategoryId" class="text-danger"></span></div>
+...
+<div><span asp-validation-for="SupplierId" class="text-danger"></span></div>
+```
+由于 span 元素是内联显示的，因此必须小心呈现验证消息，以明确消息与哪个元素相关。您可以通过重新启动 ASP.NET Core、请求 http://localhost:5000/controllers/form、清除名称和价格字段并提交表单来查看新验证消息的效果。如图 29-7 所示，响应包括文本字段旁边的验证消息。
+
+### Displaying Model-Level Messages
+验证摘要消息似乎是多余的，因为它重复了属性级消息。但摘要有一个有用的技巧，即能够显示适用于整个模型的消息，而不仅仅是单个属性。这意味着您可以报告由单个属性的组合引起的错误，否则很难用属性级消息来表达这些错误。  
+在清单 29-12 中，我向 FormController.SubmitForm 操作添加了一个检查，当 Name 值以 Small 开头且 Price 值超过 100 时记录验证错误。  
+Listing 29-12. Performing Model-Level Validation in the FormController.cs File in the Controllers Folder
+```cs
+if (ModelState.GetValidationState(nameof(Product.Name)) == ModelValidationState.Valid
+    && ModelState.GetValidationState(nameof(Product.Price)) == ModelValidationState.Valid
+    && product.Name.ToLower().StartsWith("small") && product.Price > 100) 
+{
+    ModelState.AddModelError("", "Small products cannot cost more than $100");
+}
+```
+如果用户输入以 Small 开头的名称值和大于 100 的价格值，则会记录模型级验证错误。只有当各个属性值没有验证问题时，我才会检查值的组合，这确保用户不会看到冲突的消息。与整个模型相关的验证错误使用带有空字符串作为第一个参数的 AddModelError 来记录。
+清单 29-13 将 asp-validation-summary 属性的值更改为 ModelOnly，这排除了属性级错误，这意味着摘要将仅显示适用于整个模型的那些错误。  
+Listing 29-13. Configuring the Validation Summary in the Form.cshtml File in the Views/Form Folder
+```html
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+```
+重新启动 ASP.NET Core 并请求 http://localhost:5000/controllers/form。在名称字段中输入 Small Kayak，在价格字段中输入 150，然后提交表格。响应将包括模型级错误消息，如图 29-8 所示。  
+
+## Explicitly Validating Data in a Razor Page
+Razor 页面验证依赖于上一节中控制器中使用的相同功能。清单 29-14 向 FormHandler 页面添加了显式验证检查和错误摘要。  
+Listing 29-14. Validating Data in the FormHandler.cshtml File in the Pages Folder
+```cshtml
+@page "/pages/form/{id:long?}"
+@model FormHandlerModel
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+
+<partial name="_Validation" />
+
+<div class="m-2">
+    <h5 class="bg-primary text-white text-center p-2">HTML Form</h5>
+    <form asp-page="FormHandler" method="post" id="htmlform">
+        <div class="form-group">
+            <label>Name</label>
+            <div>
+                <span asp-validation-for="Product.Name" class="text-danger"></span>
+            </div>
+            <input class="form-control" asp-for="Product.Name" />
+        </div>
+        <div class="form-group">
+            <label>Price</label>
+            <div>
+                <span asp-validation-for="Product.Price" class="text-danger"></span>
+            </div>
+            <input class="form-control" asp-for="Product.Price" />
+        </div>
+        <div class="form-group">
+            <label>Category Name</label>
+            @{
+                #pragma warning disable CS8602
+            }
+            <input class="form-control" asp-for="Product.Category.Name" />
+            @{
+                #pragma warning restore CS8602
+            }
+        </div>
+        <div class="form-group">
+            <label>CategoryId</label>
+            <div>
+                <span asp-validation-for="Product.CategoryId" class="text-danger">
+                </span>
+            </div>
+            <input class="form-control" asp-for="Product.CategoryId" />
+        </div>
+        <div class="form-group">
+            <label>SupplierId</label>
+            <div>
+                <span asp-validation-for="Product.SupplierId" class="text-danger">
+                </span>
+            </div>
+            <input class="form-control" asp-for="Product.SupplierId" />
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Submit</button>
+    </form>
+    <button form="htmlform" asp-page="FormHandler" class="btn btn-primary mt-2">
+        Submit (Outside Form)
+    </button>
+</div>
+
+@functions {
+    [IgnoreAntiforgeryToken]
+    public class FormHandlerModel : PageModel
+    {
+        private DataContext context;
+        public FormHandlerModel(DataContext dbContext)
+        {
+            context = dbContext;
+        }
+
+        [BindProperty]
+        public Product? Product { get; set; }
+
+        public async Task OnGetAsync(long id = 1)
+        {
+            Product = await context.Products.FirstAsync(p => p.ProductId == id);
+        }
+
+        public IActionResult OnPost()
+        {
+            if (ModelState.GetValidationState("Product.Price") == ModelValidationState.Valid && Product.Price < 1)
+            {
+                ModelState.AddModelError("Product.Price", "Enter a positive price");
+            }
+            if (ModelState.GetValidationState("Product.Name")
+                == ModelValidationState.Valid
+                && ModelState.GetValidationState("Product.Price")
+                == ModelValidationState.Valid
+                && Product.Name.ToLower().StartsWith("small")
+                && Product.Price > 100)
+            {
+                ModelState.AddModelError("",
+                "Small products cannot cost more than $100");
+            }
+            if (ModelState.GetValidationState("Product.CategoryId")
+            == ModelValidationState.Valid &&
+            !context.Categories.Any(c => c.CategoryId == Product.CategoryId))
+            {
+                ModelState.AddModelError("Product.CategoryId",
+                "Enter an existing category ID");
+            }
+            if (ModelState.GetValidationState("Product.SupplierId")
+            == ModelValidationState.Valid &&
+            !context.Suppliers.Any(s => s.SupplierId == Product.SupplierId))
+            {
+                ModelState.AddModelError("Product.SupplierId",
+                "Enter an existing supplier ID");
+            }
+            if (ModelState.IsValid)
+            {
+                TempData["name"] = Product.Name;
+                TempData["price"] = Product.Price.ToString();
+                TempData["categoryId"] = Product.CategoryId.ToString();
+                TempData["supplierId"] = Product.SupplierId.ToString();
+                return RedirectToPage("FormResults");
+            }
+            else
+            {
+                return Page();
+            }
+        }
+    }
+}
+```
+
+PageModel 类定义了一个 ModelState 属性，该属性等同于我在控制器中使用的属性并允许记录验证错误。验证过程是相同的，但在记录错误时必须小心，以确保名称与 Razor Pages 使用的模式相匹配。当我在控制器中记录错误时，我使用 nameof 关键字来选择与错误相关的属性，如下所示：   
+```cs
+...
+ModelState.AddModelError(nameof(Product.Price),"Enter a positive price");
+...
+```
+这是一个常见的约定，因为它可以确保错别字不会导致错误记录错误。此表达式在 Razor 页面中不起作用，其中必须针对 Product.Price 而不是 Price 记录错误，以反映 Razor 页面中的 @Model 表达式返回页面模型对象，如下所示：
+```cs
+...
+ModelState.AddModelError("Product.Price", "Enter a positive price");
+...
+```
+要测试验证过程，重启ASP.NET Core，使用浏览器请求http://localhost:5000/pages/form，提交空字段或无法转换成Product类要求的C#类型值的表单。错误消息的显示与控制器的错误消息相同，如图 29-9 所示。 （值 1、2 和 3 对 CategoryId 和 SupplierId 字段都有效。）
+
+## Specifying Validation Rules Using Metadata
+将验证逻辑放入操作方法中的一个问题是它最终会在从用户接收数据的每个操作或处理程序方法中重复。为了帮助减少重复，验证过程支持使用属性直接在模型类中表达模型验证规则，确保无论使用哪种操作方法处理请求，都将应用同一组验证规则。在清单 29-15 中，我已将属性应用于 Product 类以描述 Name 和 Price 属性所需的验证。  
+Listing 29-15. Applying Validation Attributes in the Product.cs File in the Models Folder
+```cs
+[Required(ErrorMessage = "Please enter a value")]
+public string Name { get; set; } = string.Empty;
+
+[Range(1, 999999, ErrorMessage = "Please enter a positive price")]
+[Column(TypeName = "decimal(8, 2)")]
+public decimal Price { get; set; }
+```
+我在清单中使用了两个验证属性： Required 和 Range 。 Required 特性指定如果用户未提交属性值则为验证错误，这在您拥有可为空的属性但想要从用户那里获取值时很有用。  
+我在清单 29-15 中使用了 Required 属性来更改当用户没有为 Name 属性提供值时显示的错误消息。如前所述，隐式验证检查在处理不可空属性的方式上不一致，但这可以使用所有验证属性定义的 ErrorMessage 参数来纠正。  
+我还在清单 29-15 中应用了 Range 属性，它允许我为 Price 属性指定一组可接受的值。表 29-7 显示了一组可用的内置验证属性。  
+Table 29-7. The Built-in Validation Attributes
+**忽略**
+
+validation 属性的使用允许我从 action 方法中删除一些显式验证，如清单 29-16 所示。  
+Listing 29-16. Removing Explicit Validation in the FormController.cs File in the Controllers Folder  
+```cs
+[HttpPost]
+public IActionResult SubmitForm(Product product) {
+    //if (ModelState.GetValidationState(nameof(Product.Price))
+    // == ModelValidationState.Valid && product.Price <= 0) {
+    // ModelState.AddModelError(nameof(Product.Price),
+    // "Enter a positive price");
+    //}
+    ...
+}
+```
+要查看正在运行的验证属性，请重新启动 ASP.NET Core MVC，请求 http://localhost:5000/controllers/form，清除 Name 和 Price 字段，然后提交表单。响应将包括由 Price 字段的属性产生的验证错误和 Name 字段的新消息，如图 29-10 所示。验证属性在调用操作方法之前应用，这意味着在执行模型级验证时，我仍然可以依赖模型状态来确定各个属性是否有效。
+
+**VALIDATION WORK AROUNDS**
+在使用验证属性时，获得您需要的验证结果需要多加注意。例如，如果要确保用户已选中复选框，则不能使用 Required 属性，因为当复选框未选中时浏览器将发送 false 值，这将始终通过 Required 属性应用的检查。相反，使用 Range 属性并将最小值和最大值指定为 true，如下所示： 
+```
+...
+[Range(typeof(bool), "true", "true", ErrorMessage="You must check the box")]
+...
+```
+如果这种解决方法感觉不舒服，那么您可以创建自定义验证属性，如下一节所述。要查看正在运行的验证属性，请重新启动 ASP.NET Core MVC，请求 http://localhost:5000/controllers/form，清除 Name 和 Price 字段，然后提交表单。响应将包括属性产生的验证错误，如图 29-10 所示。
+
+**UNDERSTANDING WEB SERVICE CONTROLLER VALIDATION**
+**使用 ApiController 属性装饰的控制器不需要检查 ModelState.IsValid 属性**。相反，只有在没有验证错误时才会调用 action 方法，这意味着您始终可以依赖于通过模型绑定功能接收经过验证的对象。如果检测到任何验证错误，则请求终止，并向浏览器发送错误响应。
+
