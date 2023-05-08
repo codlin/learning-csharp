@@ -1,6 +1,6 @@
 @model Product
 @{
-    Layout = "_SimpleLayout";
+    Layout = "_SimpleLayout"; 
 }
 <h5 class="bg-primary text-white text-center p-2">HTML Form</h5>
 <form asp-action="submitform" method="post" id="htmlform">
@@ -13,15 +13,12 @@
         <input class="form-control" asp-for="Price" />
     </div>
     <div class="form-group">
-        <label>Category Name</label>
-        @{
-            #pragma warning disable CS8602
-        }
-        <input class="form-control" name="Category.Name" value="@Model.Category.Name" />
-        <input class="form-control" asp-for="Category.Name" />
-        @{
-            #pragma warning restore CS8602
-        }
+        <label>CategoryId</label>
+        <input class="form-control" asp-for="CategoryId" />
+    </div>
+    <div class="form-group">
+        <label>SupplierId</label>
+        <input class="form-control" asp-for="SupplierId" />
     </div>
     <button type="submit" class="btn btn-primary mt-2">Submit</button>
 </form>

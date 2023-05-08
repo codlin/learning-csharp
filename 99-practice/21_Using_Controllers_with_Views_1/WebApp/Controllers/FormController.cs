@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApp.Models;
-
 namespace WebApp.Controllers;
 
 [AutoValidateAntiforgeryToken]
@@ -13,27 +11,22 @@ public class FormController : Controller
     {
         context = dbContext;
     }
-    public async Task<IActionResult> Index([FromQuery] long? id)
+    public async Task<IActionResult> Index(long? id)
     {
-        ViewBag.Categories = new SelectList(context.Categories, "CategoryId", "Name");
-        return View("Form", await context.Products.Include(p => p.Category)
-            .Include(p => p.Supplier).FirstOrDefaultAsync(p => id == null || p.ProductId == id));
+        return View("Form", await context.Products
+        .FirstOrDefaultAsync(p => id == null || p.ProductId == id));
     }
-
+    [HttpPost]
+    public IActionResult SubmitForm(Product product)
+    {
+        TempData["name"] = product.Name;
+        TempData["price"] = product.Price.ToString();
+        TempData["categoryId"] = product.CategoryId.ToString();
+        TempData["supplierId"] = product.SupplierId.ToString();
+        return RedirectToAction(nameof(Results));
+    }
     public IActionResult Results()
     {
-        return View();
-    }
-
-    public string Header([FromHeader(Name = "Accept-Language")] string accept)
-    {
-        return $"Header: {accept}";
-    }
-
-    [HttpPost]
-    [IgnoreAntiforgeryToken]
-    public Product Body([FromBody] Product model)
-    {
-        return model;
+        return View(TempData);
     }
 }
