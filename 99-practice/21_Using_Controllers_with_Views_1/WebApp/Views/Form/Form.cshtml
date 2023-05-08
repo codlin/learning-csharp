@@ -1,8 +1,11 @@
 @model Product
 @{
-    Layout = "_SimpleLayout"; 
+    Layout = "_SimpleLayout";
 }
 <h5 class="bg-primary text-white text-center p-2">HTML Form</h5>
+
+<partial name="_Validation" />
+
 <form asp-action="submitform" method="post" id="htmlform">
     <div class="form-group">
         <label asp-for="Name"></label>
