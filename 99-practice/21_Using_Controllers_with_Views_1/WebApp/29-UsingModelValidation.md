@@ -497,5 +497,25 @@ http://localhost:5000/api/Validation/categorykey?Product.CategoryId=1
 我更喜欢解决这种差异的方式是通过向将接受两种类型请求的验证操作方法添加参数，使用前面章节中描述的模型绑定功能很容易做到这一点，如清单 29-27 所示。  
 Listing 29-27. Adding Parameters in the ValidationController.cs File in the Controllers Folder
 ```cs
+...
+[HttpGet("categorykey")]
+public bool CategoryKey(string? categoryId, [FromQuery] KeyTarget target)
+{
+    long keyVal;
+    return long.TryParse(categoryId ?? target.CategoryId, out keyVal) && dataContext.Categories.Find(keyVal) != null;
+}
+[HttpGet("supplierkey")]
+public bool SupplierKey(string? supplierId, [FromQuery] KeyTarget target)
+{
+    long keyVal;
+    return long.TryParse(supplierId ?? target.SupplierId, out keyVal) && dataContext.Suppliers.Find(keyVal) != null;
+}
 
+[Bind(Prefix = "Product")]
+public class KeyTarget
+{
+    public string? CategoryId { get; set; }
+    public string? SupplierId { get; set; }
+}
+```
 KeyTarget 类被配置为绑定到请求的 Product 部分，其属性将匹配两种类型的远程验证请求。每个操作方法都被赋予了一个 KeyTarget 参数，如果现有参数没有收到任何值，则使用该参数。这允许相同的操作方法适应两种类型的请求，您可以通过重新启动 ASP.NET Core，导航到 http://localhost:5000/pages/form，输入一个不存在的键值，然后单击提交按钮来查看，这将产生如图 29-14 所示的响应。
