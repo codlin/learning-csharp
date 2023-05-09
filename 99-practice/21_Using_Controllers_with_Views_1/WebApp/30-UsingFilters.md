@@ -29,4 +29,16 @@ public IActionResult Secure()
 我必须记住在我想要要求 HTTPS 的每个控制器中的每个操作方法中实施相同的检查。实现安全策略的代码是控制器的重要组成部分——公认的简单——这使得控制器更难理解，我忘记将它添加到新的操作方法中只是时间问题，造成一个漏洞在我的安全策略中。这是过滤器解决的问题类型。清单 30-12 替换了我对 HTTPS 的检查并实现了一个过滤器。  
 Listing 30-12. Applying a Filter in the HomeController.cs File in the Controllers Folder
 ```cs
+[RequireHttps]
+public IActionResult Index()
+{
+    return View("Message",
+    "This is the Index action on the Home controller");
+}
+[RequireHttps]
+public IActionResult Secure()
+{
+    return View("Message",
+    "This is the Secure action on the Home controller");
+}
 ```
