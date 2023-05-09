@@ -296,7 +296,20 @@ public class ChangeArgAttribute : ActionFilterAttribute  // <--HERE
 此属性的行为与早期实现的方式相同，基类的使用是偏好问题。重启 ASP.NET Core 并请求 https://localhost:44350/home/messages? message1=hello&message2=world，你会看到如图30-8所示的响应。
 
 ### Using the Controller Filter Methods
-Controller 类是呈现 Razor 视图的控制器的基础，实现了 IActionFilter 和 IAsyncActionFilter 接口，这意味着您可以定义功能并将其应用于控制器和任何派生控制器定义的操作。清单 30-24 直接在 HomeController 类中实现了 ChangeArg 过滤器功能。 Home 控制器覆盖 OnActionExecuting 方法的 Controller 实现，并使用它来修改将传递给执行方法的参数。重启 ASP.NET Core 并请求 https://localhost:44350/home/messages?message1=hello&message2=world，你将看到如图 30-8 所示的响应。
+Controller 类是呈现 Razor 视图的控制器的基础，实现了 IActionFilter 和 IAsyncActionFilter 接口，这意味着您可以定义功能并将其应用于控制器和任何派生控制器定义的操作。清单 30-24 直接在 HomeController 类中实现了 ChangeArg 过滤器功能。     
+Listing 30-24. Using Action Filter Methods in the HomeController.cs File in the Controllers Folder
+```cs
+using Microsoft.AspNetCore.Mvc.Filters;
+...
+//[ChangeArg]
+...
+public override void OnActionExecuting(ActionExecutingContext context) {
+    if (context.ActionArguments.ContainsKey("message1")) {
+        context.ActionArguments["message1"] = "New message";
+    }
+}
+```
+Home 控制器覆盖 OnActionExecuting 方法的 Controller 实现，并使用它来修改将传递给执行方法的参数。重启 ASP.NET Core 并请求 https://localhost:44350/home/messages?message1=hello&message2=world，你将看到如图 30-8 所示的响应。
 
 ## Understanding Page Filters
 页面过滤器是 Razor 页面等同于`action`过滤器。这是 IPageFilter 接口，由同步页面过滤器实现： OnPageHandlerSelected 方法在 ASP.NET Core 选择页面处理程序方法之后但在执行模型绑定之前调用，这意味着处理程序方法的参数尚未确定.此方法通过 PageHandlerSelectedContext 类接收上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-10 中所示的属性。此方法不能用于使管道短路，但它可以更改将接收请求的处理程序方法。 OnPageHandlerExecuting 方法在模型绑定过程完成之后但在调用页面处理程序方法之前被调用。此方法通过 PageHandlerExecutingContext 类接收上下文，除了由 PageHandlerSelectedContext 类定义的属性外，该类还定义了表 30-11 中所示的属性。在调用页面处理程序方法之后但在处理操作结果以创建响应之前调用 OnPageHandlerExecuted 方法。此方法通过 PageHandlerExecutedContext 类接收上下文，除了 PageHandlerExecutingContext 属性外，该类还定义了表 30-12 中所示的属性。异步页面过滤器是通过实现 IAsyncPageFilter 接口创建的，该接口定义如下： OnPageHandlerSelectionAsync 在选择处理程序方法后调用，相当于同步 OnPageHandlerSelected 方法。 OnPageHandlerExecutionAsync 提供了一个 PageHandlerExecutingContext 对象，允许它短路管道和一个被调用以传递请求的委托。委托生成一个 PageHandlerExecutedContext 对象，该对象可用于检查或更改处理程序方法生成的操作结果。
