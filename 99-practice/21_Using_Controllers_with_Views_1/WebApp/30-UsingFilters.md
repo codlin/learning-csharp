@@ -312,7 +312,51 @@ public override void OnActionExecuting(ActionExecutingContext context) {
 Home 控制器覆盖 OnActionExecuting 方法的 Controller 实现，并使用它来修改将传递给执行方法的参数。重启 ASP.NET Core 并请求 https://localhost:44350/home/messages?message1=hello&message2=world，你将看到如图 30-8 所示的响应。
 
 ## Understanding Page Filters
-页面过滤器是 Razor 页面等同于`action`过滤器。这是 IPageFilter 接口，由同步页面过滤器实现： OnPageHandlerSelected 方法在 ASP.NET Core 选择页面处理程序方法之后但在执行模型绑定之前调用，这意味着处理程序方法的参数尚未确定.此方法通过 PageHandlerSelectedContext 类接收上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-10 中所示的属性。此方法不能用于使管道短路，但它可以更改将接收请求的处理程序方法。 OnPageHandlerExecuting 方法在模型绑定过程完成之后但在调用页面处理程序方法之前被调用。此方法通过 PageHandlerExecutingContext 类接收上下文，除了由 PageHandlerSelectedContext 类定义的属性外，该类还定义了表 30-11 中所示的属性。在调用页面处理程序方法之后但在处理操作结果以创建响应之前调用 OnPageHandlerExecuted 方法。此方法通过 PageHandlerExecutedContext 类接收上下文，除了 PageHandlerExecutingContext 属性外，该类还定义了表 30-12 中所示的属性。异步页面过滤器是通过实现 IAsyncPageFilter 接口创建的，该接口定义如下： OnPageHandlerSelectionAsync 在选择处理程序方法后调用，相当于同步 OnPageHandlerSelected 方法。 OnPageHandlerExecutionAsync 提供了一个 PageHandlerExecutingContext 对象，允许它短路管道和一个被调用以传递请求的委托。委托生成一个 PageHandlerExecutedContext 对象，该对象可用于检查或更改处理程序方法生成的操作结果。
+Page 过滤器是等同于`action`过滤器的 Razor Page 过滤器。这是 IPageFilter 接口，由同步页面过滤器实现：  
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IPageFilter : IFilterMetadata {
+        void OnPageHandlerSelected(PageHandlerSelectedContext context);
+        void OnPageHandlerExecuting(PageHandlerExecutingContext context);
+        void OnPageHandlerExecuted(PageHandlerExecutedContext context);
+    }
+}
+```
+OnPageHandlerSelected 方法在 ASP.NET Core 选择页面处理程序方法之后但在执行模型绑定之前调用，这意味着处理程序方法的参数尚未确定。此方法通过 PageHandlerSelectedContext 类接收上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-10 中所示的属性。此方法不能用于使管道短路，但它可以更改将要接收请求的处理程序方法。   
+Table 30-10. The PageHandlerSelectedContext Properties  
+| Name | Description |
+|-|-|
+| ActionDescriptor | 此属性返回 Razor 页面的描述。 |
+| HandlerMethod | 此属性返回一个描述所选处理程序方法的 HandlerMethodDescriptor 对象。 |
+| HandlerInstance | 此属性返回将处理请求的 Razor 页面实例。 |
+
+OnPageHandlerExecuting 方法在模型绑定过程完成之后但在调用页面处理程序方法之前被调用。此方法通过 PageHandlerExecutingContext 类接收上下文，除了由 PageHandlerSelectedContext 类定义的属性外，该类还定义了表 30-11 中所示的属性。    
+Table 30-11. The PageHandlerExecutingContext Properties  
+| Name | Description |
+|-|-|
+| HandlerArguments | 此属性返回包含页面处理程序参数的字典，按名称索引。 |
+| Result | 过滤器可以通过将 IActionResult 对象分配给此属性来使管道短路。 |
+
+OnPageHandlerExecuted 方法在调用页面处理程序方法之后但在处理操作结果以创建响应之前调用。此方法通过 PageHandlerExecutedContext 类接收上下文，除了 PageHandlerExecutingContext 属性外，该类还定义了表 30-12 中所示的属性。    
+Table 30-12. The PageHandlerExecutedContext Properties
+| Name | Description |
+|-|-|
+| Canceled | 如果另一个过滤器使过滤器管道短路，则此属性返回 true。 |
+| Exception | 如果页面处理程序方法抛出异常，则此属性返回一个异常。 |
+| ExceptionHandled | 此属性设置为 true 以指示页面处理程序抛出的异常已由过滤器处理。 |
+| Result | 此属性返回将用于为客户端创建响应的操作结果。 |
+
+异步页面过滤器是通过实现 IAsyncPageFilter 接口创建的，该接口定义如下：    
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IAsyncPageFilter : IFilterMetadata {
+        Task OnPageHandlerSelectionAsync(PageHandlerSelectedContext context);
+        Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context,
+                PageHandlerExecutionDelegate next);
+    }
+}
+```
+OnPageHandlerSelectionAsync 在选择处理程序方法后调用，相当于同步 OnPageHandlerSelected 方法。 OnPageHandlerExecutionAsync 提供了一个 PageHandlerExecutingContext 对象，允许它短路管道和一个被调用以传递请求的委托。委托生成一个 PageHandlerExecutedContext 对象，该对象可用于检查或更改处理程序方法生成的操作结果。
 
 ### Creating a Page Filter
 要创建页面过滤器，请将名为 ChangePageArgs.cs 的类文件添加到 Filters 文件夹，并使用它来定义如清单 30-25 所示的类。清单 30-25 中的页面过滤器执行与我在上一节中创建的`action`过滤器相同的任务。在清单 30-26 中，我修改了 Message Razor Page 以定义一个处理程序方法并应用了页面过滤器。页面过滤器可以应用于单独的处理程序方法，或者如清单中那样应用于页面模型类，在这种情况下过滤器用于所有处理程序方法。 （我还在清单 30-26 中禁用了 SimpleCache 过滤器。资源过滤器可以与页面过滤器一起工作。我禁用了这个过滤器是因为缓存响应使一些示例更难理解。）重新启动 ASP.NET Core 并请求 https:// localhost:44350/pages/message?message1=hello&message2=world.页面过滤器将替换 OnGet 处理程序方法的 message1 参数的值，它会产生如图 30-9 所示的响应。
