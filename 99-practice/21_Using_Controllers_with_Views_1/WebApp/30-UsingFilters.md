@@ -114,3 +114,20 @@ Table 30-3. The Filter Types, Interfaces, and Attribute Base Classes
 | Result filters | IResultFilterIAsyncResultFilterIAlwaysRunResult FilterIAsyncAlwaysRunResultFilter | ResultFilterAttribute |
 | Exception Filters | IExceptionFilterIAsyncExceptionFilter | ExceptionFilterAttribute |
 
+# Creating Custom Filters
+筛选器实现 IFilterMetadata 接口，该接口位于 Microsoft.AspNetCore.Mvc.Filters 命名空间中。这是接口：
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IFilterMetadata { }
+}
+```
+该接口是空的，不需要过滤器来实现任何特定的行为。这是因为上一节中描述的每个过滤器类别都以不同的方式工作。过滤器以 FilterContext 对象的形式提供上下文数据。为方便起见，表 30-4 描述了 FilterContext 提供的属性。  
+Table 30-4. The FilterContext Properties  
+| Name | Description |
+|-|-|
+| ActionDescriptor | 此属性返回一个 ActionDescriptor 对象，它描述了操作方法。 |
+| HttpContext | 此属性返回一个 HttpContext 对象，它提供 HTTP 请求的详细信息和将作为返回发送的 HTTP 响应。 |
+| ModelState | 该属性返回一个 ModelStateDictionary 对象，用于验证客户端发送的数据。 |
+| RouteData | 此属性返回一个 RouteData 对象，该对象描述路由系统处理请求的方式。 |
+| Filters | 此属性返回已应用于操作方法的过滤器列表，表示为 IList\<IFilterMetadata\>。 |
+
