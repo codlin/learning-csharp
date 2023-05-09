@@ -49,3 +49,29 @@ RequireHttps 属性应用 ASP.NET Core 提供的内置过滤器之一。此过�
 public class HomeController : Controller
 ```
 可以应用不同粒度级别的过滤器。如果您想限制对某些操作的访问而不是其他操作，则可以将 RequireHttps 属性仅应用于这些方法。如果您想保护所有操作方法，包括您将来添加到控制器的任何方法，则可以将 RequireHttps 属性应用于该类。如果你想对应用程序中的每个动作应用一个过滤器，那么你可以使用全局过滤器，我将在本章后面介绍。
+
+## Using Filters in Razor Pages
+筛选器也可用于 Razor Pages。例如，要在 Message Razor 页面中实施仅 HTTPS 策略，我必须添加一个检查连接的处理程序方法，如清单 30-14 所示。  
+Listing 30-14. Checking Connections in the Message.cshtml File in the Pages Folder
+```cs
+public class MessageModel : PageModel {
+    ...
+    public IActionResult OnGet()
+    {
+        if (!Request.IsHttps)
+        {
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+        }
+        else
+        {
+            return Page();
+        }
+    }
+}
+```
+处理程序方法有效，但它很笨拙，并且会出现与操作方法遇到的相同问题。在 Razor Pages 中使用过滤器时，该属性可以应用于处理程序方法，或者如清单 30-15 所示应用于整个类。  
+Listing 30-15. Applying a Filter in the Message.cshtml File in the Pages Folder
+```cs
+[RequireHttps]
+public class MessageModel : PageModel
+```
