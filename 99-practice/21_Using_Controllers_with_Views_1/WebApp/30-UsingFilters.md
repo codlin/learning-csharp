@@ -131,3 +131,38 @@ Table 30-4. The FilterContext Properties
 | RouteData | 此属性返回一个 RouteData 对象，该对象描述路由系统处理请求的方式。 |
 | Filters | 此属性返回已应用于操作方法的过滤器列表，表示为 IList\<IFilterMetadata\>。 |
 
+
+## Understanding Authorization Filters
+授权过滤器用于实施应用程序的安全策略。授权过滤器在其他类型的过滤器之前和端点处理请求之前执行。下面是 IAuthorizationFilter 接口的定义：
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IAuthorizationFilter : IFilterMetadata {
+        void OnAuthorization(AuthorizationFilterContext context);
+    }
+}
+```
+调用 OnAuthorization 方法为过滤器提供授权请求的机会。对于异步授权过滤器，这里是 IAsyncAuthorizationFilter 接口的定义：
+```cs
+using System.Threading.Tasks;
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IAsyncAuthorizationFilter : IFilterMetadata {
+        Task OnAuthorizationAsync(AuthorizationFilterContext context);
+    }
+}
+```
+调用 OnAuthorizationAsync 方法，以便过滤器可以授权请求。无论使用哪个接口，过滤器都会通过 AuthorizationFilterContext 对象接收描述请求的上下文数据，该对象派生自 FilterContext 类并添加了一个重要属性，如表 30-5 中所述。  
+Table 30-5. The AuthorizationFilterContext Property  
+| Name | Description |
+|-|-|
+| Result | 当请求不符合应用程序的授权策略时，授权筛选器会设置此 IActionResult 属性。如果设置了此属性，则 ASP.NET Core 将执行 IActionResult 而不是调用端点。|
+
+### Creating an Authorization Filter
+为了演示授权过滤器的工作原理，我在 WebApp 文件夹中创建了一个 Filters 文件夹，添加了一个名为 HttpsOnlyAttribute.cs 的类文件。
+如果请求符合授权策略，则授权筛选器不执行任何操作，并且无操作允许 ASP.NET Core 继续执行下一个筛选器，并最终执行端点。如果出现问题，过滤器将设置传递给 OnAuthorization 方法的 AuthorizationFilterContext 对象的 Result 属性。这可以防止进一步执行并提供返回给客户端的结果。在清单中，HttpsOnlyAttribute 类检查 HttpRequest 上下文对象的 IsHttps 属性，并设置 Result 属性以在没有 HTTPS 的情况下发出请求时中断执行。授权筛选器可应用于控制器、操作方法和 Razor 页面。清单 30-17 将新过滤器应用于 Home 控制器。  
+Listing 30-17. Applying a Custom Filter in the HomeController.cs File in the Controllers Folder  
+```cs
+using WebApp.Filters;
+...
+[HttpsOnly]
+public class HomeController : Controller
+```
