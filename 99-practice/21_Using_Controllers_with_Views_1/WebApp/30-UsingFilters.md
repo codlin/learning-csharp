@@ -373,7 +373,24 @@ public void OnGet(string message1, string message2) {
 重新启动 ASP.NET Core 并请求 https://localhost:44350/pages/message?message1=hello&message2=world .页面过滤器将替换 OnGet 处理程序方法的 message1 参数的值，它会产生如图 30-9 所示的响应。
 
 ### Using the Page Model Filter Methods
-PageModel 类用作页面模型类的基础，实现了 IPageFilter 和 IAsyncPageFilter 接口，这意味着您可以直接向页面模型添加过滤器功能，如清单 30-27 所示。请求 https://localhost:44350/pages/message?message1=hello&message2=world。清单 30-27 中页面模型类实现的方法将产生与图 30-9 所示相同的结果。
+PageModel 类用作页面模型类的基础，实现了 IPageFilter 和 IAsyncPageFilter 接口，这意味着您可以直接向页面模型添加过滤器功能，如清单 30-27 所示。  
+Listing 30-27. Using the PageModel Filter Methods in the Message.cshtml File in the Pages Folder  
+```cs
+@using Microsoft.AspNetCore.Mvc.Filters
+...
+//[SimpleCache]
+//[ChangePageArgs]
+...
+public override void OnPageHandlerExecuting(
+    PageHandlerExecutingContext context)
+{
+    if (context.HandlerArguments.ContainsKey("message1"))
+    {
+        context.HandlerArguments["message1"] = "New message";
+    }
+}
+```
+请求 https://localhost:44350/pages/message?message1=hello&message2=world。清单 30-27 中页面模型类实现的方法将产生与图 30-9 所示相同的结果。
 
 ## Understanding Result Filters
 结果过滤器在操作结果用于生成响应之前和之后执行，允许在端点处理响应之后修改响应。下面是 IResultFilter 接口的定义： 在端点产生操作结果后调用 OnResultExecuting 方法。此方法通过 ResultExecutingContext 类接收上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-13 中描述的属性。 OnResultExecuted 方法在动作结果执行后调用，为客户端生成响应。此方法通过 ResultExecutedContext 类接收上下文，该类定义了表 30-14 中显示的属性，以及它从 FilterContext 类继承的属性。异步结果过滤器实现 IAsyncResultFilter 接口，其定义如下： 该接口遵循由其他过滤器类型建立的模式。 OnResultExecutionAsync 方法是通过上下文对象调用的，上下文对象的 Result 属性可用于更改响应和将沿管道转发响应的委托。
