@@ -359,7 +359,18 @@ namespace Microsoft.AspNetCore.Mvc.Filters {
 OnPageHandlerSelectionAsync 在选择处理程序方法后调用，相当于同步 OnPageHandlerSelected 方法。 OnPageHandlerExecutionAsync 提供了一个 PageHandlerExecutingContext 对象，允许它短路管道和一个被调用以传递请求的委托。委托生成一个 PageHandlerExecutedContext 对象，该对象可用于检查或更改处理程序方法生成的操作结果。
 
 ### Creating a Page Filter
-要创建页面过滤器，请将名为 ChangePageArgs.cs 的类文件添加到 Filters 文件夹，并使用它来定义如清单 30-25 所示的类。清单 30-25 中的页面过滤器执行与我在上一节中创建的`action`过滤器相同的任务。在清单 30-26 中，我修改了 Message Razor Page 以定义一个处理程序方法并应用了页面过滤器。页面过滤器可以应用于单独的处理程序方法，或者如清单中那样应用于页面模型类，在这种情况下过滤器用于所有处理程序方法。 （我还在清单 30-26 中禁用了 SimpleCache 过滤器。资源过滤器可以与页面过滤器一起工作。我禁用了这个过滤器是因为缓存响应使一些示例更难理解。）重新启动 ASP.NET Core 并请求 https:// localhost:44350/pages/message?message1=hello&message2=world.页面过滤器将替换 OnGet 处理程序方法的 message1 参数的值，它会产生如图 30-9 所示的响应。
+要创建页面过滤器，请将名为 ChangePageArgs.cs 的类文件添加到 Filters 文件夹。  
+页面过滤器执行与我在上一节中创建的`action`过滤器相同的任务。在清单 30-26 中，我修改了 Message Razor Page 以定义一个处理程序方法并应用了页面过滤器。页面过滤器可以应用于单独的处理程序方法，或者如清单中那样应用于页面模型类，在这种情况下过滤器用于所有处理程序方法。 （我还在清单 30-26 中禁用了 SimpleCache 过滤器。资源过滤器可以与页面过滤器一起工作。我禁用了这个过滤器是因为缓存响应使一些示例更难理解。）  
+Listing 30-26. Using a Page Filter in the Message.cshtml File in the Pages Folder  
+```cs
+//[SimpleCache]
+[ChangePageArgs]
+...
+public void OnGet(string message1, string message2) {
+    Message = $"{message1}, {message2}";
+}
+```
+重新启动 ASP.NET Core 并请求 https://localhost:44350/pages/message?message1=hello&message2=world .页面过滤器将替换 OnGet 处理程序方法的 message1 参数的值，它会产生如图 30-9 所示的响应。
 
 ### Using the Page Model Filter Methods
 PageModel 类用作页面模型类的基础，实现了 IPageFilter 和 IAsyncPageFilter 接口，这意味着您可以直接向页面模型添加过滤器功能，如清单 30-27 所示。请求 https://localhost:44350/pages/message?message1=hello&message2=world。清单 30-27 中页面模型类实现的方法将产生与图 30-9 所示相同的结果。
