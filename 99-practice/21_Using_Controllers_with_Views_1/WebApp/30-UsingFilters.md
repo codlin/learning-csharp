@@ -48,3 +48,4 @@ RequireHttps 属性应用 ASP.NET Core 提供的内置过滤器之一。此过�
 [RequireHttps]
 public class HomeController : Controller
 ```
+可以应用不同粒度级别的过滤器。如果您想限制对某些操作的访问而不是其他操作，则可以将 RequireHttps 属性仅应用于这些方法。如果您想保护所有操作方法，包括您将来添加到控制器的任何方法，则可以将 RequireHttps 属性应用于该类。如果你想对应用程序中的每个动作应用一个过滤器，那么你可以使用全局过滤器，我将在本章后面介绍。
