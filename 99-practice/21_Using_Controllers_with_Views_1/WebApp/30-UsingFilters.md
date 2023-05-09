@@ -166,3 +166,66 @@ using WebApp.Filters;
 [HttpsOnly]
 public class HomeController : Controller
 ```
+
+## Understanding Resource Filters
+资源筛选器针对每个请求执行两次：在 ASP.NET Core 模型绑定过程之前以及在处理操作结果以生成结果之前再次执行。这是 IResourceFilter 接口的定义：
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IResourceFilter : IFilterMetadata {
+        void OnResourceExecuting(ResourceExecutingContext context);
+        void OnResourceExecuted(ResourceExecutedContext context);
+    }
+}
+```
+OnResourceExecuting 方法在处理请求时调用，而 OnResourceExecuted 方法在端点处理请求之后但在执行操作结果之前调用。对于异步资源筛选器，这里是 IAsyncResourceFilter 接口的定义：  
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IAsyncResourceFilter : IFilterMetadata {
+        Task OnResourceExecutionAsync(ResourceExecutingContext context,
+                                      ResourceExecutionDelegate next);
+    }
+}
+```
+该接口定义了一个方法，该方法接收上下文对象和要调用的委托。资源过滤器能够在调用委托之前检查请求并在执行之前检查响应。使用 ResourceExecutingContext 类为 OnResourceExecuting 方法提供上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-6 中所示的属性。  
+Table 30-6. The Properties Defined by the ResourceExecutingContext Class  
+| Name | Description |
+|-|-|
+| Result | 此 IActionResult 属性用于提供使管道短路的结果。|
+| ValueProviderFactories | 此属性返回一个 IList\<IValueProviderFactory\>，它提供对为模型绑定过程提供值的对象的访问。|
+
+使用 ResourceExecutedContext 类为 OnResourceExecuted 方法提供上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-7 中所示的属性。  
+Table 30-7. The Properties Defined by the ResourceExecutedContext Class  
+| Name | Description |
+|-|-|
+| Result | 此 IActionResult 属性提供将用于生成响应的操作结果。 |
+| Canceled | 如果另一个筛选器通过将操作结果分配给 ActionExecutingContext 对象的 Result 属性而使管道短路，则此 bool 属性设置为 true。 |
+| Exception | 该属性用于存储执行过程中抛出的异常。 |
+| ExceptionDispatchInfo | 此方法返回一个 ExceptionDispatchInfo 对象，该对象包含执行期间抛出的任何异常的堆栈跟踪详细信息。 |
+| ExceptionHandled | 将此属性设置为 true 表示过滤器已处理异常，该异常将不会进一步传播。 |
+
+### Creating a Resource Filter
+资源过滤器通常用于可以使管道短路并尽早提供响应的地方，例如在实现数据缓存时。要创建一个简单的缓存过滤器，请使用清单 30-18 中所示的代码将一个名为 SimpleCacheAttribute.cs 的类文件添加到 Filters 文件夹中。
+
+**FILTERS AND DEPENDENCY INJECTION**
+作为属性应用的过滤器不能在其构造函数中声明依赖关系，除非它们实现 IFilterFactory 接口并负责直接创建实例，如本章后面的“创建过滤器工厂”部分所述。
+
+这个过滤器不是特别有用的缓存，但它确实展示了资源过滤器的工作原理。 OnResourceExecuting 方法通过将上下文对象的 Result 属性设置为先前缓存的操作结果，为过滤器提供了短路管道的机会。如果为 Result 属性分配了一个值，则筛选器管道会短路，并执行操作结果为客户端生成响应。缓存的操作结果仅使用一次，然后从缓存中丢弃。如果没有为 Result 属性分配值，则请求将传递到管道中的下一步，这可能是另一个过滤器或端点。    
+OnResourceExecuted 方法为筛选器提供管道未短路时产生的操作结果。在这种情况下，过滤器会缓存操作结果，以便它可以用于后续请求。资源筛选器可应用于控制器、操作方法和 Razor 页面。清单 30-19 将自定义资源过滤器应用于 Message Razor 页面并添加了一个时间戳，这将有助于确定何时缓存操作结果。  
+Listing 30-19. Applying a Resource Filter in the Message.cshtml File in the Pages Folder    
+```cs
+@using WebApp.Filters
+[SimpleCache]
+public class MessageModel : PageModel
+{
+    public object Message { get; set; } =
+    $"{DateTime.Now.ToLongTimeString()}: This is the Message Razor Page";
+}
+```
+要查看资源过滤器的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/pages/message。由于这是路径的第一次请求，因此不会有缓存结果，请求将沿着管道转发。在处理响应时，资源过滤器将缓存操作结果以供将来使用。重新加载浏览器重复请求，你会看到相同的时间戳，说明已经使用了缓存的动作结果。缓存项在使用时会被删除，这意味着重新加载浏览器将生成带有新时间戳的响应，如图 30-7 所示。
+
+### Creating an Asynchronous Resource Filter
+异步资源过滤器的接口使用单一方法接收委托，该委托用于沿过滤器管道转发请求。清单 30-20 重新实现了前面示例中的缓存过滤器，以便它实现 IAsyncResourceFilter 接口。  
+Listing 30-20. Creating an Asynchronous Filter in the AsyncSimpleCacheAttribute.cs File in the Filters Folder  
+
+OnResourceExecutionAsync 方法接收一个 ResourceExecutingContext 对象，该对象用于确定管道是否可以短路。如果不能，则在不带参数的情况下调用委托，并在请求已处理并沿着管道返回时异步生成 ResourceExecutedContext 对象。重新启动 ASP.NET Core 并重复上一节中描述的请求，您将看到相同的缓存行为，如图 30-7 所示。  
+**警告** 重要的是不要混淆这两个上下文对象。端点产生的操作结果仅在委托返回的上下文对象中可用。
