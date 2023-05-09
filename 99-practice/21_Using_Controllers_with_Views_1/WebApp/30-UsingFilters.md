@@ -284,6 +284,14 @@ Listing 30-22. Applying a Filter in the HomeController.cs File in the Controller
 ### Implementing an Action Filter Using the Attribute Base Class
 Action 属性也可以通过派生自 ActionFilterAttribute 类来实现，该类扩展了 Attribute 并继承了 IActionFilter 和 IAsyncActionFilter 接口，以便实现类仅覆盖它们需要的方法。在清单 30-23 中，我重新实现了 ChangeArg 过滤器，使其派生自 ActionFilterAttribute。  
 Listing 30-23. Using a Filter Base Class in the ChangeArgsAttribute.cs File in the Filters Folder  
+```cs
+public class ChangeArgAttribute : ActionFilterAttribute  // <--HERE
+{
+    public override async Task OnActionExecutionAsync( // <-HERE
+        ActionExecutingContext context,
+        ActionExecutionDelegate next)
+}
+```
 
 此属性的行为与早期实现的方式相同，基类的使用是偏好问题。重启 ASP.NET Core 并请求 https://localhost:44350/home/messages? message1=hello&message2=world，你会看到如图30-8所示的响应。
 
