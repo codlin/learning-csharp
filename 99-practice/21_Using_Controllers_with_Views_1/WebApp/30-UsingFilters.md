@@ -75,3 +75,42 @@ Listing 30-15. Applying a Filter in the Message.cshtml File in the Pages Folder
 [RequireHttps]
 public class MessageModel : PageModel
 ```
+
+# Understanding Filters
+ASP.NET Core 支持不同类型的筛选器，每种筛选器都有不同的用途。表 30-2 描述了过滤器类别。  
+Table 30-2. The Filter Types  
+| Name | Description |
+| Authorization filters | 这种类型的过滤器用于应用程序的授权策略。|
+| Resource filters | 此类过滤器用于拦截请求，通常用于实现缓存等功能。|
+| Action filters | 这种类型的过滤器用于在操作方法`action method`接收到请求之前修改请求，或者在操作结果生成之后修改操作结果。这种类型的过滤器只能应用于控制器和操作。|
+| Page filters | 这种类型的筛选器用于在 Razor 页面处理程序方法接收请求之前修改请求，或者在生成操作结果之后修改操作结果。这种类型的筛选器只能应用于 Razor Pages。|
+| Result filters | 这种类型的过滤器用于在执行前更改操作结果或在执行后修改结果。|
+| Exception filters | 这种类型的过滤器用于处理在执行操作方法或页面处理程序期间发生的异常。|
+
+过滤器有自己的管道，并按特定顺序执行，如图 30-5 所示。
+```
+            +-----------------------------------------------------------------------------------------------+
+            | Filter Pipeline                                                                               |
+            |   +---------------+    +------------+           +- - - - - - - +            +------------+    |   +------------+
+Request ----+-->| Authorization |--->|            |---------> |   Model      |----------->|            |----+-->|            |
+            |   | Files         |    |  Resource  |           |   Binding    |            |  Resource  |    |   |            |
+            |   +---------------+    |  Filters   |           +- - - - - - - +            |  Filters   |    |   |  Endpoint  |
+            |                        |            |   +------------+   +------------+     |            |    |   |            |
+Response <--+------------------------|            |<--|   Result   |<--| Exception  |<----|            |<---+---|            |
+            |                        |            |   |   Filter   |   |  Filters   |     |            |    |   |            |
+            |                        +------------+   +------------+   +------------+     +------------+    |   +------------+ 
+            +-----------------------------------------------------------------------------------------------+ 
+```
+过滤器可以使过滤器管道**短路**，以防止将请求转发到下一个过滤器。例如，如果用户未经身份验证，授权过滤器可以使管道短路并返回错误响应。资源、操作`action`和页面`page`过滤器能够在端点处理请求之前和之后检查请求，从而允许这些类型的过滤器使管道短路；在处理请求之前更改请求；或改变响应。 
+（我在图 30-5 中简化了过滤器的流程。**页面过滤器在模型绑定过程之前和之后运行**，如“了解页面过滤器”部分所述。）    
+每种类型的过滤器都是使用 ASP.NET 定义的接口实现的核心，它还提供基类，可以轻松地将某些类型的过滤器作为属性应用。我在接下来的部分中描述了每个接口和属性类，但它们显示在表 30-3 中以供快速参考。  
+Table 30-3. The Filter Types, Interfaces, and Attribute Base Classes  
+| Filter Type | Interfaces | Attribute Class |
+|-|-|-|
+| Authorization filters | IAuthorizationFilter IAsyncAuthorizationFilter | No attribute class is provided. |
+| Resource filters | IResourceFilter IAsyncResourceFilter | No attribute class is provided. |
+| Action filters | IActionFilterIAsyncActionFilter | ActionFilterAttribute |
+| Page filters | IPageFilterIAsyncPageFilter | No attribute class is provided. |
+| Result filters | IResultFilterIAsyncResultFilterIAlwaysRunResult FilterIAsyncAlwaysRunResultFilter | ResultFilterAttribute |
+| Exception Filters | IExceptionFilterIAsyncExceptionFilter | ExceptionFilterAttribute |
+
