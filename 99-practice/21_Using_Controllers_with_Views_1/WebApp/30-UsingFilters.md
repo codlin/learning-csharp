@@ -42,3 +42,9 @@ public IActionResult Secure()
     "This is the Secure action on the Home controller");
 }
 ```
+RequireHttps 属性应用 ASP.NET Core 提供的内置过滤器之一。此过滤器限制对操作方法的访问，以便仅支持 HTTPS 请求，并允许我从每个方法中删除安全代码并专注于处理成功的请求。
+我必须仍然记得将 RequireHttps 属性应用于每个操作方法，这意味着我可能会忘记。但是过滤器有一个有用的技巧：**将特性应用于控制器类与将它应用于每个单独的操作方法具有相同的效果**，如清单 30-13 所示。
+```cs
+[RequireHttps]
+public class HomeController : Controller
+```
