@@ -583,9 +583,34 @@ public class HomeController : Controller
 此结果过滤器使用前面示例中所示的技术来替换来自端点的结果，并允许多个过滤器构建一系列将显示给用户的消息。清单 30-40 将 Message 过滤器的几个实例应用于 Home 控制器。  
 Listing 30-40. Applying a Filter in the HomeController.cs File in the Controllers Folder  
 ```cs
+using Microsoft.AspNetCore.Mvc;
+using WebApp.Filters;
 
+namespace WebApp.Controllers;
+
+[Message("This is the controller-scoped filter")]
+public class HomeController : Controller
+{
+    [Message("This is the first action-scoped filter")]
+    [Message("This is the second action-scoped filter")]
+    public IActionResult Index()
+    {
+        return View("Message",
+        "This is the Index action on the Home controller");
+    }
+}
 ```
-清单 30-41 全局注册了 Message 过滤器。同一个过滤器有四个实例。要查看它们的应用顺序，请重新启动 ASP.NET Core 并请求 https://localhost:44350，这将产生如图 30-16 所示的响应。默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于 action 或处理程序方法。
+清单 30-41 全局注册了 Message 过滤器。  
+Listing 30-41. Creating a Global Filter in the Program.cs File in the WebApp Folder  
+```cs
+builder.Services.Configure<MvcOptions>(opts =>
+{
+    opts.Filters.Add<HttpsOnlyAttribute>();
+    opts.Filters.Add(new MessageAttribute("This is the globally-scoped filter"));
+});
+```
+同一个过滤器有四个实例。要查看它们的应用顺序，请重新启动 ASP.NET Core 并请求 https://localhost:44350，这将产生如图 30-16 所示的响应。  
+默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于 action 或处理程序方法。
 
 ## Changing Filter Order
 可以通过实现 IOrderedFilter 接口来更改默认顺序，ASP.NET Core 在确定如何对过滤器进行排序时会查找该接口。下面是接口的定义：Order 属性返回一个 int 值，低值的过滤器先于高 Order 值的过滤器应用。在清单 30-42 中，我在 Message 过滤器中实现了接口，并定义了一个构造函数参数，允许在应用过滤器时指定 Order 属性的值。在清单 30-43 中，我使用了构造函数参数来更改过滤器的应用顺序。顺序值可以是负数，这是确保过滤器在任何具有默认顺序的全局过滤器之前应用的有用方法（尽管您也可以在创建全局过滤器时设置顺序）。重新启动 ASP。 NET Core 并请求 https://localhost:44350 以查看新的过滤器顺序，如图 30-17 所示。
