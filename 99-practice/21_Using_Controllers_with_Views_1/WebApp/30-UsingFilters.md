@@ -503,10 +503,25 @@ GenerateException `action` 方法依赖默认路由模式从请求 URL 接收可
 重新启动 ASP.NET Core 并请求 https://localhost:44350/Home/GenerateException/100 。最终段将超出`action`方法预期的范围，这将抛出过滤器处理的异常类型，产生如图 30-11 所示的结果。如果你请求 /Home/GenerateException，那么过滤器将不会处理 action 方法抛出的异常，将使用默认的错误处理。
 
 # Managing the Filter Lifecycle
-默认情况下，ASP.NET Core 管理它创建的过滤器对象并将它们重用于后续请求。这并不总是期望的行为，在接下来的部分中，我将描述不同的方法来控制过滤器的创建方式。要创建一个将显示生命周期的过滤器，请将一个名为 GuidResponseAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-33 中所示的过滤器。此结果过滤器将终结点生成的 action 结果替换为将呈现消息视图并显示唯一 GUID 值的结果。过滤器被配置为可以多次应用于同一目标，如果管道中较早的过滤器创建了合适的结果，它将添加一条新消息。清单 30-34 将过滤器应用到 Home 控制器两次。 （为简洁起见，我还删除了除其中一个`action`方法之外的所有方法。）要确认过滤器正在重用，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。响应将包含来自两个 GuidResponse 过滤器属性的 GUID 值。已创建过滤器的两个实例来处理请求。重新加载浏览器，您将看到显示相同的 GUID 值，表明为处理第一个请求而创建的过滤器对象已被重用（图 30-12）。
+默认情况下，ASP.NET Core 管理它创建的过滤器对象并将它们重用于后续请求。这并不总是期望的行为，在接下来的部分中，我将描述不同的方法来控制过滤器的创建方式。要创建一个将显示生命周期的过滤器，请将一个名为 GuidResponseAttribute.cs 的类文件添加到 Filters 文件夹。
+此结果过滤器将终结点生成的 action 结果替换为将呈现消息视图并显示唯一 GUID 值的结果。过滤器被配置为可以多次应用于同一目标，如果管道中较早的过滤器创建了合适的结果，它将添加一条新消息。清单 30-34 将过滤器应用到 Home 控制器两次。 （为简洁起见，我还删除了除其中一个`action`方法之外的所有方法。）  
+Listing 30-34. Applying a Filter in the HomeController.cs File in the Controllers Folder  
+```cs
+[GuidResponse]
+[GuidResponse]
+public class HomeController : Controller
+```
+要确认过滤器正在重用，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag 。响应将包含来自两个 GuidResponse 过滤器属性的 GUID 值。已创建过滤器的两个实例来处理请求。重新加载浏览器，您将看到显示相同的 GUID 值，表明为处理第一个请求而创建的过滤器对象已被重用（图 30-12）。
 
 ## Creating Filter Factories
-过滤器可以实现 IFilterFactory 接口来负责创建过滤器的实例并指定这些实例是否可以重用。 IFilterFactory 接口定义表 30-16 中描述的成员。清单 30-35 实现了 IFilterFactory 接口并为 IsReusable 属性返回 false，以防止过滤器被重用。我使用 GetServiceOrCreateInstance 方法创建新的过滤器对象，该方法由 Microsoft.Extensions.DependencyInjection 命名空间中的 ActivatorUtilities 类定义。尽管您可以使用 new 关键字来创建过滤器，但这种方法将解决对通过过滤器的构造函数声明的服务的任何依赖性。要查看实现 IFilterFactory 接口的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。重新加载浏览器，每次处理请求时，都会创建新的过滤器，并显示新的GUID，如图30-13所示。
+过滤器可以实现 IFilterFactory 接口来负责创建过滤器的实例并指定这些实例是否可以重用。 IFilterFactory 接口定义表 30-16 中描述的成员。  
+Table 30-16. The IFilterFactory Members   
+| Name | Description |
+|-|-|
+| IsReusable | 此 bool 属性指示过滤器的实例是否可以重复使用。|
+| CreateInstance(serviceProvider) | 调用此方法来创建过滤器的新实例，并随 IServiceProvider 对象一起提供。|
+
+清单 30-35 实现了 IFilterFactory 接口并为 IsReusable 属性返回 false，以防止过滤器被重用。我使用 GetServiceOrCreateInstance 方法创建新的过滤器对象，该方法由 Microsoft.Extensions.DependencyInjection 命名空间中的 ActivatorUtilities 类定义。尽管您可以使用 new 关键字来创建过滤器，但这种方法将解决对通过过滤器的构造函数声明的服务的任何依赖性。要查看实现 IFilterFactory 接口的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。重新加载浏览器，每次处理请求时，都会创建新的过滤器，并显示新的GUID，如图30-13所示。
 
 ## Using Dependency Injection Scopes to Manage Filter Lifecycles
 过滤器可以注册为服务，这允许通过依赖注入来控制它们的生命周期，我在第 14 章中对此进行了描述。清单 30-36 将 GuidResponse 过滤器注册为范围服务。默认情况下，ASP.NET Core 为每个请求创建一个范围，这意味着将为每个请求创建一个过滤器实例。要查看效果，请重启 ASP.NET Core 并请求 https://localhost:44350/?diag。应用到 Home 控制器的两个属性都使用相同的过滤器实例进行处理，这意味着响应中的两个 GUID 是相同的。重新加载浏览器；将创建一个新的作用域，并使用一个新的过滤器对象，如图 30-14 所示。生命周期的变化在这个例子中立即生效，因为我在实现 IFilterFactory 接口时使用了 ActivatorUtilities.GetServiceOrCreateInstance 方法来创建过滤器对象。此方法将在调用其构造函数之前检查是否有可用于请求类型的服务。如果您想在不实现 IFilterFactory 和使用 ActivatorUtilities 的情况下将过滤器用作服务，您可以使用 ServiceFilter 属性应用过滤器，如下所示：ASP.NET Core 将从服务创建过滤器对象并将其应用于请求。以这种方式应用的过滤器不必从 Attribute 类派生。
