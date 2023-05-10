@@ -558,10 +558,34 @@ builder.Services.AddScoped<GuidResponseAttribute>();
 ASP.NET Core 将从服务创建过滤器对象并将其应用于请求。以这种方式应用的过滤器不必从 Attribute 类派生。
 
 # Creating Global Filters
-全局过滤器应用于 ASP.NET Core 处理的每个请求，这意味着它们不必应用于单个控制器或 Razor 页面。任何过滤器都可以用作全局过滤器；但是，`action`过滤器将仅应用于端点是`action`方法的请求，而页面过滤器将仅应用于端点是 Razor 页面的请求。全局过滤器是使用 Program.cs 文件中的选项模式设置的，如清单 30-37 所示。 MvcOptions.Filters 属性返回一个集合，向其中添加过滤器以全局应用它们，使用 Add<T> 方法或对同时也是服务的过滤器使用 AddService<T> 方法。还有一个不带泛型类型参数的 Add 方法，可用于将特定对象注册为全局过滤器。清单 30-37 中的语句注册了我在本章前面创建的 HttpsOnly 过滤器，这意味着它不再需要直接应用于单个控制器或 Razor Pages，因此清单 30-38 从 Home 控制器中删除了过滤器。重新启动 ASP.NET Core 并请求 http://localhost:5000 以确认正在应用仅 HTTPS 策略，即使该属性不再用于修饰控制器。全局授权过滤器将过滤器管道短路并产生如图 30-15 所示的响应。
+全局过滤器应用于 ASP.NET Core 处理的每个请求，这意味着它们不必应用于单个控制器或 Razor 页面。任何过滤器都可以用作全局过滤器；但是，`action`过滤器将仅应用于端点是`action`方法的请求，而页面过滤器将仅应用于端点是 Razor 页面的请求。  
+全局过滤器是使用 Program.cs 文件中的选项模式设置的，如清单 30-37 所示。   
+Listing 30-37. Creating a Global Filter in the Program.cs File in the WebApp Folder  
+```cs
+using Microsoft.AspNetCore.Mvc;
+builder.Services.Configure<MvcOptions>(opts => opts.Filters.Add<HttpsOnlyAttribute>());
+```
+MvcOptions.Filters 属性返回一个集合，向其中添加过滤器以全局应用它们，使用 Add<T> 方法或对同时也是服务的过滤器使用 AddService<T> 方法。还有一个不带泛型类型参数的 Add 方法，可用于将特定对象注册为全局过滤器。  
+清单 30-37 中的语句注册了我在本章前面创建的 HttpsOnly 过滤器，这意味着它不再需要直接应用于单个控制器或 Razor Pages，因此清单 30-38 从 Home 控制器中删除了过滤器。  
+Listing 30-38. Removing a Filter in the HomeController.cs File in the Controllers Folder  
+```cs
+//[HttpsOnly]
+[ResultDiagnostics]
+//[GuidResponse]
+//[GuidResponse]
+public class HomeController : Controller
+```
+重新启动 ASP.NET Core 并请求 http://localhost:5000 以确认正在应用仅 HTTPS 策略，即使该属性不再用于修饰控制器。全局授权过滤器将过滤器管道短路并产生如图 30-15 所示的响应。
 
 # Understanding and Changing Filter Order
-过滤器按特定顺序运行：授权、资源、 action 或页面，然后是结果。但是，如果给定类型有多个过滤器，则应用它们的顺序由应用过滤器的范围决定。为了演示这是如何工作的，将一个名为 MessageAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-39 中所示的过滤器。此结果过滤器使用前面示例中所示的技术来替换来自端点的结果，并允许多个过滤器构建一系列将显示给用户的消息。清单 30-40 将 Message 过滤器的几个实例应用于 Home 控制器。清单 30-41 全局注册了 Message 过滤器。同一个过滤器有四个实例。要查看它们的应用顺序，请重新启动 ASP.NET Core 并请求 https://localhost:44350，这将产生如图 30-16 所示的响应。默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于 action 或处理程序方法。
+过滤器按特定顺序运行：授权、资源、 action 或页面，然后是结果。但是，如果给定类型有多个过滤器，则应用它们的顺序由应用过滤器的范围决定。  
+为了演示这是如何工作的，将一个名为 MessageAttribute.cs 的类文件添加到 Filters 文件夹。  
+此结果过滤器使用前面示例中所示的技术来替换来自端点的结果，并允许多个过滤器构建一系列将显示给用户的消息。清单 30-40 将 Message 过滤器的几个实例应用于 Home 控制器。  
+Listing 30-40. Applying a Filter in the HomeController.cs File in the Controllers Folder  
+```cs
+
+```
+清单 30-41 全局注册了 Message 过滤器。同一个过滤器有四个实例。要查看它们的应用顺序，请重新启动 ASP.NET Core 并请求 https://localhost:44350，这将产生如图 30-16 所示的响应。默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于 action 或处理程序方法。
 
 ## Changing Filter Order
 可以通过实现 IOrderedFilter 接口来更改默认顺序，ASP.NET Core 在确定如何对过滤器进行排序时会查找该接口。下面是接口的定义：Order 属性返回一个 int 值，低值的过滤器先于高 Order 值的过滤器应用。在清单 30-42 中，我在 Message 过滤器中实现了接口，并定义了一个构造函数参数，允许在应用过滤器时指定 Order 属性的值。在清单 30-43 中，我使用了构造函数参数来更改过滤器的应用顺序。顺序值可以是负数，这是确保过滤器在任何具有默认顺序的全局过滤器之前应用的有用方法（尽管您也可以在创建全局过滤器时设置顺序）。重新启动 ASP。 NET Core 并请求 https://localhost:44350 以查看新的过滤器顺序，如图 30-17 所示。
