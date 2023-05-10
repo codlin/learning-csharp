@@ -477,7 +477,30 @@ Table 30-15. The ExceptionContext Properties
 | Result | 此属性设置将用于生成响应的 IActionResult。|
 
 ### Creating an Exception Filter
-异常过滤器可以通过实现过滤器接口之一或从 ExceptionFilterAttribute 类派生来创建，该类派生自 Attribute 并实现 IExceptionFilter 和 IAsyncException 过滤器。异常过滤器最常见的用途是为特定异常类型显示自定义错误页面，以便为用户提供比标准错误处理功能所能提供的更有用的信息。要创建异常过滤器，请将名为 RangeExceptionAttribute.cs 的类文件添加到 Filters 文件夹，代码如清单 30-31 所示。此过滤器使用 ExceptionContext 对象获取未处理异常的类型，如果类型为 ArgumentOutOfRangeException，则创建向用户显示消息的 action 结果。清单 30-32 向我已应用异常过滤器的 Home 控制器添加了一个`action`方法。 GenerateException `action`方法依赖默认路由模式从请求 URL 接收可为空的 int 值。如果没有匹配的 URL 段，则 action 方法抛出 ArgumentNullException；如果其值大于 50，则抛出 ArgumentOutOfRangeException。如果有值且在范围内，则 action 方法返回 ViewResult。重新启动 ASP.NET Core 并请求 https://localhost:44350/Home/GenerateException/100。最终段将超出`action`方法预期的范围，这将抛出过滤器处理的异常类型，产生如图 30-11 所示的结果。如果你请求 /Home/GenerateException，那么过滤器将不会处理 action 方法抛出的异常，将使用默认的错误处理。
+异常过滤器可以通过实现过滤器接口之一或从 ExceptionFilterAttribute 类派生来创建，该类派生自 Attribute 并实现 IExceptionFilter 和 IAsyncException 过滤器。异常过滤器最常见的用途是为特定异常类型显示自定义错误页面，以便为用户提供比标准错误处理功能所能提供的更有用的信息。  
+要创建异常过滤器，请将名为 RangeExceptionAttribute.cs 的类文件添加到 Filters 文件夹。  
+此过滤器使用 ExceptionContext 对象获取未处理异常的类型，如果类型为 ArgumentOutOfRangeException ，则创建向用户显示消息的 action 结果。清单 30-32 向我已应用异常过滤器的 Home 控制器添加了一个`action`方法。   
+Listing 30-32. Applying an Exception Filter in the HomeController.cs File in the Controllers Folder  
+```cs
+[RangeException]
+public ViewResult GenerateException(int? id)
+{
+    if (id == null)
+    {
+        throw new ArgumentNullException(nameof(id));
+    }
+    else if (id > 10)
+    {
+        throw new ArgumentOutOfRangeException(nameof(id));
+    }
+    else
+    {
+        return View("Message", $"The value is {id}");
+    }
+}
+```
+GenerateException `action` 方法依赖默认路由模式从请求 URL 接收可为空的 int 值。如果没有匹配的 URL 段，则 action 方法抛出 ArgumentNullException；如果其值大于 10，则抛出 ArgumentOutOfRangeException 。如果有值且在范围内，则 action 方法返回 ViewResult。  
+重新启动 ASP.NET Core 并请求 https://localhost:44350/Home/GenerateException/100 。最终段将超出`action`方法预期的范围，这将抛出过滤器处理的异常类型，产生如图 30-11 所示的结果。如果你请求 /Home/GenerateException，那么过滤器将不会处理 action 方法抛出的异常，将使用默认的错误处理。
 
 # Managing the Filter Lifecycle
 默认情况下，ASP.NET Core 管理它创建的过滤器对象并将它们重用于后续请求。这并不总是期望的行为，在接下来的部分中，我将描述不同的方法来控制过滤器的创建方式。要创建一个将显示生命周期的过滤器，请将一个名为 GuidResponseAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-33 中所示的过滤器。此结果过滤器将终结点生成的 action 结果替换为将呈现消息视图并显示唯一 GUID 值的结果。过滤器被配置为可以多次应用于同一目标，如果管道中较早的过滤器创建了合适的结果，它将添加一条新消息。清单 30-34 将过滤器应用到 Home 控制器两次。 （为简洁起见，我还删除了除其中一个`action`方法之外的所有方法。）要确认过滤器正在重用，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。响应将包含来自两个 GuidResponse 过滤器属性的 GUID 值。已创建过滤器的两个实例来处理请求。重新加载浏览器，您将看到显示相同的 GUID 值，表明为处理第一个请求而创建的过滤器对象已被重用（图 30-12）。
