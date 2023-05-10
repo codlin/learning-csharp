@@ -1,8 +1,8 @@
 # Using Filters
 
-过滤器将额外的逻辑注入到请求处理中。过滤器就像应用于单个端点的中间件，可以是操作或页面处理程序方法，它们提供了一种优雅的方式来管理一组特定的请求。在本章中，我将解释过滤器的工作原理，描述 ASP.NET Core 支持的不同类型的过滤器，并演示自定义过滤器的使用和 ASP.NET Core 提供的过滤器。表 30-1 对本章进行了总结。
+过滤器将额外的逻辑注入到请求处理中。过滤器就像应用于单个端点的中间件，可以是 action 或页面处理程序方法，它们提供了一种优雅的方式来管理一组特定的请求。在本章中，我将解释过滤器的工作原理，描述 ASP.NET Core 支持的不同类型的过滤器，并演示自定义过滤器的使用和 ASP.NET Core 提供的过滤器。表 30-1 对本章进行了总结。
 
-过滤器允许将原本应用于中间件组件或`action`方法的逻辑定义在可以轻松重用的类中。假设您想对某些`action`方法强制执行 HTTPS 请求。在第 16 章中，我通过阅读 HttpRequest 对象的 IsHttps 属性向您展示了如何在中间件中完成此操作。这种方法的问题是中间件必须了解路由系统的配置才能知道如何拦截对特定`action`方法的请求。一种更有针对性的方法是读取`action`方法中的 HttpRequest.IsHttps 属性，如清单 30-10 所示。  
+过滤器允许将原本应用于中间件组件或`action`方法的逻辑定义在可以轻松重用的类中。假设您想对某些`action`方法强制执行 HTTPS 请求。在第 16 章中，我通过阅读 HttpRequest 对象的 IsHttps 属性向您展示了如何在中间件中完成此 action 。这种方法的问题是中间件必须了解路由系统的配置才能知道如何拦截对特定`action`方法的请求。一种更有针对性的方法是读取`action`方法中的 HttpRequest.IsHttps 属性，如清单 30-10 所示。  
 Listing 30-10. Selectively Enforcing HTTPS in the HomeController.cs File in the Controllers Folder
 ```cs
 ..
@@ -48,7 +48,7 @@ RequireHttps 属性应用 ASP.NET Core 提供的内置过滤器之一。此过�
 [RequireHttps]
 public class HomeController : Controller
 ```
-可以应用不同粒度级别的过滤器。如果您想限制对某些操作的访问而不是其他操作，则可以将 RequireHttps 属性仅应用于这些方法。如果您想保护所有`action`方法，包括您将来添加到控制器的任何方法，则可以将 RequireHttps 属性应用于该类。如果你想对应用程序中的每个动作应用一个过滤器，那么你可以使用全局过滤器，我将在本章后面介绍。
+可以应用不同粒度级别的过滤器。如果您想限制对某些 action 的访问而不是其他 action ，则可以将 RequireHttps 属性仅应用于这些方法。如果您想保护所有`action`方法，包括您将来添加到控制器的任何方法，则可以将 RequireHttps 属性应用于该类。如果你想对应用程序中的每个动作应用一个过滤器，那么你可以使用全局过滤器，我将在本章后面介绍。
 
 ## Using Filters in Razor Pages
 过滤器也可用于 Razor Pages。例如，要在 Message Razor 页面中实施仅 HTTPS 策略，我必须添加一个检查连接的处理程序方法，如清单 30-14 所示。  
@@ -82,9 +82,9 @@ Table 30-2. The Filter Types
 | Name | Description |
 | Authorization filters | 这种类型的过滤器用于应用程序的授权策略。|
 | Resource filters | 此类过滤器用于拦截请求，通常用于实现缓存等功能。|
-| Action filters | 这种类型的过滤器用于在`action`方法`action method`接收到请求之前修改请求，或者在操作结果生成之后修改操作结果。这种类型的过滤器只能应用于控制器和操作。|
-| Page filters | 这种类型的过滤器用于在 Razor 页面处理程序方法接收请求之前修改请求，或者在生成操作结果之后修改操作结果。这种类型的过滤器只能应用于 Razor Pages。|
-| Result filters | 这种类型的过滤器用于在执行前更改操作结果或在执行后修改结果。|
+| Action filters | 这种类型的过滤器用于在`action`方法`action method`接收到请求之前修改请求，或者在 action 结果生成之后修改 action 结果。这种类型的过滤器只能应用于控制器和 action 。|
+| Page filters | 这种类型的过滤器用于在 Razor 页面处理程序方法接收请求之前修改请求，或者在生成 action 结果之后修改 action 结果。这种类型的过滤器只能应用于 Razor Pages。|
+| Result filters | 这种类型的过滤器用于在执行前更改 action 结果或在执行后修改结果。|
 | Exception filters | 这种类型的过滤器用于处理在执行`action`方法或页面处理程序期间发生的异常。|
 
 过滤器有自己的管道，并按特定顺序执行，如图 30-5 所示。
@@ -101,7 +101,7 @@ Response <--+------------------------|            |<--|   Result   |<--| Excepti
             |                        +------------+   +------------+   +------------+     +------------+    |   +------------+ 
             +-----------------------------------------------------------------------------------------------+ 
 ```
-过滤器可以使过滤器管道**短路**，以防止将请求转发到下一个过滤器。例如，如果用户未经身份验证，授权过滤器可以使管道短路并返回错误响应。资源、操作`action`和页面`page`过滤器能够在端点处理请求之前和之后检查请求，从而允许这些类型的过滤器使管道短路；在处理请求之前更改请求；或改变响应。 
+过滤器可以使过滤器管道**短路**，以防止将请求转发到下一个过滤器。例如，如果用户未经身份验证，授权过滤器可以使管道短路并返回错误响应。资源、 action `action`和页面`page`过滤器能够在端点处理请求之前和之后检查请求，从而允许这些类型的过滤器使管道短路；在处理请求之前更改请求；或改变响应。 
 （我在图 30-5 中简化了过滤器的流程。**页面过滤器在模型绑定过程之前和之后运行**，如“了解页面过滤器”部分所述。）    
 每种类型的过滤器都是使用 ASP.NET 定义的接口实现的核心，它还提供基类，可以轻松地将某些类型的过滤器作为属性应用。我在接下来的部分中描述了每个接口和属性类，但它们显示在表 30-3 中以供快速参考。  
 Table 30-3. The Filter Types, Interfaces, and Attribute Base Classes  
@@ -158,7 +158,7 @@ Table 30-5. The AuthorizationFilterContext Property
 
 ### Creating an Authorization Filter
 为了演示授权过滤器的工作原理，我在 WebApp 文件夹中创建了一个 Filters 文件夹，添加了一个名为 HttpsOnlyAttribute.cs 的类文件。
-如果请求符合授权策略，则授权过滤器不执行任何操作，并且无操作允许 ASP.NET Core 继续执行下一个过滤器，并最终执行端点。如果出现问题，过滤器将设置传递给 OnAuthorization 方法的 AuthorizationFilterContext 对象的 Result 属性。这可以防止进一步执行并提供返回给客户端的结果。在清单中，HttpsOnlyAttribute 类检查 HttpRequest 上下文对象的 IsHttps 属性，并设置 Result 属性以在没有 HTTPS 的情况下发出请求时中断执行。授权过滤器可应用于控制器、`action`方法和 Razor 页面。清单 30-17 将新过滤器应用于 Home 控制器。  
+如果请求符合授权策略，则授权过滤器不执行任何 action ，并且无 action 允许 ASP.NET Core 继续执行下一个过滤器，并最终执行端点。如果出现问题，过滤器将设置传递给 OnAuthorization 方法的 AuthorizationFilterContext 对象的 Result 属性。这可以防止进一步执行并提供返回给客户端的结果。在清单中，HttpsOnlyAttribute 类检查 HttpRequest 上下文对象的 IsHttps 属性，并设置 Result 属性以在没有 HTTPS 的情况下发出请求时中断执行。授权过滤器可应用于控制器、`action`方法和 Razor 页面。清单 30-17 将新过滤器应用于 Home 控制器。  
 Listing 30-17. Applying a Custom Filter in the HomeController.cs File in the Controllers Folder  
 ```cs
 using WebApp.Filters;
@@ -168,7 +168,7 @@ public class HomeController : Controller
 ```
 
 ## Understanding Resource Filters
-资源过滤器针对每个请求执行两次：在 ASP.NET Core 模型绑定过程之前以及在处理操作结果以生成结果之前再次执行。这是 IResourceFilter 接口的定义：
+资源过滤器针对每个请求执行两次：在 ASP.NET Core 模型绑定过程之前以及在处理 action 结果以生成结果之前再次执行。这是 IResourceFilter 接口的定义：
 ```cs
 namespace Microsoft.AspNetCore.Mvc.Filters {
     public interface IResourceFilter : IFilterMetadata {
@@ -177,7 +177,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters {
     }
 }
 ```
-OnResourceExecuting 方法在处理请求时调用，而 OnResourceExecuted 方法在端点处理请求之后但在执行操作结果之前调用。对于异步资源过滤器，这里是 IAsyncResourceFilter 接口的定义：  
+OnResourceExecuting 方法在处理请求时调用，而 OnResourceExecuted 方法在端点处理请求之后但在执行 action 结果之前调用。对于异步资源过滤器，这里是 IAsyncResourceFilter 接口的定义：  
 ```cs
 namespace Microsoft.AspNetCore.Mvc.Filters {
     public interface IAsyncResourceFilter : IFilterMetadata {
@@ -197,8 +197,8 @@ Table 30-6. The Properties Defined by the ResourceExecutingContext Class
 Table 30-7. The Properties Defined by the ResourceExecutedContext Class  
 | Name | Description |
 |-|-|
-| Result | 此 IActionResult 属性提供将用于生成响应的操作结果。 |
-| Canceled | 如果另一个过滤器通过将操作结果分配给 ActionExecutingContext 对象的 Result 属性而使管道短路，则此 bool 属性设置为 true。 |
+| Result | 此 IActionResult 属性提供将用于生成响应的 action 结果。 |
+| Canceled | 如果另一个过滤器通过将 action 结果分配给 ActionExecutingContext 对象的 Result 属性而使管道短路，则此 bool 属性设置为 true。 |
 | Exception | 该属性用于存储执行过程中抛出的异常。 |
 | ExceptionDispatchInfo | 此方法返回一个 ExceptionDispatchInfo 对象，该对象包含执行期间抛出的任何异常的堆栈跟踪详细信息。 |
 | ExceptionHandled | 将此属性设置为 true 表示过滤器已处理异常，该异常将不会进一步传播。 |
@@ -209,8 +209,8 @@ Table 30-7. The Properties Defined by the ResourceExecutedContext Class
 **FILTERS AND DEPENDENCY INJECTION**
 作为属性应用的过滤器不能在其构造函数中声明依赖关系，除非它们实现 IFilterFactory 接口并负责直接创建实例，如本章后面的“创建过滤器工厂”部分所述。
 
-这个过滤器不是特别有用的缓存，但它确实展示了资源过滤器的工作原理。 OnResourceExecuting 方法通过将上下文对象的 Result 属性设置为先前缓存的操作结果，为过滤器提供了短路管道的机会。如果为 Result 属性分配了一个值，则过滤器管道会短路，并执行操作结果为客户端生成响应。缓存的操作结果仅使用一次，然后从缓存中丢弃。如果没有为 Result 属性分配值，则请求将传递到管道中的下一步，这可能是另一个过滤器或端点。    
-OnResourceExecuted 方法为过滤器提供管道未短路时产生的操作结果。在这种情况下，过滤器会缓存操作结果，以便它可以用于后续请求。资源过滤器可应用于控制器、`action`方法和 Razor 页面。清单 30-19 将自定义资源过滤器应用于 Message Razor 页面并添加了一个时间戳，这将有助于确定何时缓存操作结果。  
+这个过滤器不是特别有用的缓存，但它确实展示了资源过滤器的工作原理。 OnResourceExecuting 方法通过将上下文对象的 Result 属性设置为先前缓存的 action 结果，为过滤器提供了短路管道的机会。如果为 Result 属性分配了一个值，则过滤器管道会短路，并执行 action 结果为客户端生成响应。缓存的 action 结果仅使用一次，然后从缓存中丢弃。如果没有为 Result 属性分配值，则请求将传递到管道中的下一步，这可能是另一个过滤器或端点。    
+OnResourceExecuted 方法为过滤器提供管道未短路时产生的 action 结果。在这种情况下，过滤器会缓存 action 结果，以便它可以用于后续请求。资源过滤器可应用于控制器、`action`方法和 Razor 页面。清单 30-19 将自定义资源过滤器应用于 Message Razor 页面并添加了一个时间戳，这将有助于确定何时缓存 action 结果。  
 Listing 30-19. Applying a Resource Filter in the Message.cshtml File in the Pages Folder    
 ```cs
 @using WebApp.Filters
@@ -221,14 +221,14 @@ public class MessageModel : PageModel
     $"{DateTime.Now.ToLongTimeString()}: This is the Message Razor Page";
 }
 ```
-要查看资源过滤器的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/pages/message。由于这是路径的第一次请求，因此不会有缓存结果，请求将沿着管道转发。在处理响应时，资源过滤器将缓存操作结果以供将来使用。重新加载浏览器重复请求，你会看到相同的时间戳，说明已经使用了缓存的动作结果。缓存项在使用时会被删除，这意味着重新加载浏览器将生成带有新时间戳的响应，如图 30-7 所示。
+要查看资源过滤器的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/pages/message。由于这是路径的第一次请求，因此不会有缓存结果，请求将沿着管道转发。在处理响应时，资源过滤器将缓存 action 结果以供将来使用。重新加载浏览器重复请求，你会看到相同的时间戳，说明已经使用了缓存的动作结果。缓存项在使用时会被删除，这意味着重新加载浏览器将生成带有新时间戳的响应，如图 30-7 所示。
 
 ### Creating an Asynchronous Resource Filter
 异步资源过滤器的接口使用单一方法接收委托，该委托用于沿过滤器管道转发请求。清单 30-20 重新实现了前面示例中的缓存过滤器，以便它实现 IAsyncResourceFilter 接口。  
 Listing 30-20. Creating an Asynchronous Filter in the AsyncSimpleCacheAttribute.cs File in the Filters Folder  
 
 OnResourceExecutionAsync 方法接收一个 ResourceExecutingContext 对象，该对象用于确定管道是否可以短路。如果不能，则在不带参数的情况下调用委托，并在请求已处理并沿着管道返回时异步生成 ResourceExecutedContext 对象。重新启动 ASP.NET Core 并重复上一节中描述的请求，您将看到相同的缓存行为，如图 30-7 所示。  
-**警告** 重要的是不要混淆这两个上下文对象。端点产生的操作结果仅在委托返回的上下文对象中可用。
+**警告** 重要的是不要混淆这两个上下文对象。端点产生的 action 结果仅在委托返回的上下文对象中可用。
 
 ## Understanding Action Filters
 与资源过滤器一样，`action`过滤器执行两次。区别在于 `action` **过滤器在模型绑定过程之后执行，而资源过滤器在模型绑定之前执行**。这意味着资源过滤器可以使管道短路并最大限度地减少 ASP.NET Core 对请求所做的工作。**当需要模型绑定时使用 action 过滤器，这意味着它们用于诸如更改模型或强制验证之类的任务**。`action`过滤器只能应用于控制器和`action`方法，这与资源过滤器不同，资源过滤器也可以与 Razor Pages 一起使用。 （Razor Pages 等同于`action`过滤器是页面过滤器，在“了解页面过滤器”部分中进行了描述。）这是 IActionFilter 接口：  
@@ -241,13 +241,13 @@ namespace Microsoft.AspNetCore.Mvc.Filters {
 }
 ```
 当`action`过滤器已应用于`action`方法时，OnActionExecuting 方法将在调用 action 方法之前调用，然后在调用 action 方法后调用 OnActionExecuted 方法。通过两个不同的上下文类为`action`过滤器提供上下文数据：OnActionExecuting 方法的 ActionExecutingContext 和 OnActionExecuted 方法的 ActionExecutedContext。    
-ActionExecutingContext 类用于描述将要调用的操作，除了 FilterContext 属性外，还定义了表 30-8 中描述的属性。   
+ActionExecutingContext 类用于描述将要调用的 action ，除了 FilterContext 属性外，还定义了表 30-8 中描述的属性。   
 Table 30-8. The ActionExecutingContext Properties  
 | Name | Description |
 |-|-|
 | Controller | 该属性返回将要调用其 action 方法的控制器。 （ action 方法的详细信息可通过从基类继承的 ActionDescriptor 属性获得。）|
 | ActionArguments | 此属性返回将传递给 action 方法的参数字典，按名称索引。过滤器可以插入、删除或更改参数。 |
-| Result | 如果过滤器将 IActionResult 分配给此属性，则管道将被短路，并且操作结果将用于生成对客户端的响应，而无需调用操作方法。|
+| Result | 如果过滤器将 IActionResult 分配给此属性，则管道将被短路，并且 action 结果将用于生成对客户端的响应，而无需调用 action 方法。|
 
 ActionExecutedContext 类用于表示已执行的 action，除了 FilterContext 属性外，还定义了表 30-9 中描述的属性。  
 Table 30-9. The ActionExecutedContext Properties  
@@ -255,10 +255,10 @@ Table 30-9. The ActionExecutedContext Properties
 |-|-|
 | Controller | 此属性返回将调用其 action 方法的 Controller 对象。|
 | Canceled | 如果另一个 action 过滤器通过将 action 结果分配给 ActionExecutingContext 对象的 Result 属性而使管道短路，则此 bool 属性设置为 true。|
-| Exception | 此属性包含操作方法抛出的任何异常。|
-| ExceptionDispatchInfo | 此方法返回一个 ExceptionDispatchInfo 对象，该对象包含操作方法抛出的任何异常的堆栈跟踪详细信息。|
+| Exception | 此属性包含 action 方法抛出的任何异常。|
+| ExceptionDispatchInfo | 此方法返回一个 ExceptionDispatchInfo 对象，该对象包含 action 方法抛出的任何异常的堆栈跟踪详细信息。|
 | ExceptionHandled | 将此属性设置为 true 表示过滤器已处理异常，该异常将不会进一步传播。 |
-| Result | 此属性返回由操作方法生成的 IActionResult。如果需要，过滤器可以更改或替换操作结果。|
+| Result | 此属性返回由 action 方法生成的 IActionResult。如果需要，过滤器可以更改或替换 action 结果。|
 
 异步`action`过滤器是使用 IAsyncActionFilter 接口实现的。  
 ```cs
@@ -296,7 +296,7 @@ public class ChangeArgAttribute : ActionFilterAttribute  // <--HERE
 此属性的行为与早期实现的方式相同，基类的使用是偏好问题。重启 ASP.NET Core 并请求 https://localhost:44350/home/messages? message1=hello&message2=world，你会看到如图30-8所示的响应。
 
 ### Using the Controller Filter Methods
-Controller 类是呈现 Razor 视图的控制器的基础，实现了 IActionFilter 和 IAsyncActionFilter 接口，这意味着您可以定义功能并将其应用于控制器和任何派生控制器定义的操作。清单 30-24 直接在 HomeController 类中实现了 ChangeArg 过滤器功能。     
+Controller 类是呈现 Razor 视图的控制器的基础，实现了 IActionFilter 和 IAsyncActionFilter 接口，这意味着您可以定义功能并将其应用于控制器和任何派生控制器定义的 action 。清单 30-24 直接在 HomeController 类中实现了 ChangeArg 过滤器功能。     
 Listing 30-24. Using Action Filter Methods in the HomeController.cs File in the Controllers Folder
 ```cs
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -337,14 +337,14 @@ Table 30-11. The PageHandlerExecutingContext Properties
 | HandlerArguments | 此属性返回包含页面处理程序参数的字典，按名称索引。 |
 | Result | 过滤器可以通过将 IActionResult 对象分配给此属性来使管道短路。 |
 
-OnPageHandlerExecuted 方法在调用页面处理程序方法之后但在处理操作结果以创建响应之前调用。此方法通过 PageHandlerExecutedContext 类接收上下文，除了 PageHandlerExecutingContext 属性外，该类还定义了表 30-12 中所示的属性。    
+OnPageHandlerExecuted 方法在调用页面处理程序方法之后但在处理 action 结果以创建响应之前调用。此方法通过 PageHandlerExecutedContext 类接收上下文，除了 PageHandlerExecutingContext 属性外，该类还定义了表 30-12 中所示的属性。    
 Table 30-12. The PageHandlerExecutedContext Properties
 | Name | Description |
 |-|-|
 | Canceled | 如果另一个过滤器使过滤器管道短路，则此属性返回 true。 |
 | Exception | 如果页面处理程序方法抛出异常，则此属性返回一个异常。 |
 | ExceptionHandled | 此属性设置为 true 以指示页面处理程序抛出的异常已由过滤器处理。 |
-| Result | 此属性返回将用于为客户端创建响应的操作结果。 |
+| Result | 此属性返回将用于为客户端创建响应的 action 结果。 |
 
 异步页面过滤器是通过实现 IAsyncPageFilter 接口创建的，该接口定义如下：    
 ```cs
@@ -356,7 +356,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters {
     }
 }
 ```
-OnPageHandlerSelectionAsync 在选择处理程序方法后调用，相当于同步 OnPageHandlerSelected 方法。 OnPageHandlerExecutionAsync 提供了一个 PageHandlerExecutingContext 对象，允许它短路管道和一个被调用以传递请求的委托。委托生成一个 PageHandlerExecutedContext 对象，该对象可用于检查或更改处理程序方法生成的操作结果。
+OnPageHandlerSelectionAsync 在选择处理程序方法后调用，相当于同步 OnPageHandlerSelected 方法。 OnPageHandlerExecutionAsync 提供了一个 PageHandlerExecutingContext 对象，允许它短路管道和一个被调用以传递请求的委托。委托生成一个 PageHandlerExecutedContext 对象，该对象可用于检查或更改处理程序方法生成的 action 结果。
 
 ### Creating a Page Filter
 要创建页面过滤器，请将名为 ChangePageArgs.cs 的类文件添加到 Filters 文件夹。  
@@ -393,7 +393,7 @@ public override void OnPageHandlerExecuting(
 请求 https://localhost:44350/pages/message?message1=hello&message2=world。清单 30-27 中页面模型类实现的方法将产生与图 30-9 所示相同的结果。
 
 ## Understanding Result Filters
-结果过滤器在操作结果用于生成响应之前和之后执行，允许在端点处理响应之后修改响应。下面是 IResultFilter 接口的定义： 
+结果过滤器在 action 结果用于生成响应之前和之后执行，允许在端点处理响应之后修改响应。下面是 IResultFilter 接口的定义： 
 ```cs
 namespace Microsoft.AspNetCore.Mvc.Filters {
     public interface IResultFilter : IFilterMetadata {
@@ -408,7 +408,7 @@ Table 30-13. The ResultExecutingContext Class Properties
 |-|-|
 | Controller | 此属性返回包含端点的对象。|
 | Cancel | 将此属性设置为 true 将使结果过滤器管道短路。|
-| Result | 此属性返回端点产生的操作结果。|
+| Result | 此属性返回端点产生的 action 结果。|
 
 OnResultExecuted 方法在 action 结果被用于生成客户端响应后执行。此方法通过 ResultExecutedContext 类接收上下文，该类定义了表 30-14 中显示的属性，以及它从 FilterContext 类继承的属性。异步结果过滤器实现 IAsyncResultFilter 接口，其定义如下：    
 Table 30-14. The ResultExecutedContext Class
@@ -418,7 +418,7 @@ Table 30-14. The ResultExecutedContext Class
 | Controller | 此属性返回包含端点的对象。|
 | Exception | 如果页面处理程序方法抛出异常，则此属性返回一个异常。|
 | ExceptionHandled | 此属性设置为 true 以指示页面处理程序抛出的异常已由过滤器处理。|
-| Result | 此属性返回将用于为客户端创建响应的操作结果。此属性是只读的。|
+| Result | 此属性返回将用于为客户端创建响应的 action 结果。此属性是只读的。|
 
 异步结果过滤器实现了 IAsyncResultFilter 接口，其定义如下：
 ```cs
@@ -436,8 +436,8 @@ namespace Microsoft.AspNetCore.Mvc.Filters {
 
 ### Creating a Result Filter
 将名为 ResultDiagnosticsAttribute.cs 的类文件添加到 Filters 文件夹。  
-此过滤器检查请求以查看它是否包含名为 diag 的查询字符串参数。如果是，则过滤器会创建一个显示诊断信息的结果，而不是端点生成的输出。清单 30-28 中的过滤器将与 Home 控制器或 Message Razor 页面定义的操作一起工作。  
-请注意，当我在清单 30-28 中创建操作结果时，我为视图使用了一个完全限定的名称。这避免了应用于 Razor Pages 的过滤器出现问题，其中 ASP.NET Core 尝试将新结果作为 Razor Pages 执行并抛出有关模型类型的异常。  
+此过滤器检查请求以查看它是否包含名为 diag 的查询字符串参数。如果是，则过滤器会创建一个显示诊断信息的结果，而不是端点生成的输出。清单 30-28 中的过滤器将与 Home 控制器或 Message Razor 页面定义的 action 一起工作。  
+请注意，当我在清单 30-28 中创建 action 结果时，我为视图使用了一个完全限定的名称。这避免了应用于 Razor Pages 的过滤器出现问题，其中 ASP.NET Core 尝试将新结果作为 Razor Pages 执行并抛出有关模型类型的异常。  
 清单 30-29 将结果过滤器应用于 Home 控制器。
 ```cs
 [ResultDiagnostics]
@@ -451,13 +451,36 @@ Listing 30-30. Using the Attribute Base Class in the ResultDiagnosticsAttribute.
 重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。过滤器将产生如图 30-10 所示的输出。
 
 ## Understanding Exception Filters
-异常过滤器允许您响应异常而无需在每个`action`方法中编写 try...catch 块。异常过滤器可以应用于控制器类、`action`方法、页面模型类或处理程序方法。当端点或已应用于端点的操作、页面和结果过滤器未处理异常时，将调用它们。 （操作、页面和结果过滤器可以通过将它们的上下文对象的 ExceptionHandled 属性设置为 true 来处理未处理的异常。）异常过滤器实现 IExceptionFilter 接口，其定义如下：遭遇。 IAsyncExceptionFilter 接口可用于创建异步异常过滤器。下面是异步接口的定义： OnExceptionAsync 方法是 IExceptionFilter 接口中 OnException 方法的异步对应方法，在出现未处理的异常时调用。对于这两个接口，上下文数据是通过 ExceptionContext 类提供的，该类派生自 FilterContext 并定义了表 30-15 中所示的其他属性。
+异常过滤器允许您响应异常而无需在每个 action 方法中编写 try...catch 块。异常过滤器可以应用于控制器类、 action 方法、页面模型类或处理程序方法。当端点或已应用于端点的 action 、页面和结果过滤器未处理异常时，将调用它们。 （ action 、页面和结果过滤器可以通过将它们的上下文对象的 ExceptionHandled 属性设置为 true 来处理未处理的异常。）异常过滤器实现 IExceptionFilter 接口，其定义如下：
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IExceptionFilter : IFilterMetadata {
+        void OnException(ExceptionContext context);
+    }
+}
+```
+如果遇到未处理的异常，则调用 OnException 方法。 IAsyncExceptionFilter 接口可用于创建异步异常过滤器。下面是异步接口的定义：
+```cs
+using System.Threading.Tasks;
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IAsyncExceptionFilter : IFilterMetadata {
+        Task OnExceptionAsync(ExceptionContext context);
+}
+}
+```
+OnExceptionAsync 方法是 IExceptionFilter 接口中 OnException 方法的异步对应方法，在出现未处理的异常时调用。对于这两个接口，上下文数据是通过 ExceptionContext 类提供的，该类派生自 FilterContext 并定义了表 30-15 中所示的其他属性。  
+Table 30-15. The ExceptionContext Properties  
+| Name | Description |
+|-|-|
+| Exception | 此属性包含抛出的任何异常。|
+| ExceptionHandled | 此 bool 属性用于指示异常是否已被处理。|
+| Result | 此属性设置将用于生成响应的 IActionResult。|
 
 ### Creating an Exception Filter
-异常过滤器可以通过实现过滤器接口之一或从 ExceptionFilterAttribute 类派生来创建，该类派生自 Attribute 并实现 IExceptionFilter 和 IAsyncException 过滤器。异常过滤器最常见的用途是为特定异常类型显示自定义错误页面，以便为用户提供比标准错误处理功能所能提供的更有用的信息。要创建异常过滤器，请将名为 RangeExceptionAttribute.cs 的类文件添加到 Filters 文件夹，代码如清单 30-31 所示。此过滤器使用 ExceptionContext 对象获取未处理异常的类型，如果类型为 ArgumentOutOfRangeException，则创建向用户显示消息的操作结果。清单 30-32 向我已应用异常过滤器的 Home 控制器添加了一个`action`方法。 GenerateException `action`方法依赖默认路由模式从请求 URL 接收可为空的 int 值。如果没有匹配的 URL 段，则 action 方法抛出 ArgumentNullException；如果其值大于 50，则抛出 ArgumentOutOfRangeException。如果有值且在范围内，则 action 方法返回 ViewResult。重新启动 ASP.NET Core 并请求 https://localhost:44350/Home/GenerateException/100。最终段将超出`action`方法预期的范围，这将抛出过滤器处理的异常类型，产生如图 30-11 所示的结果。如果你请求 /Home/GenerateException，那么过滤器将不会处理 action 方法抛出的异常，将使用默认的错误处理。
+异常过滤器可以通过实现过滤器接口之一或从 ExceptionFilterAttribute 类派生来创建，该类派生自 Attribute 并实现 IExceptionFilter 和 IAsyncException 过滤器。异常过滤器最常见的用途是为特定异常类型显示自定义错误页面，以便为用户提供比标准错误处理功能所能提供的更有用的信息。要创建异常过滤器，请将名为 RangeExceptionAttribute.cs 的类文件添加到 Filters 文件夹，代码如清单 30-31 所示。此过滤器使用 ExceptionContext 对象获取未处理异常的类型，如果类型为 ArgumentOutOfRangeException，则创建向用户显示消息的 action 结果。清单 30-32 向我已应用异常过滤器的 Home 控制器添加了一个`action`方法。 GenerateException `action`方法依赖默认路由模式从请求 URL 接收可为空的 int 值。如果没有匹配的 URL 段，则 action 方法抛出 ArgumentNullException；如果其值大于 50，则抛出 ArgumentOutOfRangeException。如果有值且在范围内，则 action 方法返回 ViewResult。重新启动 ASP.NET Core 并请求 https://localhost:44350/Home/GenerateException/100。最终段将超出`action`方法预期的范围，这将抛出过滤器处理的异常类型，产生如图 30-11 所示的结果。如果你请求 /Home/GenerateException，那么过滤器将不会处理 action 方法抛出的异常，将使用默认的错误处理。
 
 # Managing the Filter Lifecycle
-默认情况下，ASP.NET Core 管理它创建的过滤器对象并将它们重用于后续请求。这并不总是期望的行为，在接下来的部分中，我将描述不同的方法来控制过滤器的创建方式。要创建一个将显示生命周期的过滤器，请将一个名为 GuidResponseAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-33 中所示的过滤器。此结果过滤器将终结点生成的操作结果替换为将呈现消息视图并显示唯一 GUID 值的结果。过滤器被配置为可以多次应用于同一目标，如果管道中较早的过滤器创建了合适的结果，它将添加一条新消息。清单 30-34 将过滤器应用到 Home 控制器两次。 （为简洁起见，我还删除了除其中一个`action`方法之外的所有方法。）要确认过滤器正在重用，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。响应将包含来自两个 GuidResponse 过滤器属性的 GUID 值。已创建过滤器的两个实例来处理请求。重新加载浏览器，您将看到显示相同的 GUID 值，表明为处理第一个请求而创建的过滤器对象已被重用（图 30-12）。
+默认情况下，ASP.NET Core 管理它创建的过滤器对象并将它们重用于后续请求。这并不总是期望的行为，在接下来的部分中，我将描述不同的方法来控制过滤器的创建方式。要创建一个将显示生命周期的过滤器，请将一个名为 GuidResponseAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-33 中所示的过滤器。此结果过滤器将终结点生成的 action 结果替换为将呈现消息视图并显示唯一 GUID 值的结果。过滤器被配置为可以多次应用于同一目标，如果管道中较早的过滤器创建了合适的结果，它将添加一条新消息。清单 30-34 将过滤器应用到 Home 控制器两次。 （为简洁起见，我还删除了除其中一个`action`方法之外的所有方法。）要确认过滤器正在重用，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。响应将包含来自两个 GuidResponse 过滤器属性的 GUID 值。已创建过滤器的两个实例来处理请求。重新加载浏览器，您将看到显示相同的 GUID 值，表明为处理第一个请求而创建的过滤器对象已被重用（图 30-12）。
 
 ## Creating Filter Factories
 过滤器可以实现 IFilterFactory 接口来负责创建过滤器的实例并指定这些实例是否可以重用。 IFilterFactory 接口定义表 30-16 中描述的成员。清单 30-35 实现了 IFilterFactory 接口并为 IsReusable 属性返回 false，以防止过滤器被重用。我使用 GetServiceOrCreateInstance 方法创建新的过滤器对象，该方法由 Microsoft.Extensions.DependencyInjection 命名空间中的 ActivatorUtilities 类定义。尽管您可以使用 new 关键字来创建过滤器，但这种方法将解决对通过过滤器的构造函数声明的服务的任何依赖性。要查看实现 IFilterFactory 接口的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。重新加载浏览器，每次处理请求时，都会创建新的过滤器，并显示新的GUID，如图30-13所示。
@@ -469,7 +492,7 @@ Listing 30-30. Using the Attribute Base Class in the ResultDiagnosticsAttribute.
 全局过滤器应用于 ASP.NET Core 处理的每个请求，这意味着它们不必应用于单个控制器或 Razor 页面。任何过滤器都可以用作全局过滤器；但是，`action`过滤器将仅应用于端点是`action`方法的请求，而页面过滤器将仅应用于端点是 Razor 页面的请求。全局过滤器是使用 Program.cs 文件中的选项模式设置的，如清单 30-37 所示。 MvcOptions.Filters 属性返回一个集合，向其中添加过滤器以全局应用它们，使用 Add<T> 方法或对同时也是服务的过滤器使用 AddService<T> 方法。还有一个不带泛型类型参数的 Add 方法，可用于将特定对象注册为全局过滤器。清单 30-37 中的语句注册了我在本章前面创建的 HttpsOnly 过滤器，这意味着它不再需要直接应用于单个控制器或 Razor Pages，因此清单 30-38 从 Home 控制器中删除了过滤器。重新启动 ASP.NET Core 并请求 http://localhost:5000 以确认正在应用仅 HTTPS 策略，即使该属性不再用于修饰控制器。全局授权过滤器将过滤器管道短路并产生如图 30-15 所示的响应。
 
 # Understanding and Changing Filter Order
-过滤器按特定顺序运行：授权、资源、操作或页面，然后是结果。但是，如果给定类型有多个过滤器，则应用它们的顺序由应用过滤器的范围决定。为了演示这是如何工作的，将一个名为 MessageAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-39 中所示的过滤器。此结果过滤器使用前面示例中所示的技术来替换来自端点的结果，并允许多个过滤器构建一系列将显示给用户的消息。清单 30-40 将 Message 过滤器的几个实例应用于 Home 控制器。清单 30-41 全局注册了 Message 过滤器。同一个过滤器有四个实例。要查看它们的应用顺序，请重新启动 ASP.NET Core 并请求 https://localhost:44350，这将产生如图 30-16 所示的响应。默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于操作或处理程序方法。
+过滤器按特定顺序运行：授权、资源、 action 或页面，然后是结果。但是，如果给定类型有多个过滤器，则应用它们的顺序由应用过滤器的范围决定。为了演示这是如何工作的，将一个名为 MessageAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-39 中所示的过滤器。此结果过滤器使用前面示例中所示的技术来替换来自端点的结果，并允许多个过滤器构建一系列将显示给用户的消息。清单 30-40 将 Message 过滤器的几个实例应用于 Home 控制器。清单 30-41 全局注册了 Message 过滤器。同一个过滤器有四个实例。要查看它们的应用顺序，请重新启动 ASP.NET Core 并请求 https://localhost:44350，这将产生如图 30-16 所示的响应。默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于 action 或处理程序方法。
 
 ## Changing Filter Order
 可以通过实现 IOrderedFilter 接口来更改默认顺序，ASP.NET Core 在确定如何对过滤器进行排序时会查找该接口。下面是接口的定义：Order 属性返回一个 int 值，低值的过滤器先于高 Order 值的过滤器应用。在清单 30-42 中，我在 Message 过滤器中实现了接口，并定义了一个构造函数参数，允许在应用过滤器时指定 Order 属性的值。在清单 30-43 中，我使用了构造函数参数来更改过滤器的应用顺序。顺序值可以是负数，这是确保过滤器在任何具有默认顺序的全局过滤器之前应用的有用方法（尽管您也可以在创建全局过滤器时设置顺序）。重新启动 ASP。 NET Core 并请求 https://localhost:44350 以查看新的过滤器顺序，如图 30-17 所示。
