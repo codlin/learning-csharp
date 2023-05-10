@@ -435,10 +435,20 @@ namespace Microsoft.AspNetCore.Mvc.Filters {
 实现 IResultFilter 和 IAsyncResultFilter 接口的过滤器仅在端点正常处理请求时使用。如果另一个过滤器使管道短路或出现异常，则不会使用它们。需要检查或更改响应（即使管道短路）的过滤器可以实现 IAlwaysRunResultFilter 或 IAsyncAlwaysRunResultFilter 接口。这些接口派生自 IResultFilter 和 IAsyncResultFilter 但未定义新功能。相反，ASP.NET Core 会检测始终运行的接口并始终应用过滤器。
 
 ### Creating a Result Filter
-将名为 ResultDiagnosticsAttribute.cs 的类文件添加到 Filters 文件夹，并使用它来定义清单 30-28 中所示的过滤器。此过滤器检查请求以查看它是否包含名为 diag 的查询字符串参数。如果是，则过滤器会创建一个显示诊断信息的结果，而不是端点生成的输出。清单 30-28 中的过滤器将与 Home 控制器或 Message Razor 页面定义的操作一起工作。清单 30-29 将结果过滤器应用于 Home 控制器。请注意，当我在清单 30-28 中创建操作结果时，我为视图使用了一个完全限定的名称。这避免了应用于 Razor Pages 的过滤器出现问题，其中 ASP.NET Core 尝试将新结果作为 Razor Pages 执行并抛出有关模型类型的异常。重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。查询字符串参数将被过滤器检测到，这将生成如图 30-10 所示的诊断信息。
+将名为 ResultDiagnosticsAttribute.cs 的类文件添加到 Filters 文件夹。  
+此过滤器检查请求以查看它是否包含名为 diag 的查询字符串参数。如果是，则过滤器会创建一个显示诊断信息的结果，而不是端点生成的输出。清单 30-28 中的过滤器将与 Home 控制器或 Message Razor 页面定义的操作一起工作。  
+请注意，当我在清单 30-28 中创建操作结果时，我为视图使用了一个完全限定的名称。这避免了应用于 Razor Pages 的过滤器出现问题，其中 ASP.NET Core 尝试将新结果作为 Razor Pages 执行并抛出有关模型类型的异常。  
+清单 30-29 将结果过滤器应用于 Home 控制器。
+```cs
+[ResultDiagnostics]
+```
+重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag 。查询字符串参数将被过滤器检测到，这将生成如图 30-10 所示的诊断信息。
 
 ### Implementing a Result Filter Using the Attribute Base Class
-ResultFilterAttribute 类派生自 Attribute 并实现 IResultFilter 和 IAsyncResultFilter 接口，可用作结果过滤器的基类，如清单 30-30 所示。始终运行的接口没有属性基类。重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。过滤器将产生如图 30-10 所示的输出。
+ResultFilterAttribute 类派生自 Attribute 并实现 IResultFilter 和 IAsyncResultFilter 接口，可用作结果过滤器的基类，如清单 30-30 所示。始终运行的接口没有属性基类。  
+Listing 30-30. Using the Attribute Base Class in the ResultDiagnosticsAttribute.cs File in the Filters Folder  
+
+重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。过滤器将产生如图 30-10 所示的输出。
 
 ## Understanding Exception Filters
 异常过滤器允许您响应异常而无需在每个`action`方法中编写 try...catch 块。异常过滤器可以应用于控制器类、`action`方法、页面模型类或处理程序方法。当端点或已应用于端点的操作、页面和结果过滤器未处理异常时，将调用它们。 （操作、页面和结果过滤器可以通过将它们的上下文对象的 ExceptionHandled 属性设置为 true 来处理未处理的异常。）异常过滤器实现 IExceptionFilter 接口，其定义如下：遭遇。 IAsyncExceptionFilter 接口可用于创建异步异常过滤器。下面是异步接口的定义： OnExceptionAsync 方法是 IExceptionFilter 接口中 OnException 方法的异步对应方法，在出现未处理的异常时调用。对于这两个接口，上下文数据是通过 ExceptionContext 类提供的，该类派生自 FilterContext 并定义了表 30-15 中所示的其他属性。
