@@ -393,7 +393,43 @@ public override void OnPageHandlerExecuting(
 请求 https://localhost:44350/pages/message?message1=hello&message2=world。清单 30-27 中页面模型类实现的方法将产生与图 30-9 所示相同的结果。
 
 ## Understanding Result Filters
-结果过滤器在操作结果用于生成响应之前和之后执行，允许在端点处理响应之后修改响应。下面是 IResultFilter 接口的定义： 在端点产生操作结果后调用 OnResultExecuting 方法。此方法通过 ResultExecutingContext 类接收上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-13 中描述的属性。 OnResultExecuted 方法在动作结果执行后调用，为客户端生成响应。此方法通过 ResultExecutedContext 类接收上下文，该类定义了表 30-14 中显示的属性，以及它从 FilterContext 类继承的属性。异步结果过滤器实现 IAsyncResultFilter 接口，其定义如下： 该接口遵循由其他过滤器类型建立的模式。 OnResultExecutionAsync 方法是通过上下文对象调用的，上下文对象的 Result 属性可用于更改响应和将沿管道转发响应的委托。
+结果过滤器在操作结果用于生成响应之前和之后执行，允许在端点处理响应之后修改响应。下面是 IResultFilter 接口的定义： 
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IResultFilter : IFilterMetadata {
+        void OnResultExecuting(ResultExecutingContext context);
+        void OnResultExecuted(ResultExecutedContext context);
+    }
+}
+```
+在端点产生 action 结果后调用 OnResultExecuting 方法。此方法通过 ResultExecutingContext 类接收上下文，除了 FilterContext 类定义的属性外，该类还定义了表 30-13 中描述的属性。   
+Table 30-13. The ResultExecutingContext Class Properties
+| Name | Description |
+|-|-|
+| Controller | 此属性返回包含端点的对象。|
+| Cancel | 将此属性设置为 true 将使结果过滤器管道短路。|
+| Result | 此属性返回端点产生的操作结果。|
+
+OnResultExecuted 方法在 action 结果被用于生成客户端响应后执行。此方法通过 ResultExecutedContext 类接收上下文，该类定义了表 30-14 中显示的属性，以及它从 FilterContext 类继承的属性。异步结果过滤器实现 IAsyncResultFilter 接口，其定义如下：    
+Table 30-14. The ResultExecutedContext Class
+| Name | Description |
+|-|-|
+| Canceled | 如果另一个过滤器使过滤器管道短路，则此属性返回 true。|
+| Controller | 此属性返回包含端点的对象。|
+| Exception | 如果页面处理程序方法抛出异常，则此属性返回一个异常。|
+| ExceptionHandled | 此属性设置为 true 以指示页面处理程序抛出的异常已由过滤器处理。|
+| Result | 此属性返回将用于为客户端创建响应的操作结果。此属性是只读的。|
+
+异步结果过滤器实现了 IAsyncResultFilter 接口，其定义如下：
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IAsyncResultFilter : IFilterMetadata {
+        Task OnResultExecutionAsync(ResultExecutingContext context,
+            ResultExecutionDelegate next);
+    }
+}
+```
+该接口遵循由其他过滤器类型建立的模式。 OnResultExecutionAsync 方法是通过上下文对象调用的，上下文对象的 Result 属性可用于更改响应和将沿管道转发响应的委托。
 
 ### Understanding Always-Run Result Filters
 实现 IResultFilter 和 IAsyncResultFilter 接口的过滤器仅在端点正常处理请求时使用。如果另一个过滤器使管道短路或出现异常，则不会使用它们。需要检查或更改响应（即使管道短路）的过滤器可以实现 IAlwaysRunResultFilter 或 IAsyncAlwaysRunResultFilter 接口。这些接口派生自 IResultFilter 和 IAsyncResultFilter 但未定义新功能。相反，ASP.NET Core 会检测始终运行的接口并始终应用过滤器。
