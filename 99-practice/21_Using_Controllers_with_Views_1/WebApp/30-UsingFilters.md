@@ -536,7 +536,26 @@ public class GuidResponseAttribute : Attribute,
 我使用 GetServiceOrCreateInstance 方法创建新的过滤器对象，该方法由 Microsoft.Extensions.DependencyInjection 命名空间中的 ActivatorUtilities 类定义。尽管您可以使用 new 关键字来创建过滤器，但这种方法将解决对通过过滤器的构造函数声明的服务的任何依赖性。要查看实现 IFilterFactory 接口的效果，请重新启动 ASP.NET Core 并请求 https://localhost:44350/?diag。重新加载浏览器，每次处理请求时，都会创建新的过滤器，并显示新的GUID，如图30-13所示。
 
 ## Using Dependency Injection Scopes to Manage Filter Lifecycles
-过滤器可以注册为服务，这允许通过依赖注入来控制它们的生命周期，我在第 14 章中对此进行了描述。清单 30-36 将 GuidResponse 过滤器注册为范围服务。默认情况下，ASP.NET Core 为每个请求创建一个范围，这意味着将为每个请求创建一个过滤器实例。要查看效果，请重启 ASP.NET Core 并请求 https://localhost:44350/?diag。应用到 Home 控制器的两个属性都使用相同的过滤器实例进行处理，这意味着响应中的两个 GUID 是相同的。重新加载浏览器；将创建一个新的作用域，并使用一个新的过滤器对象，如图 30-14 所示。生命周期的变化在这个例子中立即生效，因为我在实现 IFilterFactory 接口时使用了 ActivatorUtilities.GetServiceOrCreateInstance 方法来创建过滤器对象。此方法将在调用其构造函数之前检查是否有可用于请求类型的服务。如果您想在不实现 IFilterFactory 和使用 ActivatorUtilities 的情况下将过滤器用作服务，您可以使用 ServiceFilter 属性应用过滤器，如下所示：ASP.NET Core 将从服务创建过滤器对象并将其应用于请求。以这种方式应用的过滤器不必从 Attribute 类派生。
+过滤器可以注册为服务，这允许通过依赖注入来控制它们的生命周期，我在第 14 章中对此进行了描述。清单 30-36 将 GuidResponse 过滤器注册为范围服务`scoped service`。  
+Listing 30-36. Creating a Filter Service in the Program.cs File in the WebApp Folder  
+```cs
+using WebApp.Filters;
+...
+builder.Services.AddScoped<GuidResponseAttribute>();
+```
+
+默认情况下，ASP.NET Core 为每个请求创建一个范围，这意味着将为每个请求创建一个过滤器实例。  
+要查看效果，请重启 ASP.NET Core 并请求 https://localhost:44350/?diag 。  
+应用到 Home 控制器的两个属性都使用相同的过滤器实例进行处理，这意味着响应中的两个 GUID 是相同的。重新加载浏览器；将创建一个新的作用域，并使用一个新的过滤器对象，如图 30-14 所示。
+
+**USING FILTERS AS SERVICES WITHOUT THE IFILTERFACTORY INTERFACE**
+生命周期的变化在这个例子中立即生效，因为我在实现 IFilterFactory 接口时使用了 ActivatorUtilities.GetServiceOrCreateInstance 方法来创建过滤器对象。此方法将在调用其构造函数之前检查是否有可用于请求类型的服务。如果您想在不实现 IFilterFactory 和使用 ActivatorUtilities 的情况下将过滤器用作服务，您可以使用 ServiceFilter 属性应用过滤器，如下所示：
+```cs
+...
+[ServiceFilter(typeof(GuidResponseAttribute))]
+...
+```
+ASP.NET Core 将从服务创建过滤器对象并将其应用于请求。以这种方式应用的过滤器不必从 Attribute 类派生。
 
 # Creating Global Filters
 全局过滤器应用于 ASP.NET Core 处理的每个请求，这意味着它们不必应用于单个控制器或 Razor 页面。任何过滤器都可以用作全局过滤器；但是，`action`过滤器将仅应用于端点是`action`方法的请求，而页面过滤器将仅应用于端点是 Razor 页面的请求。全局过滤器是使用 Program.cs 文件中的选项模式设置的，如清单 30-37 所示。 MvcOptions.Filters 属性返回一个集合，向其中添加过滤器以全局应用它们，使用 Add<T> 方法或对同时也是服务的过滤器使用 AddService<T> 方法。还有一个不带泛型类型参数的 Add 方法，可用于将特定对象注册为全局过滤器。清单 30-37 中的语句注册了我在本章前面创建的 HttpsOnly 过滤器，这意味着它不再需要直接应用于单个控制器或 Razor Pages，因此清单 30-38 从 Home 控制器中删除了过滤器。重新启动 ASP.NET Core 并请求 http://localhost:5000 以确认正在应用仅 HTTPS 策略，即使该属性不再用于修饰控制器。全局授权过滤器将过滤器管道短路并产生如图 30-15 所示的响应。

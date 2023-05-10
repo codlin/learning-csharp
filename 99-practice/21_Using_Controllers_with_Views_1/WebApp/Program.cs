@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WebApp.Filters;
 using WebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<DataContext>(opts =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<GuidResponseAttribute>();
 
 var app = builder.Build();
 app.UseStaticFiles();
