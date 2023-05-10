@@ -2,15 +2,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+
+
 namespace WebApp.Filters;
 
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class MessageAttribute : Attribute, IAsyncAlwaysRunResultFilter
+public class MessageAttribute : Attribute, IAsyncAlwaysRunResultFilter, IOrderedFilter
 {
     private int counter = 0;
     private string msg;
     public MessageAttribute(string message) => msg = message;
+
+    public int Order { get; set; }
+
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
         Dictionary<string, string> resultData;

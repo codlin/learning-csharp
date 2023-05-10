@@ -613,4 +613,41 @@ builder.Services.Configure<MvcOptions>(opts =>
 默认情况下，ASP.NET Core 运行全局过滤器，然后过滤器应用于控制器或页面模型类，最后过滤器应用于 action 或处理程序方法。
 
 ## Changing Filter Order
-可以通过实现 IOrderedFilter 接口来更改默认顺序，ASP.NET Core 在确定如何对过滤器进行排序时会查找该接口。下面是接口的定义：Order 属性返回一个 int 值，低值的过滤器先于高 Order 值的过滤器应用。在清单 30-42 中，我在 Message 过滤器中实现了接口，并定义了一个构造函数参数，允许在应用过滤器时指定 Order 属性的值。在清单 30-43 中，我使用了构造函数参数来更改过滤器的应用顺序。顺序值可以是负数，这是确保过滤器在任何具有默认顺序的全局过滤器之前应用的有用方法（尽管您也可以在创建全局过滤器时设置顺序）。重新启动 ASP。 NET Core 并请求 https://localhost:44350 以查看新的过滤器顺序，如图 30-17 所示。
+可以通过实现 IOrderedFilter 接口来更改默认顺序，ASP.NET Core 在确定如何对过滤器进行排序时会查找该接口。下面是接口的定义：  
+```cs
+namespace Microsoft.AspNetCore.Mvc.Filters {
+    public interface IOrderedFilter : IFilterMetadata {
+        int Order { get; }
+    }
+}
+```
+Order 属性返回一个 int 值，**低值的过滤器先于高 Order 值的过滤器应用**。在清单 30-42 中，我在 Message 过滤器中实现了接口，并定义了一个构造函数参数，允许在应用过滤器时指定 Order 属性的值。  
+Listing 30-42. Adding Ordering Support in the MessageAttribute.cs File in the Filters Folder  
+```cs
+public class MessageAttribute : Attribute, IAsyncAlwaysRunResultFilter, IOrderedFilter {
+    public int Order { get; set; }
+
+}
+```
+在清单 30-43 中，我使用了构造函数参数来更改过滤器的应用顺序。  
+Listing 30-43. Setting Filter Order in the HomeController.cs File in the Controllers Folder  
+```cs
+using Microsoft.AspNetCore.Mvc;
+using WebApp.Filters;
+
+namespace WebApp.Controllers;
+
+[Message("This is the controller-scoped filter", Order = 10)]
+public class HomeController : Controller
+{
+    [Message("This is the first action-scoped filter", Order = 1)]
+    [Message("This is the second action-scoped filter", Order = -1)]
+    public IActionResult Index()
+    {
+        return View("Message",
+        "This is the Index action on the Home controller");
+    }
+}
+```
+**顺序值可以是负数，这是确保过滤器在任何具有默认顺序的全局过滤器之前应用的有用方法**（尽管您也可以在创建全局过滤器时设置顺序）。  
+重新启动 ASP。 NET Core 并请求 https://localhost:44350 以查看新的过滤器顺序，如图 30-17 所示。
