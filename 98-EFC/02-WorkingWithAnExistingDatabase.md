@@ -58,10 +58,19 @@ dotnet add package Microsoft.EntityFrameworkCore --version 6.0.16
 dotnet add package Microsoft.EntityFrameworkCore.Design --version 6.0.16
 ```
 ### Step 2: Determine your connection string
+```
+"Data Source=localhost;Initial Catalog=AdventureWorks;Trusted_Connection=True"
+```
 
 ## Task 4: Create a settings file and leverage it from code
 ### Step 1: Add the appsettings.json file to store connection details
 add an appsettings.json file to the project that contains the connection string for use when connecting the context and database.
+
+可以不用 `appsettings.json` ，直接用代码连接。
+```cs
+_optionsBuilder = new DbContextOptionsBuilder<AdventureWorksContext>();
+_optionsBuilder.UseSqlServer( configuration.GetConnectionString("AdventureWorks"));
+```
 
 ### Step 2: Add the libraries to leverage the config file in the activity project
 ```shell

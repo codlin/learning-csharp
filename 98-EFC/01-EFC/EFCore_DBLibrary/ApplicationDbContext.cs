@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EFCore_DBLibrary;
 
-public class ApplicationDbContext : DbContext
+public class AdventureWorksContext : DbContext
 {
     //Add a default constructor if scaffolding is needed
-    public ApplicationDbContext() { }
+    public AdventureWorksContext() { }
     //Add the complex constructor for allowing Dependency Injection
-    public ApplicationDbContext(DbContextOptions options)
+    public AdventureWorksContext(DbContextOptions<AdventureWorksContext> options)
     : base(options)
     {
         //intentionally empty.
