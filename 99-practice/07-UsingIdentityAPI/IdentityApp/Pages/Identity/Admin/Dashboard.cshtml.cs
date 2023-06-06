@@ -41,7 +41,11 @@ public class DashboardModel : AdminPageModel
                 EmailConfirmed = true
             };
             IdentityResult result = await UserManager.CreateAsync(userObject);
-            result.Process(ModelState);
+            if (result.Process(ModelState))
+            {
+                result = await UserManager.AddPasswordAsync(userObject, "mysecret");
+                result.Process(ModelState);
+            }
         }
         if (ModelState.IsValid)
         {
