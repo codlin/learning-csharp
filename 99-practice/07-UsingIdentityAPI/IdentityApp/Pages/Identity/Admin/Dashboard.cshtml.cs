@@ -5,8 +5,13 @@ namespace IdentityApp.Pages.Identity.Admin;
 
 public class DashboardModel : AdminPageModel
 {
-    public DashboardModel(UserManager<IdentityUser> userMgr) => UserManager = userMgr;
+    public DashboardModel(UserManager<IdentityUser> userMgr, IConfiguration configuration)
+    {
+        UserManager = userMgr;
+        DashboardRole = configuration["Dashboard:Role"] ?? "Dashboard";
+    }
     public UserManager<IdentityUser> UserManager { get; set; }
+    public string DashboardRole { get; set; }
 
     public int UsersCount { get; set; } = 0;
     public int UsersUnconfirmed { get; set; } = 0;
@@ -20,6 +25,10 @@ public class DashboardModel : AdminPageModel
     public void OnGet()
     {
         UsersCount = UserManager.Users.Count();
+        UsersUnconfirmed = UserManager.Users.Where(u => !u.EmailConfirmed).Count();
+        UsersLockedout = UserManager.Users
+                        .Where(u => u.LockoutEnabled && u.LockoutEnd > System.DateTimeOffset.UtcNow)
+                        .Count();
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -28,8 +37,11 @@ public class DashboardModel : AdminPageModel
         // This ensures I don’t cause an error by deleting objects from the sequence that I am enumerating.
         foreach (IdentityUser existingUser in UserManager.Users.ToList())
         {
-            IdentityResult result = await UserManager.DeleteAsync(existingUser);
-            result.Process(ModelState);
+            if (emails.Contains(existingUser.Email) || !await UserManager.IsInRoleAsync(existingUser, DashboardRole))
+            {
+                IdentityResult result = await UserManager.DeleteAsync(existingUser);
+                result.Process(ModelState);
+            }
         }
 
         foreach (string email in emails)

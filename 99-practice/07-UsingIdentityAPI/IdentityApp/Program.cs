@@ -1,3 +1,4 @@
+using IdentityApp;
 using IdentityApp.Models;
 using IdentityApp.Services;
 using Microsoft.AspNetCore.Identity;
@@ -31,6 +32,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(opts =>
     opts.Password.RequireNonAlphanumeric = false;
     opts.SignIn.RequireConfirmedAccount = true;
 }).AddEntityFrameworkStores<IdentityDbContext>().AddDefaultTokenProviders();
+
+builder.Services.Configure<SecurityStampValidatorOptions>(opts =>
+{
+    opts.ValidationInterval = System.TimeSpan.FromMinutes(1);
+});
+
 builder.Services.AddScoped<TokenUrlEncoderService>();
 builder.Services.AddScoped<IdentityEmailService>();
 
@@ -63,4 +70,5 @@ app.UseAuthorization();
 app.MapDefaultControllerRoute();
 app.MapRazorPages();
 
+app.SeedUserStoreForDashboard();
 app.Run();
