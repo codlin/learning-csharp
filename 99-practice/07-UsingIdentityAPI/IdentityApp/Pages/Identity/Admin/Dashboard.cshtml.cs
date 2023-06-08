@@ -29,6 +29,7 @@ public class DashboardModel : AdminPageModel
         UsersLockedout = UserManager.Users
                         .Where(u => u.LockoutEnabled && u.LockoutEnd > System.DateTimeOffset.UtcNow)
                         .Count();
+        UsersTwoFactor = UserManager.Users.Where(u => u.TwoFactorEnabled).Count();
     }
 
     public async Task<IActionResult> OnPostAsync()
