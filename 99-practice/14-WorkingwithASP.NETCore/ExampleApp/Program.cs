@@ -1,3 +1,6 @@
+using ExampleApp;
+using ExampleApp.Custom;
+
 var builder = WebApplication.CreateBuilder(args);
 // builder.Services.AddDbContext<DataContext>(opts =>
 // {
@@ -12,8 +15,28 @@ var app = builder.Build();
 app.UseStaticFiles();
 app.MapDefaultControllerRoute();
 app.MapRazorPages();
-app.MapGet("/", async context =>
+
+app.UseMiddleware<CustomAuthentication>();
+app.UseMiddleware<RoleMemberships>();
+app.UseRouting();
+app.UseMiddleware<ClaimsReporter>();
+app.UseMiddleware<CustomAuthorization>();
+
+app.UseEndpoints(endpoints =>
 {
-    await context.Response.WriteAsync("Hello World!");
+    endpoints.MapGet("/", async context =>
+    {
+        await context.Response.WriteAsync("Hello World!");
+    });
+    endpoints.MapGet("/secret", SecretEndpoint.Endpoint).WithDisplayName("secret");
+    endpoints.Map("/signin", CustomSignInAndSignOut.SignIn);
+    endpoints.Map("/signout", CustomSignInAndSignOut.SignOut);
 });
+
+// app.MapGet("/", async context =>
+// {
+//     await context.Response.WriteAsync("Hello World!");
+// });
+// app.MapGet("/secret", SecretEndpoint.Endpoint).WithDisplayName("secret");
+
 app.Run();
