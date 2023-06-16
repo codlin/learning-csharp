@@ -29,4 +29,7 @@ public static class ServiceExtensions
         => services.AddDbContext<RepositoryContext>(opts
             => opts.UseNpgsql(
                 @$"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST")};Username=test;Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWD")};Database=CompanyEmployees"));
+
+    public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder)
+        => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
 }
