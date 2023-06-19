@@ -2,11 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shared.DataTransferObjects;
-
-// [Serializable]
-// public record EmployeeForCreationDto(string Name, int Age, string Position);
-
-public record EmployeeForCreationDto
+public record EmployeeForUpdateDto
 {
     [Required(ErrorMessage = "Employee name is a required field.")]
     [MaxLength(30, ErrorMessage = "Maximum length for the Name is 30 characters.")]

@@ -68,4 +68,11 @@ internal sealed class CompanyService : ICompanyService
         var ids = string.Join(",", companyCollectionToReturn.Select(c => c.Id));
         return (companies: companyCollectionToReturn, ids: ids);
     }
+    public void UpdateCompany(Guid companyId, CompanyForUpdateDto companyForUpdate, bool trackChanges)
+    {
+        var companyEntity = _repository.Company.GetCompany(companyId, trackChanges);
+        if (companyEntity is null) throw new CompanyNotFoundException(companyId);
+        _mapper.Map(companyForUpdate, companyEntity);
+        _repository.Save();
+    }
 }
