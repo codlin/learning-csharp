@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Options;
 
+using CompanyEmployees.Presentation.ActionFilters;
 using CompanyEmployees.Extensions;
 using NLog;
 using Contracts;
@@ -25,6 +26,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
 });
+builder.Services.AddScoped<ValidationFilterAttribute>();
 
 // Add services to the container.
 builder.Services.AddControllers(config =>
