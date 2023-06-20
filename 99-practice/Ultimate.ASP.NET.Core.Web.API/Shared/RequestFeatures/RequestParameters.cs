@@ -22,4 +22,8 @@ public abstract class RequestParameters
         }
     }
     private int _pageSize = 10;
+
+    public string? OrderBy { get; set; }
+
+    public string? Fields { get; set; }
 }

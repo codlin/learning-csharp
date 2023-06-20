@@ -7,6 +7,8 @@ using CompanyEmployees.Presentation.ActionFilters;
 using CompanyEmployees.Extensions;
 using NLog;
 using Contracts;
+using Shared.DataTransferObjects;
+using Service.DataShaping;
 
 LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
@@ -27,6 +29,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
 
 // Add services to the container.
 builder.Services.AddControllers(config =>
